@@ -7,7 +7,7 @@
 }(typeof globalThis !== "undefined" ? globalThis : this, function () {
   "use strict";
 
-  const VERSION = "jm-fluxo-simplificado-sem-remover-logicas-v4";
+  const VERSION = "jm-fluxo-logistico-v5-central-cards";
   const STATE_NAMES = {
     acre: "AC", alagoas: "AL", amapa: "AP", amazonas: "AM", bahia: "BA", ceara: "CE",
     "distrito federal": "DF", "espirito santo": "ES", goias: "GO", maranhao: "MA",
@@ -285,74 +285,60 @@
     };
   }
 
-  function blockLabelType(line) {
-    const normalized = key(String(line || "").replace(/:$/, ""));
-    if (!normalized) return "";
-    if (/^(a d|ad|a)\s*base$/.test(normalized) || normalized === "base") return "base";
-    if (/^b\s*(local\s*)?(ocorrencia|origem)$/.test(normalized) || normalized === "local ocorrencia" || normalized === "local de ocorrencia" || normalized === "ocorrencia") return "origin";
-    if (/^c\s*destino$/.test(normalized)) return "destination";
-    if (/^(distancia total|distancia total da rota|percurso total)$/.test(normalized)) return "distance";
-    return "";
-  }
-
-  function splitLabelAndValue(line) {
-    const raw = String(line || "").trim();
-    const match = raw.match(/^(.{1,80}?)\s*:\s*(.*)$/);
-    if (!match) return { label: raw, value: "" };
-    return { label: match[1], value: match[2] || "" };
-  }
-
-  function parseLetteredRouteSections(rawText) {
-    const inputLines = lines(rawText);
-    const blocks = { base: [], origin: [], destination: [] };
-    let current = "";
-    let distanceText = "";
-
-    inputLines.forEach(function (line) {
-      const parsed = splitLabelAndValue(line);
-      const type = blockLabelType(parsed.label);
-      if (type) {
-        if (type === "distance") {
-          distanceText = parsed.value || line;
-          current = "";
-          return;
-        }
-        current = type;
-        if (parsed.value) blocks[current].push(parsed.value);
-        return;
-      }
-      if (/^dist[aâ]ncia\s+total\s*:/i.test(line)) {
-        distanceText = line;
-        current = "";
-        return;
-      }
-      if (current && !/^dist[aâ]ncia\s+total/i.test(line)) blocks[current].push(line);
-    });
-
-    if (!blocks.origin.length && !blocks.destination.length) return null;
-
-    const base = parseAddressSection(blocks.base, null);
-    const origin = parseAddressSection(blocks.origin, base);
-    const destination = parseAddressSection(blocks.destination, origin);
-    return {
-      base,
-      origin,
-      destination,
-      totalRouteKm: kmFromText(distanceText),
-      routeModel: "base-occurrence-destination",
-      rawBlocks: blocks
-    };
-  }
-
   function parseAddressSections(rawText) {
-    const lettered = parseLetteredRouteSections(rawText);
-    if (lettered) return lettered;
     const inputLines = lines(rawText);
     const originLines = section(inputLines, "Origem", ["Destino", "Tarifas"]);
     const destinationLines = section(inputLines, "Destino", ["Tarifas"]);
     const origin = parseAddressSection(originLines, null);
     const destination = parseAddressSection(destinationLines, origin);
-    return { origin, destination, base: null, totalRouteKm: 0, routeModel: "origin-destination" };
+    return { origin, destination };
+  }
+
+
+  function isAdbcLabel(line) {
+    return /^\s*(?:A\s*\/\s*D\s*-\s*Base|A\s*-\s*Base|Base|B\s*-\s*Local\s*(?:Ocorr[eê]ncia|Ocorrencia)|B\s*-\s*Ocorr[eê]ncia|Local\s*(?:Ocorr[eê]ncia|Ocorrencia)|C\s*-\s*Destino|Destino|Dist[aâ]ncia\s*Total)\s*:?/i.test(String(line || ""));
+  }
+
+  function adbcLabelKey(line) {
+    const k = key(String(line || "").replace(/:.*/, ""));
+    if (/^(a d base|a base|base)$/.test(k)) return "base";
+    if (/^(b local ocorrencia|b ocorrencia|local ocorrencia)$/.test(k)) return "origin";
+    if (/^(c destino|destino)$/.test(k)) return "destination";
+    if (/^distancia total$/.test(k)) return "distance";
+    return "";
+  }
+
+  function parseAdbcRoute(rawText) {
+    if (!/(?:A\s*\/\s*D\s*-\s*Base|B\s*-\s*Local\s*(?:Ocorr[eê]ncia|Ocorrencia)|C\s*-\s*Destino)/i.test(String(rawText || ""))) return null;
+    const inputLines = lines(rawText);
+    const buckets = { base: [], origin: [], destination: [] };
+    let current = "";
+    let found = false;
+    inputLines.forEach(function (line) {
+      const label = adbcLabelKey(line);
+      if (label) {
+        found = true;
+        if (label === "distance") return;
+        current = label;
+        const after = cleanSegment(line.replace(/^\s*(?:A\s*\/\s*D\s*-\s*Base|A\s*-\s*Base|Base|B\s*-\s*Local\s*(?:Ocorr[eê]ncia|Ocorrencia)|B\s*-\s*Ocorr[eê]ncia|Local\s*(?:Ocorr[eê]ncia|Ocorrencia)|C\s*-\s*Destino|Destino)\s*:?\s*/i, ""));
+        if (after) buckets[current].push(after);
+        return;
+      }
+      if (current && !isAdbcLabel(line)) buckets[current].push(line);
+    });
+    if (!found || (!buckets.origin.length && !buckets.destination.length)) return null;
+    const base = parseAddressSection(buckets.base, null);
+    const origin = parseAddressSection(buckets.origin, base);
+    const destination = parseAddressSection(buckets.destination, origin);
+    const distanceLine = inputLines.find(function (line) { return /^\s*Dist[aâ]ncia\s*Total\s*:/i.test(line); }) || "";
+    return {
+      type: "ADBC_BASE_ORIGEM_DESTINO",
+      base,
+      origin,
+      destination,
+      totalRouteKm: kmFromText(distanceLine) || kmFromText(rawText),
+      rawSections: buckets
+    };
   }
 
   function parseMoney(value) {
@@ -456,7 +442,8 @@
 
   function parse(rawText) {
     const inputLines = lines(rawText);
-    const addresses = parseAddressSections(rawText);
+    const specialRoute = parseAdbcRoute(rawText);
+    const addresses = specialRoute || parseAddressSections(rawText);
     const tariffs = parseTariffs(inputLines);
     const externalStatus = nearestValue(inputLines, "Situação", {
       preferBefore: true,
@@ -482,14 +469,14 @@
       color: nearestValue(inputLines, "Cor do Veículo", { preferBefore: false }) || nearestValue(inputLines, "Cor do Veiculo", { preferBefore: false }),
       cause: nearestValue(inputLines, "Causa", { preferBefore: false }),
       totalValue: parseMoney(totalValueText) || tariffs.total,
-      totalRouteKm: addresses.totalRouteKm || kmFromText(totalRouteText),
+      totalRouteKm: specialRoute && specialRoute.totalRouteKm || kmFromText(totalRouteText),
       baseDistanceKm: kmFromText(baseDistanceText),
-      routeModel: addresses.routeModel || "origin-destination",
+      base: specialRoute && specialRoute.base || null,
+      routeFormat: specialRoute && specialRoute.type || "",
       tariffs: tariffs.rows,
       tariffTotal: tariffs.total,
       tariffCalculatedTotal: tariffs.calculatedTotal,
       tariffDeclaredTotal: tariffs.declaredTotal,
-      base: addresses.base || null,
       origin: addresses.origin,
       destination: addresses.destination
     };
@@ -499,8 +486,8 @@
     version: VERSION,
     parse,
     parseAddressSections,
-    parseLetteredRouteSections,
     parseAddressSection,
+    parseAdbcRoute,
     parseTariffs,
     normalizeKey: key,
     extractState,

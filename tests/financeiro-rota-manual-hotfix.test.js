@@ -6,7 +6,7 @@ const app = fs.readFileSync(path.join(root, 'js', 'app.js'), 'utf8');
 const jm = fs.readFileSync(path.join(root, 'jm.html'), 'utf8');
 const sw = fs.readFileSync(path.join(root, 'service-worker.js'), 'utf8');
 const version = fs.readFileSync(path.join(root, 'version.json'), 'utf8');
-const VERSION = 'jm-fluxo-simplificado-sem-remover-logicas-v4';
+const VERSION = 'jm-fluxo-logistico-v5-central-cards';
 
 function assert(cond, msg) {
   if (!cond) throw new Error(msg);

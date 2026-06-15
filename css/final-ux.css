@@ -281,31 +281,3 @@ body.driver-field-mode #signatureCanvas.is-signing {
     min-height: calc(74px + env(safe-area-inset-bottom));
   }
 }
-
-/* V4 — simplificação visual sem remover fluxos */
-body.driver-simple-mode #driverAppView .content{padding-bottom:96px}
-.driver-simple-shell{border:1px solid rgba(59,130,246,.25);background:linear-gradient(135deg,rgba(15,23,42,.98),rgba(30,41,59,.96));}
-.driver-simple-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:12px}
-.driver-simple-head h2{margin:2px 0 4px;font-size:24px}
-.driver-simple-card{border:1px solid rgba(148,163,184,.22);border-radius:16px;padding:14px;background:rgba(15,23,42,.75);margin-bottom:12px}
-.driver-simple-card span{display:block;color:#94a3b8;font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
-.driver-simple-card strong{display:block;font-size:18px;line-height:1.25;color:#f8fafc}
-.driver-simple-grid-actions{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:10px;margin-bottom:10px}
-.driver-simple-grid-actions .btn{min-height:52px;border-radius:14px;font-weight:800;white-space:normal}
-.driver-simple-grid-actions .driver-simple-big{font-size:18px;min-height:64px}
-.driver-simple-status{display:grid;grid-template-columns:1fr 1fr;gap:8px;color:#cbd5e1;font-size:13px}
-.driver-simple-status span{border:1px solid rgba(148,163,184,.18);border-radius:12px;padding:8px;background:rgba(2,6,23,.35)}
-.driver-simple-tabs{display:flex;gap:8px;overflow-x:auto;padding:4px 0;margin-top:10px}
-.driver-simple-tabs button{border:1px solid rgba(148,163,184,.22);background:rgba(15,23,42,.75);color:#e5e7eb;border-radius:999px;padding:10px 14px;font-weight:800;white-space:nowrap}
-.driver-simple-tabs button.active{background:#2563eb;border-color:#60a5fa;color:#fff}
-body.driver-simple-mode:not(.driver-show-all) #driverAppView .panel[id^="driverPanel"].driver-simple-hidden{display:none!important}
-body.driver-simple-mode:not(.driver-show-all) #driverAppView .panel[id^="driverPanel"].driver-simple-visible{display:block!important;grid-column:1 / -1!important}
-body.driver-simple-mode:not(.driver-show-all) #driverPanelReport{display:none!important}
-body.driver-simple-mode #driverPanelActive .driver-status-guide{margin-top:10px}
-body.driver-simple-mode #driverPanelActive .driver-active-actions{position:sticky;bottom:74px;z-index:20;background:rgba(15,23,42,.96);border:1px solid rgba(148,163,184,.2);border-radius:16px;padding:10px;box-shadow:0 16px 40px rgba(0,0,0,.28)}
-body.driver-simple-mode #driverPanelProofs .proof-section:not([open]){background:rgba(15,23,42,.55)}
-@media(max-width:720px){
-  .driver-simple-head{display:block}.driver-simple-head .btn{width:100%;margin-top:8px}
-  .driver-simple-grid-actions{grid-template-columns:1fr 1fr}.driver-simple-grid-actions .driver-simple-big{grid-column:1 / -1}
-  .driver-simple-status{grid-template-columns:1fr}.driver-simple-card strong{font-size:16px}
-}

@@ -1,4 +1,4 @@
-const CACHE_NAME = "jm-fluxo-simplificado-sem-remover-logicas-v4";
+const CACHE_NAME = "jm-fluxo-logistico-v5-central-cards";
 const ASSETS = [
   "./",
   "./index.html",
@@ -25,7 +25,6 @@ const ASSETS = [
   "./css/final-ux.css",
   "./js/final-ux.js",
   "./js/motorista-final-ux.js",
-  "./js/motorista-simple-flow.js",
   "./js/superadmin-public-config.js",
   "./assets/icon.svg"
 ];

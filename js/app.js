@@ -10,7 +10,7 @@
   const { auth, secondaryAuth, db, ts, arrayUnion, emailIsAdmin, getRealtimeDb, rtdbKey } = window.JM.firebase;
   const cfg = window.JM_CONFIG || {};
   const SYSTEM_SIGNATURE = "";
-  const LOGIN_FLOW_VERSION = "jm-fluxo-simplificado-sem-remover-logicas-v4";
+  const LOGIN_FLOW_VERSION = "jm-fluxo-logistico-v5-central-cards";
   let trackerTimer = null;
   let trackerBusy = false;
   let mapRefreshTimer = null;
@@ -2750,36 +2750,149 @@ Rota: ${url}`;
     return true;
   }
 
+  function callCardStorageKey() {
+    return "jm.collapsed.calls.v5";
+  }
+
+  function collapsedCallSet() {
+    if (!state.collapsedCallsV5) {
+      try {
+        state.collapsedCallsV5 = new Set(JSON.parse(localStorage.getItem(callCardStorageKey()) || "[]"));
+      } catch (_) {
+        state.collapsedCallsV5 = new Set();
+      }
+    }
+    return state.collapsedCallsV5;
+  }
+
+  function persistCollapsedCalls() {
+    try {
+      localStorage.setItem(callCardStorageKey(), JSON.stringify(Array.from(collapsedCallSet())));
+    } catch (_) {}
+  }
+
+  function toggleCallCard(id) {
+    const set = collapsedCallSet();
+    if (set.has(id)) set.delete(id); else set.add(id);
+    persistCollapsedCalls();
+    renderCalls();
+  }
+
+  function expandAllCallCards() {
+    collapsedCallSet().clear();
+    persistCollapsedCalls();
+    renderCalls();
+  }
+
+  function collapseAllCallCards() {
+    visibleRows(state.calls).filter((c) => !isFinalStatus(c)).forEach((c) => collapsedCallSet().add(c.id));
+    persistCollapsedCalls();
+    renderCalls();
+  }
+
+  function focusNewCallForm() {
+    if ($("callForm")) $("callForm").scrollIntoView({ behavior: "smooth", block: "start" });
+    const first = $("callClient") || $("callCustomerId");
+    if (first && typeof first.focus === "function") setTimeout(() => first.focus(), 250);
+  }
+
+  function callOperationalFlags(call) {
+    const flags = [];
+    if (!call.driverId) flags.push({ label: "sem motorista", cls: "warn" });
+    if (!call.vehicleId) flags.push({ label: "sem veículo", cls: "warn" });
+    if (proofStatus(call) === "completo") flags.push({ label: "provas ok", cls: "ok" });
+    if (proofStatus(call) === "parcial") flags.push({ label: "provas parciais", cls: "warn" });
+    if (call.financePending || call.billingStatus === "aguardando_provas") flags.push({ label: "financeiro pendente", cls: "danger" });
+    const unread = publicChatUnreadCount(call);
+    if (unread) flags.push({ label: unread + " msg cliente", cls: "danger" });
+    const sla = slaInfo(call);
+    if (sla && sla.label) flags.push({ label: sla.label, cls: sla.className || "info" });
+    return flags;
+  }
+
+  function renderCallCard(c) {
+    const vehicle = state.vehicles[c.vehicleId] || {};
+    const driver = state.users[c.driverId] || {};
+    const url = c.routeExternalUrl || c.routeUrl || mapsRouteUrl(c, vehicle);
+    const km = routeKm(c, vehicle);
+    const metric = c.routeDistanceText || c.routeMetrics && c.routeMetrics.fullRoute && c.routeMetrics.fullRoute.distanceText || c.routeMetrics && c.routeMetrics.bestToOrigin && c.routeMetrics.bestToOrigin.distanceText || (km ? km.toFixed(1).replace(".", ",") + " km" : "Sem rota");
+    const collapsed = collapsedCallSet().has(c.id);
+    const active = state.selectedDossierCallId === c.id;
+    const flags = callOperationalFlags(c).map((f) => `<span class="badge ${esc(f.cls)}">${esc(f.label)}</span>`).join("");
+    const valueHtml = canSeeSensitiveFinance() ? `<span class="call-card-money">${money(c.valor || 0)}</span>` : `<span class="muted small">valor restrito</span>`;
+    const quickLinks = quickCallLinks(c, vehicle);
+    const adminActions = canOwnCompany() ? `<button class="btn" onclick="JM.app.editCall('${esc(c.id)}')">Editar</button><button class="btn danger" onclick="JM.app.deleteCall('${esc(c.id)}')">Excluir</button>` : "";
+    const viewProofActions = proofStatus(c) !== "pendente" ? `<button class="btn" onclick="JM.app.viewCallProofs('${esc(c.id)}')">Provas</button>` : "";
+    const proofActions = (canOwnCompany() || hasRole(["gerente"])) && proofStatus(c) === "completo" ? `<button class="btn good" onclick="JM.app.reviewCallProofs('${esc(c.id)}')">Revisar</button>` : "";
+    return `<article class="call-card ${collapsed ? "is-collapsed" : ""} ${active ? "is-active" : ""}" data-call-id="${esc(c.id)}">
+      <header class="call-card-head">
+        <button class="call-card-main" type="button" onclick="JM.app.selectCallDossier('${esc(c.id)}')" aria-label="Abrir chamado ${esc(c.protocolo || c.id)}">
+          <span class="call-card-protocol">${esc(c.protocolo || c.id)}</span>
+          <span class="call-card-client">${esc(c.cliente || "Cliente não informado")}</span>
+          <span class="call-card-route">${esc(c.originLabel || c.origem && c.origem.label || "Origem não informada")} → ${esc(c.destLabel || c.destino && c.destino.label || "Destino não informado")}</span>
+        </button>
+        <div class="call-card-status">
+          <span class="badge ${statusClass(c)}">${esc(operationalStatus(c))}</span>
+          ${proofStatusBadge(c)}
+          ${valueHtml}
+        </div>
+        <button class="btn call-card-toggle" type="button" onclick="JM.app.toggleCallCard('${esc(c.id)}')">${collapsed ? "Abrir" : "Minimizar"}</button>
+      </header>
+      <div class="call-card-body">
+        <div class="call-card-grid">
+          <div><b>Motorista</b><br><span>${esc(driver.nome || driver.email || "Sem motorista")}</span></div>
+          <div><b>Veículo</b><br><span>${esc(vehicle.placa || vehicle.apelido || "Sem veículo")}</span></div>
+          <div><b>Rota/KM</b><br><span>${esc(metric)}</span></div>
+          <div><b>Cliente</b><br><span>${esc(c.phone || "Sem WhatsApp")}</span></div>
+        </div>
+        <div class="call-card-flags">${flags || `<span class="badge info">sem alertas críticos</span>`}</div>
+        <div class="call-card-actions">
+          <button class="btn primary" onclick="JM.app.selectCallDossier('${esc(c.id)}')">Abrir painel</button>
+          ${quickLinks}
+          <button class="btn good" onclick="JM.app.setCallStatus('${esc(c.id)}','despachado')">Despachar</button>
+          <button class="btn" onclick="JM.app.setCallStatus('${esc(c.id)}','motorista_a_caminho')">A caminho</button>
+          <button class="btn" onclick="JM.app.setCallStatus('${esc(c.id)}','finalizado')">Finalizar</button>
+          ${url ? `<a class="btn" target="_blank" rel="noopener noreferrer" href="${esc(url)}">Rota</a>` : ""}
+          ${viewProofActions}${proofActions}${adminActions}
+        </div>
+      </div>
+    </article>`;
+  }
+
   function renderCalls() {
     const filter = callListFilter("calls");
-    const rows = visibleRows(state.calls).filter((c) => !isFinalStatus(c) && matchesCallListFilter(c, filter)).sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
-    if (!rows.length) return $("callsTable").innerHTML = `<p class="muted">Nenhum chamado registrado.</p>`;
-    $("callsTable").innerHTML = `<table><thead><tr><th>Protocolo</th><th>Cliente</th><th>Origem/Destino</th><th>Veículo</th><th>Status</th><th>Ações</th></tr></thead><tbody>` + rows.map((c) => {
-      const vehicle = state.vehicles[c.vehicleId] || {};
-      const driver = state.users[c.driverId] || {};
-      const url = c.routeExternalUrl || c.routeUrl || mapsRouteUrl(c, vehicle);
-      const km = routeKm(c, vehicle);
-      const metric = c.routeDistanceText || c.routeMetrics && c.routeMetrics.fullRoute && c.routeMetrics.fullRoute.distanceText || c.routeMetrics && c.routeMetrics.bestToOrigin && c.routeMetrics.bestToOrigin.distanceText || (km ? km.toFixed(1).replace(".", ",") + " km" : "Sem rota");
-      const routeBadge = c.routePrecision === "osrm_openstreetmap" || c.routeMetrics && c.routeMetrics.fullRoute && c.routeMetrics.fullRoute.isPrecise ? `<br><span class="badge ok">Rota por ruas</span>` : `<br><span class="badge warn">Fallback/estimada</span>`;
-      const tow = c.towPricing || c.deslocamentoGuincho || {};
-      const towHtml = tow.ativo ? `<br><span class="badge info">Guincho ${esc(String(tow.kmTotal || 0).replace(".", ","))} km · ${canSeeSensitiveFinance() ? money(tow.total || 0) : "valor restrito"}</span>` : "";
-      const adminActions = canOwnCompany() ? `<button class="btn" onclick="JM.app.editCall('${esc(c.id)}')">Editar</button><button class="btn danger" onclick="JM.app.deleteCall('${esc(c.id)}')">Excluir</button>` : "";
-      const viewProofActions = proofStatus(c) !== "pendente" ? `<button class="btn" onclick="JM.app.viewCallProofs('${esc(c.id)}')">Ver provas</button>` : "";
-      const proofActions = (canOwnCompany() || hasRole(["gerente"])) && proofStatus(c) === "completo" ? `<button class="btn good" onclick="JM.app.reviewCallProofs('${esc(c.id)}')">Revisar provas</button>` : "";
-      const valueHtml = canSeeSensitiveFinance() ? `<br><b>${money(c.valor || 0)}</b>` : "";
-      const sla = slaInfo(c);
-      const unreadChat = publicChatUnreadCount(c);
-      const chatBadge = unreadChat ? `<br><span class="badge danger">${unreadChat} mensagem(ns) do cliente</span>` : "";
-      const quickLinks = quickCallLinks(c, vehicle);
-      return `<tr>
-        <td><b>${esc(c.protocolo || c.id)}</b><br><span class="muted small">${dateTime(c.createdAt)}</span></td>
-        <td>${esc(c.cliente || "")}<br><span class="muted small">${esc(c.phone || "")}</span><br><span class="muted small">${esc(c.source || "Particular")}${c.insurance ? " · " + esc(c.insurance) : ""}${c.insuranceProtocol ? " · Prot. " + esc(c.insuranceProtocol) : ""}</span></td>
-        <td><span class="small">${esc(c.originLabel || c.origem && c.origem.label || "-")}</span><br><span class="muted small">→ ${esc(c.destLabel || c.destino && c.destino.label || "-")}</span><br><b>${esc(metric)}</b>${routeBadge}${towHtml}${chatBadge}${url ? `<br><a class="info small" target="_blank" rel="noopener noreferrer" href="${esc(url)}">Abrir rota no Maps</a>` : ""}</td>
-        <td>${esc(vehicle.placa || "-")}<br><span class="muted small">${esc(driver.nome || driver.email || "Sem motorista")}</span></td>
-        <td><span class="badge ${statusClass(c)}">${esc(operationalStatus(c))}</span>${valueHtml}<br><span class="badge ${sla.className}">${esc(sla.label)}</span><br>${proofStatusBadge(c)}</td>
-        <td class="row-actions"><button class="btn" onclick="JM.app.selectCallDossier('${esc(c.id)}')">Painel</button>${quickLinks}<button class="btn good" onclick="JM.app.setCallStatus('${esc(c.id)}','despachado')">Despachar</button><button class="btn primary" onclick="JM.app.setCallStatus('${esc(c.id)}','motorista_a_caminho')">A caminho</button><button class="btn" onclick="JM.app.setCallStatus('${esc(c.id)}','finalizado')">Finalizar</button>${viewProofActions}${proofActions}${adminActions}</td>
-      </tr>`;
-    }).join("") + `</tbody></table>`;
+    const allActive = visibleRows(state.calls).filter((c) => !isFinalStatus(c));
+    const rows = allActive.filter((c) => matchesCallListFilter(c, filter)).sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
+    const container = $("callsTable");
+    if (!container) return;
+    const waiting = rows.filter((c) => currentStatusKey(c) === "aguardando_despacho").length;
+    const running = rows.filter((c) => !["aguardando_despacho", "cancelado", "finalizado"].includes(currentStatusKey(c))).length;
+    const proofPending = rows.filter((c) => proofStatus(c) !== "completo").length;
+    if (!rows.length) {
+      container.innerHTML = `<div class="call-board-empty"><p class="muted">Nenhum chamado ativo nos filtros atuais.</p><button class="btn primary" type="button" onclick="JM.app.focusNewCallForm()">Cadastrar novo chamado</button></div>`;
+      renderCallDossier();
+      return;
+    }
+    container.innerHTML = `<div class="call-board-v5">
+      <div class="call-board-head">
+        <div>
+          <b>Fila operacional</b>
+          <p class="muted small">${rows.length} chamado(s) exibido(s). Abrir um chamado não oculta os demais.</p>
+        </div>
+        <div class="call-board-kpis">
+          <span class="badge warn">${waiting} aguardando</span>
+          <span class="badge info">${running} em operação</span>
+          <span class="badge ${proofPending ? "warn" : "ok"}">${proofPending} com prova pendente</span>
+        </div>
+        <div class="actions">
+          <button class="btn" type="button" onclick="JM.app.expandAllCallCards()">Abrir todos</button>
+          <button class="btn" type="button" onclick="JM.app.collapseAllCallCards()">Minimizar todos</button>
+          <button class="btn primary" type="button" onclick="JM.app.focusNewCallForm()">Novo chamado</button>
+        </div>
+      </div>
+      <div class="call-card-list">${rows.map(renderCallCard).join("")}</div>
+    </div>`;
+    renderCallDossier();
   }
 
   function selectCallDossier(id) {
@@ -4355,6 +4468,7 @@ Rota: ${url}`;
       ? structured.externalStatus
       : (aiValue(lines, ["situação", "situacao"]) || (/finalizado/i.test(raw) ? "Finalizado" : ""));
     const technician = structured && structured.technician ? structured.technician : "";
+    const baseDetails = structured && structured.base ? structured.base : null;
     const originDetails = structured && structured.origin ? structured.origin : null;
     const destinationDetails = structured && structured.destination ? structured.destination : null;
     const origin = originDetails && originDetails.searchAddress
@@ -4382,6 +4496,7 @@ Rota: ${url}`;
       technician ? "Técnico informado pela seguradora: " + technician : "",
       billingClient && billingClient !== insurance ? "Cliente/associado/pagador: " + billingClient : "",
       externalStatus ? "Status no portal externo: " + externalStatus : "",
+      baseDetails && baseDetails.searchAddress ? "Base operacional A/D: " + baseDetails.searchAddress : "",
       cause ? "Causa: " + cause : "",
       originDetails && originDetails.reference ? "Referência da origem: " + originDetails.reference : "",
       originDetails && originDetails.observation ? "Observação da origem: " + originDetails.observation : "",
@@ -4405,6 +4520,8 @@ Rota: ${url}`;
       destination,
       originDetails,
       destinationDetails,
+      baseDetails,
+      routeFormat: structured && structured.routeFormat || "",
       technician,
       plate,
       vehicle,
@@ -4672,7 +4789,7 @@ Rota: ${url}`;
       technician: original.technician || "",
       originDetails: original.originDetails || null,
       destinationDetails: original.destinationDetails || null,
-      parserVersion: "jm-fluxo-simplificado-sem-remover-logicas-v4"
+      parserVersion: "jm-fluxo-logistico-v5-central-cards"
     };
     return { original, reviewed };
   }
@@ -4695,7 +4812,7 @@ Rota: ${url}`;
       aiGenerated: true,
       aiReviewed: true,
       aiCreatedAt: now,
-      aiParserVersion: "jm-fluxo-simplificado-sem-remover-logicas-v4",
+      aiParserVersion: "jm-fluxo-logistico-v5-central-cards",
       cliente: reviewed.customerName || reviewed.requester || reviewed.billingClient || "Cliente não informado",
       phone: reviewed.customerPhone || "",
       serviceType: reviewed.serviceType || "Seguradora",
@@ -4866,7 +4983,7 @@ Rota: ${url}`;
           tariffSummary: reviewed.tariffSummary,
           mapLinks: original.mapLinks || [],
           rawText: draft.rawText || "",
-          parserVersion: "jm-fluxo-simplificado-sem-remover-logicas-v4"
+          parserVersion: "jm-fluxo-logistico-v5-central-cards"
         },
         rawPayload: draft.rawText || "",
         payload: Object.assign({}, original, reviewed),
@@ -5538,6 +5655,10 @@ Rota: ${url}`;
     replyPublicChat,
     markPublicChatRead,
     selectCallDossier,
+    toggleCallCard,
+    expandAllCallCards,
+    collapseAllCallCards,
+    focusNewCallForm,
     reopenCall,
     editTeamMember,
     deleteTeamMember,

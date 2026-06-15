@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const VERSION = "jm-fluxo-simplificado-sem-remover-logicas-v4";
+  const VERSION = "jm-fluxo-logistico-v5-central-cards";
   const motor = window.JM && window.JM.motorista;
   const utils = window.JM && window.JM.utils || {};
   if (!motor || !motor.state) return;

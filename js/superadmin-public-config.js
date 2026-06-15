@@ -1,6 +1,6 @@
 (function () {
   "use strict";
-  const VERSION = "jm-fluxo-simplificado-sem-remover-logicas-v4";
+  const VERSION = "jm-fluxo-logistico-v5-central-cards";
   const jm = window.JM || {};
   const firebaseApi = jm.firebase;
   if (!firebaseApi || !firebaseApi.db || !firebaseApi.auth) return;

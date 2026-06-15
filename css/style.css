@@ -1954,3 +1954,30 @@ html[data-theme="light"] .proof-wizard-actions { background:rgba(255,255,255,.97
 .driver-proof-missing-summary{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 10px}
 .driver-proof-missing-summary span{border:1px solid rgba(148,163,184,.35);border-radius:999px;padding:5px 8px;font-size:12px;background:rgba(15,23,42,.55)}
 .driver-proof-missing-actions button b{display:block;font-size:11px;opacity:.75;margin-bottom:2px;text-transform:uppercase;letter-spacing:.02em}
+
+/* V5 — Central operacional em cards: simplifica a tela sem remover fluxos */
+.call-board-v5{display:grid;gap:12px}
+.call-board-head{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;padding:12px;border:1px solid var(--line,#22314d);border-radius:16px;background:rgba(15,23,42,.55)}
+.call-board-head p{margin:4px 0 0}
+.call-board-kpis{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+.call-card-list{display:grid;gap:10px;max-height:66vh;overflow:auto;padding-right:4px}
+.call-card{border:1px solid var(--line,#22314d);border-radius:18px;background:linear-gradient(180deg,rgba(15,23,42,.96),rgba(2,6,23,.92));box-shadow:0 12px 30px rgba(0,0,0,.18);overflow:hidden}
+.call-card.is-active{outline:2px solid rgba(14,165,233,.65);box-shadow:0 0 0 4px rgba(14,165,233,.16),0 12px 30px rgba(0,0,0,.22)}
+.call-card-head{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:12px}
+.call-card-main{appearance:none;border:0;background:transparent;color:inherit;text-align:left;display:grid;gap:3px;min-width:0;cursor:pointer;padding:0}
+.call-card-protocol{font-weight:800;color:#93c5fd;font-size:.86rem;letter-spacing:.02em}
+.call-card-client{font-weight:800;font-size:1.02rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.call-card-route{font-size:.78rem;color:var(--muted,#94a3b8);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.call-card-status{display:flex;gap:6px;flex-wrap:wrap;align-items:center;justify-content:flex-end;min-width:160px}
+.call-card-money{font-weight:800;color:#bbf7d0;white-space:nowrap}
+.call-card-body{padding:0 12px 12px;border-top:1px solid rgba(148,163,184,.16)}
+.call-card-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}
+.call-card-grid>div{border:1px solid rgba(148,163,184,.16);border-radius:12px;padding:9px;background:rgba(15,23,42,.56);min-width:0}
+.call-card-grid span{display:block;color:var(--muted,#94a3b8);font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.call-card-flags{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.call-card-actions{display:flex;flex-wrap:wrap;gap:7px}.call-card-actions .btn{min-height:38px}
+.call-card.is-collapsed .call-card-body{display:none}.call-card.is-collapsed{background:rgba(15,23,42,.92)}
+.call-board-empty{display:grid;gap:10px;place-items:start;padding:16px;border:1px dashed var(--line,#22314d);border-radius:16px}
+.call-dossier{scroll-margin-top:80px}.call-dossier .dossier-head{position:sticky;top:0;z-index:2;background:rgba(2,6,23,.94);backdrop-filter:blur(8px);padding:10px;border-radius:14px;border:1px solid rgba(148,163,184,.16)}
+@media(max-width:900px){.call-board-head{grid-template-columns:1fr}.call-board-kpis{justify-content:flex-start}.call-card-head{grid-template-columns:1fr}.call-card-status{justify-content:flex-start;min-width:0}.call-card-grid{grid-template-columns:1fr 1fr}.call-card-list{max-height:none}.call-card-route{white-space:normal}.call-card-toggle{width:100%}}
+@media(max-width:520px){.call-card-grid{grid-template-columns:1fr}.call-card-actions .btn,.call-card-actions a.btn{width:100%;justify-content:center}.call-board-head .actions{display:grid;grid-template-columns:1fr;gap:8px}.call-board-head .actions .btn{width:100%}}

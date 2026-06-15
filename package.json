@@ -1,15 +1,15 @@
 {
   "name": "jm-guinchos",
-  "version": "32.7.9-fluxo-simplificado-v4",
+  "version": "5.0.0-fluxo-logistico",
   "private": true,
-  "description": "JM Guinchos V4 - telas simplificadas sem remoção de fluxos, cálculo manual assistido e parser IA por blocos Base/Ocorrência/Destino.",
+  "description": "JM Guinchos V5 - central logística com cards, minimização de chamados e fluxo simplificado sem remover lógicas.",
   "scripts": {
     "start": "node server.js",
     "serve": "node server.js",
     "cap:init": "npx cap init \"JM Guinchos\" br.com.thiaguinho.jmguinchos --web-dir .",
     "cap:add:android": "npx cap add android",
     "cap:sync": "npx cap sync android",
-    "check:js": "node --check js/app.js && node --check js/tracker.js && node --check js/mapa.js && node --check js/utils.js && node --check js/firebase.js && node --check js/superadmin.js && node --check js/superadmin-public-config.js && node --check js/motorista.js && node --check js/motorista-final-ux.js && node --check js/motorista-simple-flow.js && node --check js/final-ux.js && node --check js/google-maps.js && node --check js/insurance-parser.js && node --check service-worker.js"
+    "check:js": "node --check js/app.js && node --check js/tracker.js && node --check js/mapa.js && node --check js/utils.js && node --check js/firebase.js && node --check js/superadmin.js && node --check js/superadmin-public-config.js && node --check js/motorista.js && node --check js/motorista-final-ux.js && node --check js/final-ux.js && node --check js/google-maps.js && node --check js/insurance-parser.js && node --check service-worker.js"
   },
   "dependencies": {
     "@capacitor/android": "latest",

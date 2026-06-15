@@ -1,41 +1,23 @@
-# JM Guinchos — V4 Fluxo Simplificado
+# JM Guinchos — V5 Fluxo Logístico
 
-Versão preparada para novo repositório.
+Sistema operacional para guincho, socorro, munck e remoção.
 
-## Objetivo
-Simplificar a experiência visual sem remover fluxos internos:
+## Entradas principais
+- `index.html`: entrada/login.
+- `jm.html`: gestor/central operacional.
+- `motorista.html`: painel motorista.
+- `cliente-chamado.html`: acompanhamento público do cliente.
+- `superadmin.html`: configurações e administração.
+- `relatorio.html`: relatório/laudo.
 
-- gestor continua com central, chamados, mapa, financeiro, provas, relatórios e integrações;
-- motorista ganha modo guiado com menos informação na tela;
-- provas, assinatura, GPS, despesas, checklist e histórico continuam preservados;
-- cálculo confuso de guincho automático fica fora da experiência principal;
-- rota/KM/pedágio continuam como apoio assistido/manual;
-- IA reconhece blocos A/D Base, B Local Ocorrência, C Destino e Distância Total.
+## V5
+Esta versão melhora a UX logística sem remover fluxos: chamados em cards, minimizar/reabrir cards, painel de chamado preservado e parser de acionamentos A/D Base / B Ocorrência / C Destino.
 
-## Publicação
-Suba todos os arquivos deste pacote na raiz do novo repositório GitHub Pages.
+## Configuração
+Preencha `js/config.firebase.js` com os dados reais do Firebase antes de publicar.
 
-Arquivos principais:
-
-- `index.html`
-- `jm.html`
-- `motorista.html`
-- `superadmin.html`
-- `cliente-chamado.html`
-- `relatorio.html`
-- `css/`
-- `js/`
-- `assets/`
-- `service-worker.js`
-- `manifest.json`
-- `version.json`
-
-## Testes locais executados
-
+## Testes locais
 ```bash
 npm run check:js
 node tests/run-all.js
 ```
-
-## Observação
-Não foram alteradas Firebase Rules/RTDB Rules neste pacote.

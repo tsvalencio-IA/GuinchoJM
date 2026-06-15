@@ -1,13 +1,8 @@
 {
-  "version": "jm-fluxo-simplificado-sem-remover-logicas-v4",
-  "name": "JM Guinchos - Fluxo simplificado sem remover lógicas",
-  "date": "2026-06-15",
-  "base": "JM-SEXTAFEIRA-main (2).zip + hotfix manual sem cálculo confuso de guincho",
-  "scope": [
-    "Painel motorista simplificado visualmente com modo guiado",
-    "Fluxos antigos preservados no DOM e JS",
-    "Parser IA atualizado para A/D Base, B Local Ocorrência, C Destino e Distância Total",
-    "Cálculo de guincho automático confuso removido da experiência principal; valor continua manual/assistido"
-  ],
-  "cacheName": "jm-fluxo-simplificado-sem-remover-logicas-v4"
+  "version": "jm-fluxo-logistico-v5-central-cards",
+  "description": "V5 logística: central de chamados em cards, minimizar/reabrir chamados sem ocultar fila, parser IA A/D Base B Ocorrência C Destino, fluxo simplificado sem remover lógicas.",
+  "updatedAt": "2026-06-15T19:40:00Z",
+  "build": "V5",
+  "base": "JM-HOTFIX-MANUAL-SEM-CALC-GUINCHO-V3",
+  "notes": "Preserva financeiro, GPS, provas, assinatura, motorista, cliente e superadmin. Evolui UX do gestor e parser de acionamentos."
 }

@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const root = path.resolve(__dirname, "..");
 const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
-const version = "jm-fluxo-simplificado-sem-remover-logicas-v4";
+const version = "jm-fluxo-logistico-v5-central-cards";
 
 const jm = read("jm.html");
 const motorista = read("motorista.html");
