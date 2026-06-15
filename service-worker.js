@@ -1,4 +1,4 @@
-const CACHE_NAME = "jm-fluxo-logistico-v5-central-cards";
+const CACHE_NAME = "jm-fluxo-comercial-v6-laudos-financeiro";
 const ASSETS = [
   "./",
   "./index.html",

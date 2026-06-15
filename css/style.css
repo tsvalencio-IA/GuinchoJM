@@ -1981,3 +1981,94 @@ html[data-theme="light"] .proof-wizard-actions { background:rgba(255,255,255,.97
 .call-dossier{scroll-margin-top:80px}.call-dossier .dossier-head{position:sticky;top:0;z-index:2;background:rgba(2,6,23,.94);backdrop-filter:blur(8px);padding:10px;border-radius:14px;border:1px solid rgba(148,163,184,.16)}
 @media(max-width:900px){.call-board-head{grid-template-columns:1fr}.call-board-kpis{justify-content:flex-start}.call-card-head{grid-template-columns:1fr}.call-card-status{justify-content:flex-start;min-width:0}.call-card-grid{grid-template-columns:1fr 1fr}.call-card-list{max-height:none}.call-card-route{white-space:normal}.call-card-toggle{width:100%}}
 @media(max-width:520px){.call-card-grid{grid-template-columns:1fr}.call-card-actions .btn,.call-card-actions a.btn{width:100%;justify-content:center}.call-board-head .actions{display:grid;grid-template-columns:1fr;gap:8px}.call-board-head .actions .btn{width:100%}}
+
+/* JM V6 — acabamento comercial de assinaturas, laudos e financeiro */
+.signature-footer {
+  display: block !important;
+  position: fixed;
+  right: 16px;
+  bottom: 8px;
+  z-index: 180;
+  color: rgba(71, 85, 105, .72);
+  font-size: .62rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: none;
+  pointer-events: none;
+}
+.signature-footer::after { content: "Powered by thIAguinho Soluções Digitais"; }
+.app:not(.hidden) ~ .signature-footer {
+  position: static;
+  margin: 10px 18px 12px 292px;
+  text-align: right;
+}
+.report-signature,
+.report-powered-footer {
+  margin-top: 14px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(148, 163, 184, .28);
+  color: #64748b;
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-align: right;
+}
+.signature-pad {
+  background: #fff !important;
+  border: 2px solid #334155 !important;
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, .08), 0 10px 28px rgba(15,23,42,.16);
+}
+.signature-pad.is-signing { border-color: #0f766e !important; box-shadow: 0 0 0 4px rgba(20,184,166,.14), inset 0 0 0 1px rgba(15,23,42,.08); }
+.signature-preview,
+.signature-image,
+.signature-img,
+.photo .signature-img {
+  background: #fff !important;
+  border: 2px solid #334155 !important;
+  border-radius: 10px !important;
+  padding: 8px !important;
+  min-height: 92px;
+  object-fit: contain;
+  filter: contrast(1.45) saturate(.85) brightness(.92);
+  box-shadow: 0 8px 22px rgba(15,23,42,.10);
+}
+.signature-state-badge.ready,
+.signature-state-badge.saved { color: #064e3b; background: #d1fae5; border-color: #10b981; }
+.finance-summary.executive,
+.finance-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 10px 0 14px;
+}
+.finance-kpi-card {
+  border: 1px solid rgba(148, 163, 184, .22);
+  border-radius: 14px;
+  padding: 12px;
+  background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.025));
+}
+.finance-kpi-card small { color: var(--muted); display: block; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.finance-kpi-card b { display: block; font-size: 1.15rem; margin-top: 4px; }
+.finance-kpi-card.good b { color: #22c55e; }
+.finance-kpi-card.warn b { color: #f59e0b; }
+.finance-kpi-card.danger b { color: #ef4444; }
+.finance-section-title { margin: 14px 0 8px; font-size: .9rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+@media (max-width: 980px) {
+  .finance-summary.executive,
+  .finance-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .app:not(.hidden) ~ .signature-footer { margin: 8px 12px 10px; text-align:center; }
+  .signature-footer { left: 0; right: 0; text-align: center; font-size: .58rem; }
+}
+@media (max-width: 520px) {
+  .finance-summary.executive,
+  .finance-kpi-grid { grid-template-columns: 1fr; }
+}
+@media print {
+  .signature-footer { display:block !important; position: fixed; bottom: 7mm; right: 10mm; color:#64748b; }
+  .report-signature,
+  .report-powered-footer { color:#64748b; border-top:1px solid #cbd5e1; }
+  .signature-preview,
+  .signature-image,
+  .signature-img,
+  .photo .signature-img { border: 1.5px solid #334155 !important; filter: contrast(1.65) saturate(.8) brightness(.88); box-shadow:none; }
+}

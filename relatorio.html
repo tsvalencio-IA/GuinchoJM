@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>JM Guinchos - Relatório de Provas</title>
-  <link rel="stylesheet" href="css/style.css?v=jm-fluxo-logistico-v5-central-cards">
+  <link rel="stylesheet" href="css/style.css?v=jm-fluxo-comercial-v6-laudos-financeiro">
   <style>
     body { background:var(--bg); color:var(--text); }
     .report-page { max-width: 1060px; margin: 0 auto; padding: 24px; }
@@ -19,7 +19,7 @@
     .report-photo span { display:block; padding:8px; color:#475569; }
     .report-stage { break-inside: avoid; border:1px solid var(--line); border-radius:10px; padding:12px; margin-bottom:12px; background:var(--panel); }
     .report-stage .report-grid { grid-template-columns: repeat(4,minmax(0,1fr)); }
-    .signature-image { width:100%; max-width:360px; height:92px; object-fit:contain; border:1px solid #dbe3ef; border-radius:8px; background:#fff; }
+    .signature-image { width:100%; max-width:420px; height:118px; object-fit:contain; border:2px solid #334155; border-radius:10px; background:#fff; padding:8px; filter:contrast(1.65) saturate(.85) brightness(.88); box-shadow:0 8px 22px rgba(15,23,42,.10); }
     .print-actions { position: sticky; top: 0; background:var(--bg); padding:10px 0; z-index: 5; }
     @media print {
       .print-actions { display:none; }
@@ -29,7 +29,7 @@
       .report-photo img { height:82px; }
       .signature-image { height:78px; }
       .report-stage .report-grid { grid-template-columns: repeat(4,minmax(0,1fr)); }
-      .signature-footer { position: fixed; bottom: 8px; left:0; right:0; }
+      .signature-footer { display:block !important; position: fixed; bottom: 7mm; left:0; right:10mm; text-align:right; color:#64748b; font-size:10px; } .signature-footer::after { content:"Powered by thIAguinho Soluções Digitais"; }
     }
     @media (max-width: 760px) { .report-grid, .report-stage .report-grid { grid-template-columns:1fr 1fr; } .report-page { padding:12px; } .report-header { flex-direction:column; } .report-meta { text-align:left; width:100%; } }
   </style>
@@ -77,10 +77,10 @@
   </main>
   <footer class="signature-footer" aria-hidden="true"></footer>
 
-  <script src="js/config.firebase.js?v=jm-fluxo-logistico-v5-central-cards"></script>
+  <script src="js/config.firebase.js?v=jm-fluxo-comercial-v6-laudos-financeiro"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-  <script src="js/utils.js?v=jm-fluxo-logistico-v5-central-cards"></script>
+  <script src="js/utils.js?v=jm-fluxo-comercial-v6-laudos-financeiro"></script>
   <script>
     (function () {
       "use strict";

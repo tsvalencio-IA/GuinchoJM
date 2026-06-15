@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const VERSION = "jm-fluxo-logistico-v5-central-cards";
+  const VERSION = "jm-fluxo-comercial-v6-laudos-financeiro";
   const utils = window.JM && window.JM.utils || {};
   const app = window.JM && window.JM.app;
   if (!app || !app.state) return;

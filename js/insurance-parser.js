@@ -7,7 +7,7 @@
 }(typeof globalThis !== "undefined" ? globalThis : this, function () {
   "use strict";
 
-  const VERSION = "jm-fluxo-logistico-v5-central-cards";
+  const VERSION = "jm-fluxo-comercial-v6-laudos-financeiro";
   const STATE_NAMES = {
     acre: "AC", alagoas: "AL", amapa: "AP", amazonas: "AM", bahia: "BA", ceara: "CE",
     "distrito federal": "DF", "espirito santo": "ES", goias: "GO", maranhao: "MA",

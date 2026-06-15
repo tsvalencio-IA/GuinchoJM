@@ -1,8 +1,8 @@
 {
-  "version": "jm-fluxo-logistico-v5-central-cards",
-  "description": "V5 logística: central de chamados em cards, minimizar/reabrir chamados sem ocultar fila, parser IA A/D Base B Ocorrência C Destino, fluxo simplificado sem remover lógicas.",
-  "updatedAt": "2026-06-15T19:40:00Z",
-  "build": "V5",
-  "base": "JM-HOTFIX-MANUAL-SEM-CALC-GUINCHO-V3",
-  "notes": "Preserva financeiro, GPS, provas, assinatura, motorista, cliente e superadmin. Evolui UX do gestor e parser de acionamentos."
+  "version": "jm-fluxo-comercial-v6-laudos-financeiro",
+  "description": "V6 comercial: assinaturas com alto contraste, laudos/relatórios profissionais com rodapé thIAguinho, financeiro mais executivo e fluxo logístico V5 preservado.",
+  "updatedAt": "2026-06-15T20:10:00Z",
+  "build": "V6",
+  "base": "JM-FLUXO-LOGISTICO-V5",
+  "notes": "Não altera Firebase Rules/RTDB Rules. Preserva gestor, motorista, cliente, GPS, provas, assinatura, despesas, financeiro e parser IA. Evolui apresentação comercial, laudos e leitura financeira."
 }

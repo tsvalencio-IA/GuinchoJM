@@ -9,8 +9,8 @@
   } = window.JM.utils;
   const { auth, secondaryAuth, db, ts, arrayUnion, emailIsAdmin, getRealtimeDb, rtdbKey } = window.JM.firebase;
   const cfg = window.JM_CONFIG || {};
-  const SYSTEM_SIGNATURE = "";
-  const LOGIN_FLOW_VERSION = "jm-fluxo-logistico-v5-central-cards";
+  const SYSTEM_SIGNATURE = "Powered by thIAguinho Soluções Digitais";
+  const LOGIN_FLOW_VERSION = "jm-fluxo-comercial-v6-laudos-financeiro";
   let trackerTimer = null;
   let trackerBusy = false;
   let mapRefreshTimer = null;
@@ -3312,7 +3312,7 @@ Rota: ${url}`;
     const headerHtml = `<header class="report-header"><div><h1>Laudo técnico de atendimento</h1><p class="muted">${esc(company.nome || "JM Guinchos")} · ${esc(company.cidadeBase || "")} · ${esc(company.telefoneOperacional || "")}</p></div><div class="report-stamp"><b>${esc(call.protocolo || id)}</b><span>${dateTime(new Date().toISOString())}</span></div></header>`;
     const win = window.open("", "_blank");
     if (!win) return toast("O navegador bloqueou a janela de provas.", "danger");
-    win.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Laudo ${esc(call.protocolo || id)}</title><style>body{font-family:Arial,sans-serif;padding:18px;color:#111827}.report-header{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;border-bottom:2px solid #0f766e;padding-bottom:12px;margin-bottom:14px}.report-header h1{margin:0 0 4px;font-size:24px}.report-stamp{text-align:right;border:1px solid #d1d5db;border-radius:8px;padding:10px;min-width:160px}.report-stamp span{display:block;color:#64748b;font-size:12px;margin-top:4px}h2{font-size:15px;margin:18px 0 8px;color:#0f766e}.muted{color:#64748b}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.photo{break-inside:avoid;border:1px solid #d1d5db;border-radius:8px;padding:8px;margin:6px 0;background:#fff}.photo img{width:100%;height:118px;object-fit:cover;object-position:center;margin-top:6px;border-radius:6px}.signature-img,.photo .signature-img{width:100%;max-width:360px;height:92px;object-fit:contain;background:#fff;border:1px solid #d1d5db;border-radius:6px}.missing{color:#991b1b;background:#fef2f2}.report-context{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.report-context div{border:1px solid #e5e7eb;border-radius:8px;padding:8px}table{width:100%;border-collapse:collapse;margin:8px 0}th,td{border:1px solid #e5e7eb;padding:6px;text-align:left;font-size:12px}@media print{button{display:none}.photo{page-break-inside:avoid}.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.photo img{height:92px}.signature-img{height:82px}body{padding:8mm}.report-header{position:running(reportHeader)}}@page{margin:10mm}</style></head><body>${headerHtml}<div class="report-context"><div><b>Cliente</b><br>${esc(call.cliente || "-")}</div><div><b>Seguradora</b><br>${esc(call.insurance || call.source || "-")}</div><div><b>Placa</b><br>${esc(call.customerPlate || "-")}</div></div><h2>Checklist por etapa</h2><ul>${checklistHtml}</ul><p>${esc(checklist.notes || "")}</p>${inspectionHtml}${damageHtml}${stageEvidenceHtml}<h2>Assinatura ou justificativa por fase</h2><div class="grid">${phaseSigHtml}</div><h2>Assinatura geral de compatibilidade</h2>${sigHtml}<h2>Fotos gerais</h2>${photoHtml}${SYSTEM_SIGNATURE ? `<p class="muted">${SYSTEM_SIGNATURE}</p>` : ""}</body></html>`);
+    win.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Laudo ${esc(call.protocolo || id)}</title><style>body{font-family:Arial,sans-serif;padding:18px;color:#111827}.report-header{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;border-bottom:2px solid #0f766e;padding-bottom:12px;margin-bottom:14px}.report-header h1{margin:0 0 4px;font-size:24px}.report-stamp{text-align:right;border:1px solid #d1d5db;border-radius:8px;padding:10px;min-width:160px}.report-stamp span{display:block;color:#64748b;font-size:12px;margin-top:4px}h2{font-size:15px;margin:18px 0 8px;color:#0f766e}.muted{color:#64748b}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.photo{break-inside:avoid;border:1px solid #d1d5db;border-radius:8px;padding:8px;margin:6px 0;background:#fff}.photo img{width:100%;height:118px;object-fit:cover;object-position:center;margin-top:6px;border-radius:6px}.signature-img,.photo .signature-img{width:100%;max-width:420px;height:118px;object-fit:contain;background:#fff;border:2px solid #334155;border-radius:8px;padding:8px;filter:contrast(1.65) saturate(.85) brightness(.88)}.report-powered-footer{margin-top:14px;padding-top:8px;border-top:1px solid #cbd5e1;color:#64748b;font-size:10px;text-align:right}.missing{color:#991b1b;background:#fef2f2}.report-context{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.report-context div{border:1px solid #e5e7eb;border-radius:8px;padding:8px}table{width:100%;border-collapse:collapse;margin:8px 0}th,td{border:1px solid #e5e7eb;padding:6px;text-align:left;font-size:12px}@media print{button{display:none}.photo{page-break-inside:avoid}.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.photo img{height:92px}.signature-img{height:82px}body{padding:8mm}.report-header{position:running(reportHeader)}}@page{margin:10mm}</style></head><body>${headerHtml}<div class="report-context"><div><b>Cliente</b><br>${esc(call.cliente || "-")}</div><div><b>Seguradora</b><br>${esc(call.insurance || call.source || "-")}</div><div><b>Placa</b><br>${esc(call.customerPlate || "-")}</div></div><h2>Checklist por etapa</h2><ul>${checklistHtml}</ul><p>${esc(checklist.notes || "")}</p>${inspectionHtml}${damageHtml}${stageEvidenceHtml}<h2>Assinatura ou justificativa por fase</h2><div class="grid">${phaseSigHtml}</div><h2>Assinatura geral de compatibilidade</h2>${sigHtml}<h2>Fotos gerais</h2>${photoHtml}${SYSTEM_SIGNATURE ? `<div class="report-powered-footer">${SYSTEM_SIGNATURE}</div>` : ""}</body></html>`);
     win.document.close();
   }
 
@@ -4789,7 +4789,7 @@ Rota: ${url}`;
       technician: original.technician || "",
       originDetails: original.originDetails || null,
       destinationDetails: original.destinationDetails || null,
-      parserVersion: "jm-fluxo-logistico-v5-central-cards"
+      parserVersion: "jm-fluxo-comercial-v6-laudos-financeiro"
     };
     return { original, reviewed };
   }
@@ -4812,7 +4812,7 @@ Rota: ${url}`;
       aiGenerated: true,
       aiReviewed: true,
       aiCreatedAt: now,
-      aiParserVersion: "jm-fluxo-logistico-v5-central-cards",
+      aiParserVersion: "jm-fluxo-comercial-v6-laudos-financeiro",
       cliente: reviewed.customerName || reviewed.requester || reviewed.billingClient || "Cliente não informado",
       phone: reviewed.customerPhone || "",
       serviceType: reviewed.serviceType || "Seguradora",
@@ -4983,7 +4983,7 @@ Rota: ${url}`;
           tariffSummary: reviewed.tariffSummary,
           mapLinks: original.mapLinks || [],
           rawText: draft.rawText || "",
-          parserVersion: "jm-fluxo-logistico-v5-central-cards"
+          parserVersion: "jm-fluxo-comercial-v6-laudos-financeiro"
         },
         rawPayload: draft.rawText || "",
         payload: Object.assign({}, original, reviewed),
@@ -5073,13 +5073,30 @@ Rota: ${url}`;
     });
     const entradas = rows.filter((t) => t.type === "entrada" && t.module !== "payments_shadow").reduce((s, t) => s + Number(t.amount || 0), 0);
     const saidas = rows.filter((t) => t.type === "saida").reduce((s, t) => s + Number(t.amount || 0), 0);
+    const recebido = rows.filter((t) => t.type === "entrada" && /pago|recebido|quitado|liquidado/i.test(String(t.status || ""))).reduce((s, t) => s + Number(t.paidAmount != null ? t.paidAmount : t.amount || 0), 0);
+    const aReceber = rows.filter((t) => t.type === "entrada" && !/pago|recebido|quitado|liquidado/i.test(String(t.status || ""))).reduce((s, t) => s + Number(t.balanceAmount != null ? t.balanceAmount : t.amount || 0), 0);
+    const pago = rows.filter((t) => t.type === "saida" && /pago|quitado|liquidado|aprovado/i.test(String(t.status || ""))).reduce((s, t) => s + Number(t.paidAmount != null ? t.paidAmount : t.amount || 0), 0);
+    const aPagar = rows.filter((t) => t.type === "saida" && !/pago|quitado|liquidado|aprovado/i.test(String(t.status || ""))).reduce((s, t) => s + Number(t.balanceAmount != null ? t.balanceAmount : t.amount || 0), 0);
+    const despesasPendentes = visibleRows(state.expenses).filter((e) => e.status === "pendente").reduce((s, e) => s + Number(e.amount || 0), 0);
+    const lucroPrevisto = entradas - saidas;
+    const lucroCaixa = recebido - pago;
     const toBill = visibleRows(state.calls).filter((c) => Number(c.valor || 0) > 0 && (isFinalStatus(c.statusKey || c.status) || /faturar|receber/i.test(String(c.billingStatus || ""))) && !c.receivableTransactionId && !c.closingId);
     const billingQueue = toBill.length ? `<div class="workflow-box warn"><b>Chamados finalizados/a faturar sem financeiro oficial</b><div class="table-wrap"><table><thead><tr><th>Chamado</th><th>Cliente/seguradora</th><th>Veículo</th><th>Valor</th><th>Ação</th></tr></thead><tbody>${toBill.map((c) => {
       const vehicle = state.vehicles[c.vehicleId] || {};
       return `<tr><td>${esc(c.protocolo || c.id)}</td><td>${esc(callDisplayName(c))}</td><td>${esc(vehicle.placa || c.vehicleId || "-")}</td><td><b>${money(c.valor || 0)}</b></td><td><button class="btn good" onclick="JM.app.generateCallReceivable('${esc(c.id)}')">Gerar cobrança</button></td></tr>`;
     }).join("")}</tbody></table></div></div>` : "";
     const filterInfo = rows.length === allRows.length ? "" : `<span>Filtrados <b>${rows.length}/${allRows.length}</b></span>`;
-    $("financeTable").innerHTML = `<div class="finance-summary"><span>Receitas <b>${money(entradas)}</b></span><span>Despesas <b>${money(saidas)}</b></span><span>Lucro bruto <b>${money(entradas - saidas)}</b></span><span>Registros <b>${rows.length}</b></span>${filterInfo}</div>${billingQueue}<table><thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th>Vínculos</th><th>Status</th><th>Valor</th><th>Ações</th></tr></thead><tbody>` +
+    const financeKpis = `<div class="finance-kpi-grid" aria-label="Resumo financeiro executivo">
+      <div class="finance-kpi-card good"><small>Receita prevista</small><b>${money(entradas)}</b></div>
+      <div class="finance-kpi-card good"><small>Recebido</small><b>${money(recebido)}</b></div>
+      <div class="finance-kpi-card warn"><small>A receber</small><b>${money(aReceber)}</b></div>
+      <div class="finance-kpi-card danger"><small>Despesas</small><b>${money(saidas)}</b></div>
+      <div class="finance-kpi-card danger"><small>Pago</small><b>${money(pago)}</b></div>
+      <div class="finance-kpi-card warn"><small>A pagar</small><b>${money(aPagar)}</b></div>
+      <div class="finance-kpi-card ${lucroPrevisto >= 0 ? "good" : "danger"}"><small>Lucro previsto</small><b>${money(lucroPrevisto)}</b></div>
+      <div class="finance-kpi-card ${lucroCaixa >= 0 ? "good" : "danger"}"><small>Caixa realizado</small><b>${money(lucroCaixa)}</b></div>
+    </div><div class="finance-summary executive"><span>Registros <b>${rows.length}</b></span><span>Chamados a faturar <b>${toBill.length}</b></span><span>Despesas pendentes <b>${money(despesasPendentes)}</b></span>${filterInfo}</div>`;
+    $("financeTable").innerHTML = `${financeKpis}${billingQueue}<div class="finance-section-title">Lançamentos financeiros</div><table><thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th>Vínculos</th><th>Status</th><th>Valor</th><th>Ações</th></tr></thead><tbody>` +
       rows.map((t) => {
         const call = state.calls[t.callId] || {};
         const vehicle = state.vehicles[t.vehicleId] || {};

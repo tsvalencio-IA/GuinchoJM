@@ -4,7 +4,7 @@
   const { $, esc, parseMoney, toast, statusClass, routeKm, mapsRouteUrl, statusKey, statusLabel, isFinalStatus, setupCollapsiblePanels, pointFrom } = window.JM.utils;
   const { auth, db, arrayUnion, getRealtimeDb, rtdbKey } = window.JM.firebase;
   const cfg = window.JM_CONFIG || {};
-  const DRIVER_FLOW_VERSION = "jm-fluxo-logistico-v5-central-cards";
+  const DRIVER_FLOW_VERSION = "jm-fluxo-comercial-v6-laudos-financeiro";
   const state = {
     user: null,
     profile: null,
@@ -1461,10 +1461,10 @@
         canvas.width = w;
         canvas.height = h;
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        ctx.lineWidth = 3.2;
+        ctx.lineWidth = 3.8;
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
-        ctx.strokeStyle = "#e6edf7";
+        ctx.strokeStyle = "#111827";
         if (old) {
           const img = new Image();
           img.onload = () => ctx.drawImage(img, 0, 0, rect.width, rect.height);

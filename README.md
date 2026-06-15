@@ -1,23 +1,30 @@
-# JM Guinchos — V5 Fluxo Logístico
+# JM Guinchos — Fluxo Comercial V6
 
-Sistema operacional para guincho, socorro, munck e remoção.
+Versão comercial para novo repositório.
 
 ## Entradas principais
-- `index.html`: entrada/login.
-- `jm.html`: gestor/central operacional.
-- `motorista.html`: painel motorista.
-- `cliente-chamado.html`: acompanhamento público do cliente.
-- `superadmin.html`: configurações e administração.
-- `relatorio.html`: relatório/laudo.
+- `index.html`: login/entrada.
+- `jm.html`: painel gestor, central operacional, financeiro e IA de chamados.
+- `motorista.html`: painel motorista com fluxo guiado.
+- `cliente-chamado.html`: portal público do cliente.
+- `relatorio.html`: laudo público de atendimento.
+- `superadmin.html`: gestão administrativa.
 
-## V5
-Esta versão melhora a UX logística sem remover fluxos: chamados em cards, minimizar/reabrir cards, painel de chamado preservado e parser de acionamentos A/D Base / B Ocorrência / C Destino.
+## V6 — foco comercial
+- Assinaturas com traço escuro e melhor contraste.
+- Pré-visualização de assinatura reforçada no gestor, relatório e laudo.
+- Rodapé discreto e profissional: `Powered by thIAguinho Soluções Digitais`.
+- Relatórios e laudos com apresentação mais comercial.
+- Financeiro com KPIs executivos: receita prevista, recebido, a receber, despesas, pago, a pagar, lucro previsto e caixa realizado.
+- Fluxo V5 preservado: central por cards, minimizar/reabrir chamados, parser IA A/D Base · B Ocorrência · C Destino.
 
-## Configuração
-Preencha `js/config.firebase.js` com os dados reais do Firebase antes de publicar.
+## Preservado
+GPS, provas, assinatura, despesas, financeiro, gestor, motorista, cliente, superadmin, relatórios, parser IA, Firebase Rules e RTDB Rules.
 
-## Testes locais
+## Validação local executada
 ```bash
 npm run check:js
 node tests/run-all.js
 ```
+
+Ambos passaram nesta entrega.
