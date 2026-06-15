@@ -1,0 +1,423 @@
+{
+  "version": "jm-fluxo-simplificado-sem-remover-logicas-v4",
+  "manifestExcludes": [
+    "MANIFESTO_SHA256_V4.json"
+  ],
+  "files": [
+    {
+      "path": "ENTREGA_FLUXO_SIMPLIFICADO_V4.md",
+      "sha256": "bebdfb6d96d01372ce216896fbe8eb7fc7ae1fc9c5f3d101e877e51529e676c3",
+      "bytes": 1345
+    },
+    {
+      "path": "LISTA_ARQUIVOS_V4.txt",
+      "sha256": "672b99ca905aeb20d2a5de59d6aea001e7db721253ba49772783bb4a021b9278",
+      "bytes": 2587
+    },
+    {
+      "path": "README.md",
+      "sha256": "5b0771afa260528ecc33487099750516e99d5d596d2af35db77af4b5b3d6677e",
+      "bytes": 1095
+    },
+    {
+      "path": "README_JM_GUINCHOS.md",
+      "sha256": "6a3dbe648ae7acd7ce698f4c2c48a07a5c8610397afdecd5982d7d6642a1d007",
+      "bytes": 2489
+    },
+    {
+      "path": "assets/icon.svg",
+      "sha256": "c91dfbbb8226ecd8f755ea08ded77767bd0efd8eee52e4d3fb41c2abaa5abe56",
+      "bytes": 542
+    },
+    {
+      "path": "assets/vehicle-icons/carsv2-map/arrow_base.png",
+      "sha256": "e8745f89af1dc71ce6247c5887d1dbd9e37ba8114ccaaf04fca9ac097efde382",
+      "bytes": 21152
+    },
+    {
+      "path": "assets/vehicle-icons/carsv2-map/bicycle_base.png",
+      "sha256": "10834bb8b3dfef34e69d5457d09c55241a2115e64b0ec74dd396836361666a7e",
+      "bytes": 10948
+    },
+    {
+      "path": "assets/vehicle-icons/carsv2-map/boat_base.png",
+      "sha256": "559f5a9bcf3e1d05a4ddb54c739f496f0be474a4beb2deaddb11c08a8b74eb9c",
+      "bytes": 23672
+    },
+    {
+      "path": "assets/vehicle-icons/carsv2-map/bus_base.png",
+      "sha256": "21221b8cffbf6911d63af6a14998e3f831c2c6d3556c5b0fcb99e7086dadde9f",
+      "bytes": 9203
+    },
+    {
+      "path": "assets/vehicle-icons/carsv2-map/caminhaoBau_base.png",
+      "sha256": "dc0d55d5e7ae0500532a814f6e1c9f547b06a4fad3038a456a468be52eaf61e8",
+      "bytes": 10768
+    },
+    {
+      "path": "assets/vehicle-icons/carsv2-map/carroPasseio_base.png",
+      "sha256": "b67045921c4980f85067b0cc6e5fbc11f31261221afc474a5107b181f49e3fc4",
+      "bytes": 16945
+    },
+    {
+      "path": "assets/vehicle-icons/carsv2-map/carroUtilitario_base.png",
+      "sha256": "a74e582999f5a63c7431139b71abb2bcb44d4320f2746f67c8873c09cf3fc19c",
+      "bytes": 24782
+    },
+    {
+      "path": "assets/vehicle-icons/carsv2-map/crane_base.png",
+      "sha256": "5b72c765fde8219ff053e33c06c7bfd7ba20178162b36690516649147a8deef8",
+      "bytes": 23007
+    },
+    {
+      "path": "assets/vehicle-icons/carsv2-map/default_base.png",
+      "sha256": "e8745f89af1dc71ce6247c5887d1dbd9e37ba8114ccaaf04fca9ac097efde382",
+      "bytes": 21152
+    },
+    {
+      "path": "assets/vehicle-icons/carsv2-map/helicopter_base.png",
+      "sha256": "d68c9572381945ced5b658e6eebc33a3723b37a927ef83cd90965d868b16f38b",
+      "bytes": 22317
+    },
+    {
+      "path": "assets/vehicle-icons/carsv2-map/motorcycle_base.png",
+      "sha256": "59473e553059f280c6c099d12c82e6b50dbbf0d8795a54799264d65447971b9d",
+      "bytes": 18387
+    },
+    {
+      "path": "assets/vehicle-icons/carsv2-map/offroad_base.png",
+      "sha256": "966c0496f0e1be522d146c029fd5f8fd869bd1321f1be4d580af754a382cfba2",
+      "bytes": 26494
+    },
+    {
+      "path": "assets/vehicle-icons/carsv2-map/person_base.png",
+      "sha256": "06e6ff0f2c1e744d3d83d94ea5f46d17016b680b2dfce1247662e6115e519c3f",
+      "bytes": 29098
+    },
+    {
+      "path": "assets/vehicle-icons/carsv2-map/pet_base.png",
+      "sha256": "05203fdfaa514a165c157e1e02b19333fa15ec7eb1363b81290a2ac1652f76fe",
+      "bytes": 31795
+    },
+    {
+      "path": "assets/vehicle-icons/carsv2-map/plane_base.png",
+      "sha256": "d312d39c730982aebbdadaa7d705fb3f1bcd34b3efc0671021fe9883115004f6",
+      "bytes": 28408
+    },
+    {
+      "path": "assets/vehicle-icons/carsv2-map/scooter_base.png",
+      "sha256": "afd328a2b281b86bf0dda395d3bbb880fa9078aff21134374a266104a42af8ea",
+      "bytes": 18351
+    },
+    {
+      "path": "assets/vehicle-icons/carsv2-map/ship_base.png",
+      "sha256": "bac9cab6acc76e45dc08701d482f2dcadacb69fe42cba7c648139f7e4f4dc24b",
+      "bytes": 16894
+    },
+    {
+      "path": "assets/vehicle-icons/carsv2-map/tractor_base.png",
+      "sha256": "b9cb7b44ce81088ea0404c06adc71f216218e339f651fb5a19961e6083ec3d9a",
+      "bytes": 27600
+    },
+    {
+      "path": "assets/vehicle-icons/carsv2-map/truckBau_base.png",
+      "sha256": "301b9164b6e9ebb5b7940e55b112a7a6399b91f2c78773bd814e87fcdf1edb9b",
+      "bytes": 15449
+    },
+    {
+      "path": "assets/vehicle-icons/carsv2-map/truckCavalo_base.png",
+      "sha256": "2a857eb718fe386f945d7f0aa116132d18511d3caac3d82fc5eb1e1d7f364098",
+      "bytes": 18583
+    },
+    {
+      "path": "assets/vehicle-icons/carsv2-map/vanUtilitario_base.png",
+      "sha256": "8b3bf859c097f6bb1e5d579eae41925f403d63740d723cf9067619862eeb37c5",
+      "bytes": 16313
+    },
+    {
+      "path": "capacitor.config.json",
+      "sha256": "5a79264896910f5b4b861a574d2b652fca4b07801f6a396a5a913d35b83e8f4e",
+      "bytes": 256
+    },
+    {
+      "path": "cliente-chamado.html",
+      "sha256": "cdfbd8993b23113a9acb092b846e9877bbf0593d945d0494f55770defc2f9c26",
+      "bytes": 8631
+    },
+    {
+      "path": "css/final-ux.css",
+      "sha256": "7ddcc4884f34ed908cfd06bdbb6a673ab6d363661b19c10d54b402033a6167d3",
+      "bytes": 21397
+    },
+    {
+      "path": "css/style.css",
+      "sha256": "350fa1b264311c8962b5c904febfb6d524054c6e5667e8f1fd453840946f17e5",
+      "bytes": 63442
+    },
+    {
+      "path": "database.rules.json",
+      "sha256": "93b6d4271941360a79db1ac061fdcc3428419da9c5071e731d941ee3c013d2c8",
+      "bytes": 2637
+    },
+    {
+      "path": "firebase.json",
+      "sha256": "e77167a75de2e3435e93c65215a587a6ecc03ec2feca63e1468255a9a253c3cf",
+      "bytes": 112
+    },
+    {
+      "path": "firestore.rules",
+      "sha256": "cc9e2ac5c2143cc458e8f2c1511d27b7051955c3a4e1ffc9ea14b2918b274a38",
+      "bytes": 10243
+    },
+    {
+      "path": "formulario.html",
+      "sha256": "b2290669ce50e2cc43b8171c8f93fc913f85212de157bb259ab047444c24fd0c",
+      "bytes": 23002
+    },
+    {
+      "path": "index.html",
+      "sha256": "db07cf482a1190427735e07c5cde4e5ba3d68b0fdb50530f040efb9efc77d353",
+      "bytes": 1533
+    },
+    {
+      "path": "jm.html",
+      "sha256": "dd8744c6fc7ca3e8e6673158c1e2b376ca3d6607e790d78779312ddedb3b2684",
+      "bytes": 44146
+    },
+    {
+      "path": "js/app.js",
+      "sha256": "8212938b7468a930e837d6d8010c8a42c32d9f04c959e85d18614bae5f4d13b5",
+      "bytes": 299884
+    },
+    {
+      "path": "js/config.firebase.js",
+      "sha256": "fdcef89a621d8532aca3f2aef9fa51f1a13a1de52ac53f8cb43ab5a38006b24d",
+      "bytes": 2232
+    },
+    {
+      "path": "js/final-ux.js",
+      "sha256": "67a3bffa1fcda23012b22e8e6bf2d42f1fc277f99355d8eecec1b1a0e1dcadaf",
+      "bytes": 29272
+    },
+    {
+      "path": "js/firebase.js",
+      "sha256": "46bdfcf3774037af15bcc792fc7960667ea8ddfea22d7767ea4fe124f3e05804",
+      "bytes": 2191
+    },
+    {
+      "path": "js/google-maps.js",
+      "sha256": "29df3deeab6292fb5b956f046fe585115868d97c26c8bf7ce0e0bf536b293141",
+      "bytes": 31582
+    },
+    {
+      "path": "js/insurance-parser.js",
+      "sha256": "f715189ef3fe3a7bc312db254b692b6dba6057466d280d2221c0c3a0761129db",
+      "bytes": 20972
+    },
+    {
+      "path": "js/mapa.js",
+      "sha256": "eed802201c94cfe796b1b67e3b6b1b1bb322387ad3c781093d4d21f598fbf0bc",
+      "bytes": 20135
+    },
+    {
+      "path": "js/motorista-final-ux.js",
+      "sha256": "087a46a1179463274ecbd5cbfaf62be6e9f07eaf4faab57f0f8035b8febe26b6",
+      "bytes": 10492
+    },
+    {
+      "path": "js/motorista-simple-flow.js",
+      "sha256": "160076324cbf864e65f72a342b8ebd556d562715df5437110bac44b21e74e718",
+      "bytes": 7143
+    },
+    {
+      "path": "js/motorista.js",
+      "sha256": "3b03e9898ac3dfcc34e5c8b551eea4384397352555da15d33ae653dae6e05339",
+      "bytes": 159032
+    },
+    {
+      "path": "js/superadmin-public-config.js",
+      "sha256": "8fad48e5333533f0309ce0a367afa091ecaa5d5268e3e016ebd9644f924c3c6e",
+      "bytes": 2150
+    },
+    {
+      "path": "js/superadmin.js",
+      "sha256": "fa5bb1eae15ee985414843ec72d2270a2ea3bfe4989717172399902776d5d848",
+      "bytes": 27807
+    },
+    {
+      "path": "js/toll-plazas.js",
+      "sha256": "c62ee6a94599239ba19044d923351e189bc9b353d84a24a9b89ca853ba6ee837",
+      "bytes": 722
+    },
+    {
+      "path": "js/tracker.js",
+      "sha256": "9e0c9f0f04ce9938c88cf8db30d3b09103d4e091bebf60d46ea475e3bb1ceed2",
+      "bytes": 15127
+    },
+    {
+      "path": "js/utils.js",
+      "sha256": "1cc37e482c3d8aa0002e915b2dc12fbeb07816f15cf0bf66c6310cf8cf7418b9",
+      "bytes": 21326
+    },
+    {
+      "path": "manifest.json",
+      "sha256": "b7f10273d6afcab4cb7ad7fbbcaa66c3470c72658f541f56cede1a87dca3b570",
+      "bytes": 475
+    },
+    {
+      "path": "motorista.html",
+      "sha256": "c56b180963df44fb4372c3d230eb1cade47137deebaf9adf823b4bee0087a02d",
+      "bytes": 25369
+    },
+    {
+      "path": "package.json",
+      "sha256": "765da6abadb441560e408620dbe02a042127705838f044b879fd69cdaecdd3b1",
+      "bytes": 1179
+    },
+    {
+      "path": "railway.json",
+      "sha256": "f006a44769dc8eb4972266c83c73bc2010863a09ef43f3f6c0c5eb5cd699cebc",
+      "bytes": 233
+    },
+    {
+      "path": "relatorio.html",
+      "sha256": "d22046f73e50aa3cd9568003a06a6d35afb0b0cdf05dbec6c33d9d735bf5e211",
+      "bytes": 12141
+    },
+    {
+      "path": "server.js",
+      "sha256": "121cbf6d0b7cd1ce0327cf89d8da4f2b924ec0acc0d9ae052d7e8d65b534eb6c",
+      "bytes": 1377
+    },
+    {
+      "path": "service-worker.js",
+      "sha256": "6b4d100f288f814097ded1ca7ed8468adb286c717add0df1b81e5d829750c11f",
+      "bytes": 2426
+    },
+    {
+      "path": "superadmin.html",
+      "sha256": "e9ef03bbda574e1838dc8e605c5f78a36cc34ee4a483d08a177687b1acfc217c",
+      "bytes": 12190
+    },
+    {
+      "path": "tests/browser-smoke.html",
+      "sha256": "93d0a05e91a14270f2597afb36fb88f1486dede91f21f4eaff17985906dc7f51",
+      "bytes": 784
+    },
+    {
+      "path": "tests/final-phases.test.js",
+      "sha256": "0f7e0f85326eee38c96864b3089b0e286ddadfb1824cdeaad9428144cf572a32",
+      "bytes": 4506
+    },
+    {
+      "path": "tests/financeiro-rota-manual-hotfix.test.js",
+      "sha256": "c9eff02ce53dc81e9cd0ca86705fca56f03851c48fd84a9ca20bfdc9aab12ac9",
+      "bytes": 2158
+    },
+    {
+      "path": "tests/geocode-brasil.test.js",
+      "sha256": "cb7149093ec7945db14a46d886a4b17dd72f5ec7006b83122868ba28e9a2d8ae",
+      "bytes": 2304
+    },
+    {
+      "path": "tests/insurance-parser-base-occurrence-destination.test.js",
+      "sha256": "65994d889049d24442a21e173baa88d323df6b7dc6c3c137338272d067624124",
+      "bytes": 1426
+    },
+    {
+      "path": "tests/insurance-parser.test.js",
+      "sha256": "587c32f531bd546ce7b5952a7f948a65278341185dce2b3a4b1c2b67ac752612",
+      "bytes": 2783
+    },
+    {
+      "path": "tests/login-gestor.test.js",
+      "sha256": "4dfb532a17aa847c063bd8ce0b102290061c00acb048dcac65f598fd0fe47d24",
+      "bytes": 2148
+    },
+    {
+      "path": "tests/login-responsiveness-browser.html",
+      "sha256": "bbd29c5b7d1effcb4bd248aad1573223dd3916d3988b3a082f8810aad5d38d34",
+      "bytes": 915
+    },
+    {
+      "path": "tests/login-ui-responsiveness.test.js",
+      "sha256": "41c407f97c58691ef61ad2e0096ebbd96e5a657c7c67fb8023a109e004eabdb2",
+      "bytes": 1034
+    },
+    {
+      "path": "tests/motorista-pendencias-v32-7-6.test.js",
+      "sha256": "690dd35fb4dd07625ca4cb17d7e9af876873913dc1f7e4bad5895cab2c33f318",
+      "bytes": 1531
+    },
+    {
+      "path": "tests/motorista-pendencias-v32-7-7.test.js",
+      "sha256": "5a250ac1f35ac7a00427bd502e390992d102ca78482b6bae1a5c2c97bc36024e",
+      "bytes": 2583
+    },
+    {
+      "path": "tests/motorista-signature-header.test.js",
+      "sha256": "245e7293c4aac17531c7510ebbd65001fbf7bdd8fd6474bb9a4adf8b31ae6670",
+      "bytes": 1873
+    },
+    {
+      "path": "tests/phase1-motorista.test.js",
+      "sha256": "b5804b04ed03c4a0f9d2e6eecdc9fd7150a1e4552f1bae8ed38b6f079fae5a10",
+      "bytes": 2172
+    },
+    {
+      "path": "tests/phase2-motorista.test.js",
+      "sha256": "4a1e719df775e2d0d64b376a4972022b9bbf7bfa352037934a25d1d9d76fe86e",
+      "bytes": 1869
+    },
+    {
+      "path": "tests/run-all.js",
+      "sha256": "5af7595af3494a9709a0df0480bea94777b44790c29ed25439d7d2301aa057bc",
+      "bytes": 721
+    },
+    {
+      "path": "tests/version-cache.test.js",
+      "sha256": "3b15927f565b2f4fa3b53fdc5eb6e2a7167d781ae5672a1c938b3e53f2a99b99",
+      "bytes": 821
+    },
+    {
+      "path": "tutorial-assets/renders/01-login-gestao.png",
+      "sha256": "6dc4538c58b49cba92d919a9c6707ebd030f79b52d313d4666701708db507329",
+      "bytes": 94216
+    },
+    {
+      "path": "tutorial-assets/renders/02-central-operacional.png",
+      "sha256": "d9ed352d7f2aa38032930b5a3e3ceb23da315a67d3441fb2c9f4e01ae877f31e",
+      "bytes": 36097
+    },
+    {
+      "path": "tutorial-assets/renders/03-novo-chamado-rota.png",
+      "sha256": "f5f9fcb7334bd312ae650a48f27b6b5e2a3307db50c57e3766eecaf9b4445687",
+      "bytes": 81698
+    },
+    {
+      "path": "tutorial-assets/renders/04-assistente-ia.png",
+      "sha256": "217a3a085fc42086c7f1dec965bbe13adcc9051f45cd1d9b4b3e63a50e73ffa6",
+      "bytes": 36276
+    },
+    {
+      "path": "tutorial-assets/renders/05-mapa-tracker.png",
+      "sha256": "410200914c3350ebc33b720b3bb8952245e8c84b502e2bd91204054537b340d2",
+      "bytes": 21430
+    },
+    {
+      "path": "tutorial-assets/renders/06-financeiro.png",
+      "sha256": "99234a271117d72bb364806bf7b6ea10a70ceba9761c3e4e4e96067b0f2d6038",
+      "bytes": 36487
+    },
+    {
+      "path": "tutorial-assets/renders/07-evidencias-motorista.png",
+      "sha256": "3c22a4d0463d41bca832aeb3f42237291a117e3f2973d3e166a7ec4cb8004685",
+      "bytes": 98811
+    },
+    {
+      "path": "version.json",
+      "sha256": "00de0b01d413ce5d25c75bac2ace02d6178dc2db5aff9c6513c0c1abe05b8138",
+      "bytes": 642
+    }
+  ]
+}

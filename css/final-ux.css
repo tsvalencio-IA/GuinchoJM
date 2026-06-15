@@ -1,0 +1,311 @@
+/* JM Guinchos V32.7 — UX operacional final sem simplificação */
+:root{
+  --ux-border:rgba(148,163,184,.22);
+  --ux-soft:rgba(56,189,248,.08);
+  --ux-green:rgba(34,197,94,.14);
+  --ux-amber:rgba(245,158,11,.14);
+  --ux-red:rgba(239,68,68,.14);
+}
+
+/* Fase 7 — prancha técnica */
+.damage-editor-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px}
+.damage-editor-grid .wide{grid-column:1/-1}
+.damage-technical-legend{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px;padding:10px;border:1px solid var(--ux-border);border-radius:12px;background:rgba(15,23,42,.14)}
+.damage-technical-legend b{width:100%}
+.damage-technical-legend span{padding:5px 8px;border:1px solid rgba(248,113,113,.35);border-radius:999px;background:rgba(127,29,29,.12);font-size:.72rem;font-weight:800}
+.damage-technical-legend small{width:100%;color:var(--muted)}
+
+/* Fase 8 — despesa rápida */
+.expense-quick-types{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:10px 0 12px}
+.expense-quick-types button{min-height:44px;border:1px solid var(--ux-border);border-radius:12px;background:rgba(15,23,42,.24);color:var(--text);font-weight:800;padding:8px}
+.expense-quick-types button.active{border-color:rgba(34,197,94,.72);background:var(--ux-green);color:#bbf7d0}
+.expense-review{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding:10px;border:1px dashed rgba(56,189,248,.45);border-radius:12px;background:var(--ux-soft)}
+.expense-review div{min-width:0}.expense-review span{display:block;color:var(--muted);font-size:.68rem;text-transform:uppercase;letter-spacing:.06em}.expense-review b{display:block;overflow-wrap:anywhere}
+.driver-expense-history{margin-top:12px;display:grid;gap:8px}.driver-expense-history-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.driver-expense-history-head span{color:var(--muted);font-size:.75rem}
+.driver-expense-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px;border:1px solid var(--ux-border);border-radius:12px;background:rgba(15,23,42,.14)}
+.driver-expense-item>div{display:grid;gap:3px}.driver-expense-item>div:last-child{text-align:right}.driver-expense-item span{font-size:.72rem;color:var(--muted)}
+
+/* Fase 9 — central de despacho */
+.dispatch-advisor{margin:14px 0}.dispatch-advisor-head,.finance-unified-head,.ai-validation-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}
+.dispatch-advisor-head>div,.finance-unified-head>div,.ai-validation-head>div{display:grid;gap:3px}
+.dispatch-advisor-empty{display:grid;gap:5px;text-align:center;padding:18px;color:var(--muted)}
+.dispatch-ranking{display:grid;gap:8px}.dispatch-rank-card{display:grid;grid-template-columns:42px minmax(0,1.1fr) minmax(0,1.5fr) auto;gap:10px;align-items:center;width:100%;min-height:58px;padding:10px;border:1px solid var(--ux-border);border-radius:12px;background:rgba(15,23,42,.14);color:var(--text);text-align:left}
+.dispatch-rank-card:hover,.dispatch-rank-card.selected{border-color:rgba(56,189,248,.65);background:var(--ux-soft)}
+.dispatch-rank-number{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:rgba(56,189,248,.16);font-weight:900}
+.dispatch-rank-main,.dispatch-rank-info{display:grid;gap:2px;min-width:0}.dispatch-rank-main small,.dispatch-rank-info small{color:var(--muted);overflow-wrap:anywhere}.dispatch-advisor-actions{display:flex;gap:8px;margin-top:10px;justify-content:flex-end}
+
+/* Fase 10 — assistente em 3 etapas */
+.call-wizard-form{display:block!important}.call-wizard-step{margin-top:12px}.call-wizard-nav{display:grid;gap:10px;padding:12px;border:1px solid rgba(56,189,248,.28);border-radius:14px;background:rgba(15,23,42,.18);position:sticky;top:78px;z-index:12;backdrop-filter:blur(8px)}
+.call-wizard-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.call-wizard-tabs button{min-height:44px;border:1px solid var(--ux-border);border-radius:10px;background:rgba(15,23,42,.28);color:var(--muted);font-weight:800;padding:8px}.call-wizard-tabs button span{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;margin-right:6px;background:rgba(148,163,184,.18)}.call-wizard-tabs button.active{background:var(--ux-soft);border-color:rgba(56,189,248,.65);color:var(--text)}
+.call-wizard-info{display:grid;gap:3px}.call-wizard-info span,.call-wizard-info small{color:var(--muted)}.call-wizard-actions{display:flex;gap:8px;flex-wrap:wrap}
+
+/* Fase 11 — revisão da IA */
+.ai-validation-panel{margin-bottom:12px;padding:12px;border:1px solid rgba(34,197,94,.28);border-radius:14px;background:rgba(15,23,42,.15)}
+.ai-validation-empty{padding:12px;text-align:center;color:var(--muted)}
+.ai-validation-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.ai-validation-grid>div{padding:9px;border:1px solid var(--ux-border);border-radius:10px;background:rgba(15,23,42,.14)}.ai-validation-grid .wide{grid-column:1/-1}.ai-validation-grid span{display:block;color:var(--muted);font-size:.68rem;text-transform:uppercase;letter-spacing:.05em}.ai-validation-grid b{display:block;margin-top:3px;overflow-wrap:anywhere}
+
+/* Fase 14 — financeiro unificado */
+.finance-unified-hub{grid-column:1/-1}.finance-unified-tabs{display:flex;gap:6px;flex-wrap:wrap}.finance-unified-tabs button{min-height:38px;padding:8px 11px;border-radius:10px;border:1px solid var(--ux-border);background:rgba(15,23,42,.18);color:var(--muted);font-weight:800}.finance-unified-tabs button.active{background:var(--ux-soft);color:var(--text);border-color:rgba(56,189,248,.55)}
+.finance-unified-kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}.finance-unified-kpis>div{padding:10px;border:1px solid var(--ux-border);border-radius:10px;background:rgba(15,23,42,.14)}.finance-unified-kpis span{display:block;color:var(--muted);font-size:.68rem;text-transform:uppercase}.finance-unified-kpis b{display:block;margin-top:4px;overflow-wrap:anywhere}.finance-unified-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+
+/* Fase 15 — cartões mobile */
+.responsive-card-table{width:100%}
+
+/* Fase 16 — minimização única */
+.panel.is-collapsible>.panel-collapse-head{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;min-height:42px!important}
+.panel.is-collapsible>.panel-collapse-head h2,.panel.is-collapsible>.panel-collapse-head h3{margin:0!important;float:none!important}
+.panel.is-collapsible>.panel-collapse-body{display:block!important;overflow:visible!important}
+.panel.is-collapsed>.panel-collapse-body{display:none!important}
+.panel.is-collapsed{min-height:auto!important;padding-bottom:12px!important}
+.panel-collapse-toggle{float:none!important;margin:0!important;min-width:96px!important}
+
+/* Fase 17 — PWA */
+.jm-update-banner{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:10000;width:min(620px,calc(100% - 24px));display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border:1px solid rgba(56,189,248,.55);border-radius:14px;background:#0f1c2d;color:#fff;box-shadow:0 18px 48px rgba(0,0,0,.35)}.jm-update-banner>div{display:grid;gap:2px}.jm-update-banner span{color:#cbd5e1;font-size:.78rem}
+.driver-offline-notice{position:sticky;top:0;z-index:140;display:flex;align-items:center;justify-content:center;gap:10px;padding:10px;background:#7c2d12;color:#ffedd5}.driver-offline-notice span{font-size:.8rem}
+
+@media(max-width:1180px){
+  .finance-unified-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .ai-validation-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+@media(max-width:760px){
+  .damage-editor-grid,.expense-review,.ai-validation-grid,.finance-unified-kpis{grid-template-columns:1fr}
+  .expense-quick-types{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .dispatch-rank-card{grid-template-columns:36px minmax(0,1fr);align-items:start}.dispatch-rank-info,.dispatch-rank-card>.badge{grid-column:2}.dispatch-advisor-actions>*{flex:1}
+  .call-wizard-nav{top:68px}.call-wizard-tabs{grid-template-columns:1fr}.call-wizard-tabs button{text-align:left}.call-wizard-actions{display:grid;grid-template-columns:1fr 1fr}.call-wizard-actions .btn{width:100%}
+  .finance-unified-head,.dispatch-advisor-head,.ai-validation-head{flex-direction:column}.finance-unified-tabs{width:100%}.finance-unified-tabs button{flex:1}
+  .driver-expense-item{align-items:flex-start}.driver-expense-item>div:last-child{text-align:right}
+
+  .responsive-card-table,.responsive-card-table thead,.responsive-card-table tbody,.responsive-card-table tr,.responsive-card-table td{display:block;width:100%}
+  .responsive-card-table thead{display:none}
+  .responsive-card-table tbody{display:grid;gap:10px}
+  .responsive-card-table tr{padding:10px;border:1px solid var(--ux-border);border-radius:14px;background:rgba(15,23,42,.14);box-shadow:0 8px 24px rgba(0,0,0,.12)}
+  .responsive-card-table td{display:grid;grid-template-columns:minmax(105px,38%) minmax(0,1fr);gap:8px;align-items:start;padding:7px 0!important;border:0!important;white-space:normal!important;overflow-wrap:anywhere}
+  .responsive-card-table td::before{content:attr(data-label);font-size:.68rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+  .responsive-card-table td .actions{justify-content:flex-start}
+  .jm-update-banner{bottom:calc(90px + env(safe-area-inset-bottom));align-items:flex-start}.jm-update-banner .btn{flex:0 0 auto}
+}
+
+
+/* V32.7.6 — cabeçalho legível e assinatura explícita do motorista */
+#driverAppView .driver-topbar{
+  display:block;
+  height:auto;
+  min-height:0;
+  padding:10px 14px;
+  overflow:visible;
+}
+.driver-topbar-main{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:12px;
+  align-items:center;
+}
+.driver-topbar-identity{min-width:0;display:grid;gap:2px}
+.driver-topbar-identity h2{margin:0;font-size:1.05rem;line-height:1.15}
+.driver-topbar-identity #driverUserBox{white-space:normal;overflow-wrap:anywhere;line-height:1.25}
+#driverAppView .driver-topbar .driver-topbar-actions{
+  width:auto;
+  display:flex;
+  flex-wrap:nowrap;
+  gap:8px;
+  align-items:center;
+  justify-content:flex-end;
+}
+#driverAppView .driver-topbar .driver-topbar-actions .btn{min-height:42px;padding:8px 12px;white-space:nowrap}
+.driver-runtime-details{margin-top:8px;border:1px solid rgba(148,163,184,.2);border-radius:12px;background:rgba(15,23,42,.18);overflow:hidden}
+.driver-runtime-details>summary{list-style:none;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center;min-height:40px;padding:8px 10px;cursor:pointer;color:var(--text)}
+.driver-runtime-details>summary::-webkit-details-marker{display:none}
+.driver-runtime-dot{width:10px;height:10px;border-radius:50%;background:var(--muted);box-shadow:0 0 0 4px rgba(148,163,184,.1)}
+.driver-runtime-dot.ok{background:var(--green);box-shadow:0 0 0 4px rgba(34,197,94,.12)}
+.driver-runtime-dot.warn{background:var(--amber);box-shadow:0 0 0 4px rgba(245,158,11,.12)}
+.driver-runtime-dot.danger{background:var(--red);box-shadow:0 0 0 4px rgba(239,68,68,.12)}
+.driver-runtime-summary{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.78rem;font-weight:800}
+.driver-runtime-toggle-label{font-size:.68rem;color:var(--accent);font-weight:900;text-transform:uppercase;letter-spacing:.05em}
+.driver-runtime-details[open] .driver-runtime-toggle-label::after{content:" ▲"}
+.driver-runtime-details:not([open]) .driver-runtime-toggle-label::after{content:" ▼"}
+.driver-runtime-details .driver-runtime-bar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;max-width:none;margin:0;padding:0 10px 10px}
+.driver-runtime-details .driver-runtime-chip{display:flex;min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;line-height:1.25;border-radius:10px}
+
+.proof-wizard-head-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.signature-shortcut-btn{border-color:rgba(34,197,94,.55)!important;background:rgba(34,197,94,.12)!important;color:#bbf7d0!important;min-height:36px!important;padding:7px 10px!important}
+.signature-capture-card{padding:14px;border:1px solid rgba(34,197,94,.48);border-radius:16px;background:linear-gradient(180deg,rgba(34,197,94,.08),rgba(15,23,42,.14));box-shadow:0 12px 28px rgba(0,0,0,.12);scroll-margin-top:150px}
+.signature-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.signature-card-head>div{display:grid;gap:3px;min-width:0}
+.signature-card-head strong{font-size:1.02rem}
+.signature-card-head small{color:var(--muted);line-height:1.35}
+.signature-state-badge{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;min-height:30px;padding:5px 9px;border-radius:999px;border:1px solid var(--line);font-size:.7rem;font-weight:900;white-space:nowrap}
+.signature-state-badge.pending{color:var(--amber);border-color:rgba(245,158,11,.48);background:rgba(245,158,11,.1)}
+.signature-state-badge.ready{color:#bbf7d0;border-color:rgba(34,197,94,.55);background:rgba(34,197,94,.12)}
+.signature-state-badge.saved{color:#bae6fd;border-color:rgba(56,189,248,.55);background:rgba(56,189,248,.12)}
+.signature-state-badge.justified{color:#fde68a;border-color:rgba(245,158,11,.55);background:rgba(245,158,11,.12)}
+.signature-capture-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.signature-canvas-wrap{min-width:0}
+.signature-canvas-wrap .signature-pad{width:100%;height:clamp(210px,34vh,300px);min-height:210px}
+.signature-actions{margin-top:8px;justify-content:flex-end}
+
+@media(max-width:760px){
+  #driverAppView .driver-topbar{position:sticky;top:0;padding:calc(8px + env(safe-area-inset-top)) 10px 8px}
+  .driver-topbar-main{grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:start}
+  .driver-topbar-identity h2{font-size:.98rem}
+  #driverAppView .driver-topbar .driver-topbar-actions{width:auto;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  #driverAppView .driver-topbar .driver-topbar-actions .btn{min-width:0;min-height:38px;padding:7px 9px;font-size:.72rem}
+  .driver-runtime-details{margin-top:7px}
+  .driver-runtime-details>summary{min-height:38px;padding:7px 9px}
+  .driver-runtime-summary{font-size:.72rem}
+  .driver-runtime-details .driver-runtime-bar{grid-template-columns:1fr;padding:0 8px 8px}
+  .driver-runtime-details .driver-runtime-chip{font-size:.7rem;min-height:34px;padding:7px 9px}
+  .proof-wizard-head{display:grid;grid-template-columns:1fr;gap:8px}
+  .proof-wizard-head-actions{justify-content:space-between;width:100%}
+  .signature-shortcut-btn{flex:1}
+  .signature-capture-card{padding:11px;scroll-margin-top:175px}
+  .signature-card-head{display:grid;grid-template-columns:1fr;gap:8px}
+  .signature-state-badge{width:max-content}
+  .signature-capture-grid{grid-template-columns:1fr}
+  .signature-mode-toolbar{grid-template-columns:1fr;align-items:stretch}
+  .signature-mode-toolbar .btn{width:100%;min-height:48px}
+  .signature-canvas-wrap .signature-pad{height:240px;min-height:220px}
+  #driverPanelActive,#driverPanelCalls,#driverPanelMap,#driverPanelLocation,#driverPanelProofs,#driverPanelReport,#driverPanelExpense{scroll-margin-top:175px}
+}
+
+@media(max-width:420px){
+  .driver-topbar-main{grid-template-columns:1fr}
+  #driverAppView .driver-topbar .driver-topbar-actions{width:100%;grid-template-columns:1fr 1fr}
+  .driver-runtime-toggle-label{font-size:.62rem}
+  .proof-wizard-head-actions{display:grid;grid-template-columns:auto minmax(0,1fr);width:100%}
+  .signature-shortcut-btn{width:100%}
+}
+
+
+/* V32.7.5 — estabilização do painel motorista sem camada nova de JS */
+body.driver-field-mode #driverAppView {
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+body.driver-field-mode #driverAppView .content {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+body.driver-field-mode #driverAppView .grid,
+body.driver-field-mode #driverProofForm,
+body.driver-field-mode .form-grid {
+  min-width: 0;
+}
+body.driver-field-mode #driverAppView .panel,
+body.driver-field-mode #driverAppView input,
+body.driver-field-mode #driverAppView select,
+body.driver-field-mode #driverAppView textarea,
+body.driver-field-mode #driverAppView button {
+  max-width: 100%;
+}
+body.driver-field-mode #driverPanelLocation {
+  display: block !important;
+}
+body.driver-field-mode #driverPanelLocation.hidden {
+  display: block !important;
+}
+body.driver-field-mode #driverLocationStatus {
+  display: block;
+  overflow-wrap: anywhere;
+}
+body.driver-field-mode #driverSignatureSection {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+body.driver-field-mode #signatureCanvas {
+  display: block;
+  width: 100% !important;
+  max-width: 100%;
+  border: 1px dashed rgba(148,163,184,.75);
+  background: rgba(255,255,255,.96);
+  touch-action: pan-y;
+}
+body.driver-field-mode #signatureCanvas.is-signing {
+  touch-action: none;
+}
+@media (max-width: 760px) {
+  body.driver-field-mode #driverAppView .driver-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 1200;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: visible;
+  }
+  body.driver-field-mode .driver-topbar-main {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  body.driver-field-mode #driverAppView .driver-topbar .driver-topbar-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  body.driver-field-mode #driverAppView .driver-topbar .driver-topbar-actions .btn {
+    min-width: 0;
+    width: 100%;
+    min-height: 44px;
+  }
+  body.driver-field-mode .driver-runtime-details .driver-runtime-bar {
+    max-width: none;
+    grid-template-columns: 1fr;
+  }
+  body.driver-field-mode #driverAppView main.content {
+    padding: 12px 10px calc(112px + env(safe-area-inset-bottom));
+  }
+  body.driver-field-mode #driverAppView .grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  body.driver-field-mode #driverAppView .panel {
+    grid-column: 1 / -1 !important;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  body.driver-field-mode .driver-active-actions {
+    position: static;
+    grid-template-columns: 1fr;
+    margin: 12px 0 0;
+  }
+  body.driver-field-mode .proof-wizard-actions {
+    position: static;
+    grid-template-columns: 1fr;
+    margin-top: 10px;
+  }
+  body.driver-field-mode .driver-field-nav {
+    min-height: calc(74px + env(safe-area-inset-bottom));
+  }
+}
+
+/* V4 — simplificação visual sem remover fluxos */
+body.driver-simple-mode #driverAppView .content{padding-bottom:96px}
+.driver-simple-shell{border:1px solid rgba(59,130,246,.25);background:linear-gradient(135deg,rgba(15,23,42,.98),rgba(30,41,59,.96));}
+.driver-simple-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:12px}
+.driver-simple-head h2{margin:2px 0 4px;font-size:24px}
+.driver-simple-card{border:1px solid rgba(148,163,184,.22);border-radius:16px;padding:14px;background:rgba(15,23,42,.75);margin-bottom:12px}
+.driver-simple-card span{display:block;color:#94a3b8;font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+.driver-simple-card strong{display:block;font-size:18px;line-height:1.25;color:#f8fafc}
+.driver-simple-grid-actions{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:10px;margin-bottom:10px}
+.driver-simple-grid-actions .btn{min-height:52px;border-radius:14px;font-weight:800;white-space:normal}
+.driver-simple-grid-actions .driver-simple-big{font-size:18px;min-height:64px}
+.driver-simple-status{display:grid;grid-template-columns:1fr 1fr;gap:8px;color:#cbd5e1;font-size:13px}
+.driver-simple-status span{border:1px solid rgba(148,163,184,.18);border-radius:12px;padding:8px;background:rgba(2,6,23,.35)}
+.driver-simple-tabs{display:flex;gap:8px;overflow-x:auto;padding:4px 0;margin-top:10px}
+.driver-simple-tabs button{border:1px solid rgba(148,163,184,.22);background:rgba(15,23,42,.75);color:#e5e7eb;border-radius:999px;padding:10px 14px;font-weight:800;white-space:nowrap}
+.driver-simple-tabs button.active{background:#2563eb;border-color:#60a5fa;color:#fff}
+body.driver-simple-mode:not(.driver-show-all) #driverAppView .panel[id^="driverPanel"].driver-simple-hidden{display:none!important}
+body.driver-simple-mode:not(.driver-show-all) #driverAppView .panel[id^="driverPanel"].driver-simple-visible{display:block!important;grid-column:1 / -1!important}
+body.driver-simple-mode:not(.driver-show-all) #driverPanelReport{display:none!important}
+body.driver-simple-mode #driverPanelActive .driver-status-guide{margin-top:10px}
+body.driver-simple-mode #driverPanelActive .driver-active-actions{position:sticky;bottom:74px;z-index:20;background:rgba(15,23,42,.96);border:1px solid rgba(148,163,184,.2);border-radius:16px;padding:10px;box-shadow:0 16px 40px rgba(0,0,0,.28)}
+body.driver-simple-mode #driverPanelProofs .proof-section:not([open]){background:rgba(15,23,42,.55)}
+@media(max-width:720px){
+  .driver-simple-head{display:block}.driver-simple-head .btn{width:100%;margin-top:8px}
+  .driver-simple-grid-actions{grid-template-columns:1fr 1fr}.driver-simple-grid-actions .driver-simple-big{grid-column:1 / -1}
+  .driver-simple-status{grid-template-columns:1fr}.driver-simple-card strong{font-size:16px}
+}

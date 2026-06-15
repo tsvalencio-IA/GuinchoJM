@@ -1,0 +1,13 @@
+{
+  "version": "jm-fluxo-simplificado-sem-remover-logicas-v4",
+  "name": "JM Guinchos - Fluxo simplificado sem remover lógicas",
+  "date": "2026-06-15",
+  "base": "JM-SEXTAFEIRA-main (2).zip + hotfix manual sem cálculo confuso de guincho",
+  "scope": [
+    "Painel motorista simplificado visualmente com modo guiado",
+    "Fluxos antigos preservados no DOM e JS",
+    "Parser IA atualizado para A/D Base, B Local Ocorrência, C Destino e Distância Total",
+    "Cálculo de guincho automático confuso removido da experiência principal; valor continua manual/assistido"
+  ],
+  "cacheName": "jm-fluxo-simplificado-sem-remover-logicas-v4"
+}
