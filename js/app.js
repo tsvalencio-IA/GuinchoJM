@@ -10,7 +10,7 @@
   const { auth, secondaryAuth, db, ts, arrayUnion, emailIsAdmin, getRealtimeDb, rtdbKey } = window.JM.firebase;
   const cfg = window.JM_CONFIG || {};
   const SYSTEM_SIGNATURE = "Powered by thIAguinho Soluções Digitais";
-  const LOGIN_FLOW_VERSION = "jm-fluxo-comercial-v6-laudos-financeiro";
+  const LOGIN_FLOW_VERSION = "jm-fluxo-operacional-v7-gestor-responsivo-provas";
   let trackerTimer = null;
   let trackerBusy = false;
   let mapRefreshTimer = null;
@@ -153,6 +153,52 @@
 
   function canSeeSensitiveFinance() {
     return canManageFinance();
+  }
+
+  function canEditOperationalCall() {
+    return canOwnCompany() || canOperateCalls() || hasRole(["gerente", "manager"]);
+  }
+
+  function callVehicleSummary(call, vehicle) {
+    const parts = [];
+    const placa = vehicle && (vehicle.placa || vehicle.plate) || call && (call.customerPlate || call.placa || call.vehiclePlate);
+    const model = vehicle && (vehicle.apelido || vehicle.modelo || vehicle.model) || call && (call.customerVehicle || call.vehicleName || call.vehicleModel);
+    const brand = vehicle && (vehicle.marca || vehicle.brand) || call && (call.vehicleBrand || "");
+    const color = vehicle && (vehicle.cor || vehicle.color) || call && (call.vehicleColor || "");
+    if (placa) parts.push("Placa: " + placa);
+    if (model) parts.push("Veículo: " + model);
+    if (brand) parts.push("Marca: " + brand);
+    if (color) parts.push("Cor: " + color);
+    return parts.length ? parts.join(" · ") : "Dados do veículo não informados.";
+  }
+
+  function callClientSummary(call) {
+    const parts = [];
+    if (call && (call.cliente || call.customerName)) parts.push("Cliente: " + (call.cliente || call.customerName));
+    if (call && call.phone) parts.push("Telefone: " + call.phone);
+    if (call && call.customerId && state.customers[call.customerId]) {
+      const c = state.customers[call.customerId];
+      if (c.document) parts.push("Documento: " + c.document);
+      if (c.email) parts.push("E-mail: " + c.email);
+      if (c.paymentTerm) parts.push("Prazo: " + c.paymentTerm);
+    }
+    return parts.length ? parts.join(" · ") : "Cliente não informado.";
+  }
+
+  function callPaymentSummary(call) {
+    const txs = visibleRows(state.transactions).filter((t) => t.callId === call.id);
+    const entradas = txs.filter((t) => t.type === "entrada").reduce((s, t) => s + Number(t.amount || 0), 0);
+    const saidas = txs.filter((t) => t.type === "saida").reduce((s, t) => s + Number(t.amount || 0), 0);
+    const parts = [
+      "Status: " + (call.billingStatus || "aberto"),
+      "Valor previsto: " + money(call.valor || 0),
+      "Recebido: " + money(entradas),
+      "Custos/despesas: " + money(saidas),
+      "Resultado: " + money(entradas - saidas)
+    ];
+    const toll = call.tollEstimate && Number(call.tollEstimate.total || 0);
+    if (toll) parts.push("Pedágio estimado: " + money(toll));
+    return parts.join(" · ");
   }
 
   function isFinalStatus(status) {
@@ -2821,7 +2867,8 @@ Rota: ${url}`;
     const flags = callOperationalFlags(c).map((f) => `<span class="badge ${esc(f.cls)}">${esc(f.label)}</span>`).join("");
     const valueHtml = canSeeSensitiveFinance() ? `<span class="call-card-money">${money(c.valor || 0)}</span>` : `<span class="muted small">valor restrito</span>`;
     const quickLinks = quickCallLinks(c, vehicle);
-    const adminActions = canOwnCompany() ? `<button class="btn" onclick="JM.app.editCall('${esc(c.id)}')">Editar</button><button class="btn danger" onclick="JM.app.deleteCall('${esc(c.id)}')">Excluir</button>` : "";
+    const editActions = canEditOperationalCall() ? `<button class="btn warn" onclick="JM.app.editCall('${esc(c.id)}')">Editar chamado</button>` : "";
+    const adminActions = canOwnCompany() ? `<button class="btn danger" onclick="JM.app.deleteCall('${esc(c.id)}')">Excluir</button>` : "";
     const viewProofActions = proofStatus(c) !== "pendente" ? `<button class="btn" onclick="JM.app.viewCallProofs('${esc(c.id)}')">Provas</button>` : "";
     const proofActions = (canOwnCompany() || hasRole(["gerente"])) && proofStatus(c) === "completo" ? `<button class="btn good" onclick="JM.app.reviewCallProofs('${esc(c.id)}')">Revisar</button>` : "";
     return `<article class="call-card ${collapsed ? "is-collapsed" : ""} ${active ? "is-active" : ""}" data-call-id="${esc(c.id)}">
@@ -2841,9 +2888,10 @@ Rota: ${url}`;
       <div class="call-card-body">
         <div class="call-card-grid">
           <div><b>Motorista</b><br><span>${esc(driver.nome || driver.email || "Sem motorista")}</span></div>
-          <div><b>Veículo</b><br><span>${esc(vehicle.placa || vehicle.apelido || "Sem veículo")}</span></div>
+          <div><b>Veículo</b><br><span>${esc(callVehicleSummary(c, vehicle))}</span></div>
           <div><b>Rota/KM</b><br><span>${esc(metric)}</span></div>
-          <div><b>Cliente</b><br><span>${esc(c.phone || "Sem WhatsApp")}</span></div>
+          <div><b>Cliente</b><br><span>${esc(callClientSummary(c))}</span></div>
+          <div><b>Pagamento</b><br><span>${canSeeSensitiveFinance() ? esc(callPaymentSummary(c)) : "restrito"}</span></div>
         </div>
         <div class="call-card-flags">${flags || `<span class="badge info">sem alertas críticos</span>`}</div>
         <div class="call-card-actions">
@@ -2853,7 +2901,7 @@ Rota: ${url}`;
           <button class="btn" onclick="JM.app.setCallStatus('${esc(c.id)}','motorista_a_caminho')">A caminho</button>
           <button class="btn" onclick="JM.app.setCallStatus('${esc(c.id)}','finalizado')">Finalizar</button>
           ${url ? `<a class="btn" target="_blank" rel="noopener noreferrer" href="${esc(url)}">Rota</a>` : ""}
-          ${viewProofActions}${proofActions}${adminActions}
+          ${viewProofActions}${proofActions}${editActions}${adminActions}
         </div>
       </div>
     </article>`;
@@ -3013,7 +3061,7 @@ Rota: ${url}`;
     const callDataForSave = prepareCallDataForFirestore(baseData);
     try {
       if (state.editingCallId) {
-        if (!canOwnCompany() && !hasRole(["gerente"])) return toast("Somente gestor/dono ou gerente pode editar chamados.", "danger");
+        if (!canEditOperationalCall()) return toast("Sem permissão operacional para editar chamados.", "danger");
         const current = state.calls[state.editingCallId] || {};
         const nextKey = currentStatusKey(current) || (selectedDriverId ? "despachado" : "aguardando_despacho");
         await db.collection("calls").doc(state.editingCallId).set(Object.assign({}, callDataForSave, {
@@ -3144,7 +3192,7 @@ Rota: ${url}`;
   }
 
   function editCall(id) {
-    if (!canOwnCompany() && !hasRole(["gerente"])) return toast("Somente gestor/dono ou gerente pode editar chamados.", "danger");
+    if (!canEditOperationalCall()) return toast("Sem permissão operacional para editar chamados.", "danger");
     const call = state.calls[id];
     if (!call) return toast("Chamado não encontrado.", "danger");
     if (isFinalStatus(call) && call.locked !== false) return toast("Chamado finalizado está travado. Reabra com autorização antes de editar.", "danger");
@@ -3636,13 +3684,16 @@ Rota: ${url}`;
     box.innerHTML = `
       <div class="dossier-head">
         <div><h3>${esc(call.protocolo || call.id)} · ${esc(call.cliente || "")}</h3><p class="muted small">${esc(call.insurance || call.source || "Particular")} ${call.insuranceProtocol ? "· Prot. " + esc(call.insuranceProtocol) : ""} · ${esc(call.customerPlate || "")}</p></div>
-        <div class="actions"><span class="badge ${statusClass(call)}">${esc(operationalStatus(call))}</span>${proofStatusBadge(call)}<button class="btn" onclick="JM.app.viewCallProofs('${esc(call.id)}')">Abrir provas</button>${isFinalStatus(call) && (canOwnCompany() || hasRole(["gerente"])) ? `<button class="btn warn" onclick="JM.app.reopenCall('${esc(call.id)}')">Reabrir com autorização</button>` : ""}</div>
+        <div class="actions"><span class="badge ${statusClass(call)}">${esc(operationalStatus(call))}</span>${proofStatusBadge(call)}${canEditOperationalCall() ? `<button class="btn warn" onclick="JM.app.editCall('${esc(call.id)}')">Editar chamado</button>` : ""}<button class="btn" onclick="JM.app.viewCallProofs('${esc(call.id)}')">Abrir provas</button>${isFinalStatus(call) && (canOwnCompany() || hasRole(["gerente"])) ? `<button class="btn warn" onclick="JM.app.reopenCall('${esc(call.id)}')">Reabrir com autorização</button>` : ""}</div>
       </div>
       <div class="dossier-grid">
-        <section><h3>Operação</h3><p class="small"><b>Origem:</b> ${esc(call.originLabel || call.origem && call.origem.label || "-")}<br><b>Destino:</b> ${esc(call.destLabel || call.destino && call.destino.label || "-")}<br><b>Veículo:</b> ${esc(vehicle.placa || call.vehicleId || "-")}<br><b>Motorista:</b> ${esc(driver.nome || driver.email || "-")}</p></section>
-        <section class="wide"><h3>Rota interna do chamado</h3><div id="callDossierRouteMap" class="map mini-map"></div></section>
+        <section><h3>Operação</h3><p class="small"><b>Origem:</b> ${esc(call.originLabel || call.origem && call.origem.label || "-")}<br><b>Destino:</b> ${esc(call.destLabel || call.destino && call.destino.label || "-")}<br><b>Motorista:</b> ${esc(driver.nome || driver.email || "-")}<br><b>Status:</b> ${esc(operationalStatus(call))}</p></section>
+        <section><h3>Cliente</h3><p class="small">${esc(callClientSummary(call))}</p></section>
+        <section><h3>Veículo</h3><p class="small">${esc(callVehicleSummary(call, vehicle))}<br><b>ID interno:</b> ${esc(call.vehicleId || "-")}</p></section>
+        <section><h3>Pagamento</h3><p class="small">${canSeeSensitiveFinance() ? esc(callPaymentSummary(call)) : "Financeiro restrito para este perfil."}</p></section>
+        <section class="wide"><h3>Rota interna do chamado</h3><p class="muted small">Mapa operacional com origem, destino e veículo vinculado quando houver coordenadas.</p><div id="callDossierRouteMap" class="map mini-map"></div></section>
         <section><h3>Precificação do guincho</h3>${towText}</section>
-        <section><h3>Rota, pedagio e preco sugerido</h3>${routePricingText}</section>
+        <section><h3>Rota, pedágio e preço sugerido</h3>${routePricingText}</section>
         <section><h3>Checklist</h3>${checklistHtml}<p class="muted small">${esc(checklist.notes || "")}</p></section>
         <section><h3>Mapa de avarias</h3>${damageHtml}</section>
         <section class="wide"><h3>Antes e depois por etapa</h3>${beforeAfterHtml}</section>

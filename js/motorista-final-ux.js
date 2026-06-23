@@ -194,3 +194,5 @@
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bootstrap, { once: true });
   else bootstrap();
 })();
+
+/* jm-fluxo-operacional-v7-gestor-responsivo-provas */

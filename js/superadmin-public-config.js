@@ -57,3 +57,5 @@
     }, (error) => console.warn("Integrações privadas indisponíveis", error));
   });
 })();
+
+/* jm-fluxo-operacional-v7-gestor-responsivo-provas */

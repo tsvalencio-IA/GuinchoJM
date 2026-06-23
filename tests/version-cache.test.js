@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const assert = require("assert");
 const root = path.resolve(__dirname, "..");
-const version = "jm-fluxo-comercial-v6-laudos-financeiro";
+const version = "jm-fluxo-operacional-v7-gestor-responsivo-provas";
 const activeFiles = ["index.html","jm.html","motorista.html","superadmin.html","cliente-chamado.html","relatorio.html","service-worker.js","js/app.js","js/motorista.js"];
 for (const file of activeFiles) {
   const text = fs.readFileSync(path.join(root,file),"utf8");
