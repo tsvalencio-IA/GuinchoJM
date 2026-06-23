@@ -2301,3 +2301,78 @@ body.driver-show-all #driverAppView .panel[id^="driverPanel"] { display:block !i
   body.driver-simple-mode:not(.driver-show-all) .proof-wizard-tabs { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .driver-proof-stage-intro { padding:12px; }
 }
+
+/* V13 — Motorista sequencial automático: uma ação por vez, prova ou justificativa obrigatória */
+body.driver-sequential-mode #driverSimpleShell.driver-seq-host{
+  position:sticky;
+  top:8px;
+  z-index:80;
+  padding:0;
+  border:0;
+  background:transparent;
+  box-shadow:none;
+}
+.driver-seq-shell{
+  display:grid;
+  gap:10px;
+  padding:12px;
+  border-radius:20px;
+  border:1px solid rgba(56,189,248,.42);
+  background:linear-gradient(180deg,rgba(15,23,42,.98),rgba(15,23,42,.94));
+  box-shadow:0 16px 44px rgba(2,6,23,.34);
+}
+html[data-theme="light"] .driver-seq-shell{background:linear-gradient(180deg,rgba(255,255,255,.99),rgba(248,250,252,.96));}
+.driver-seq-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.driver-seq-top span{font-size:.7rem;font-weight:1000;text-transform:uppercase;letter-spacing:.1em;color:var(--accent)}
+.driver-seq-card{display:grid;gap:9px;padding:14px;border-radius:18px;border:1px solid rgba(148,163,184,.25);background:rgba(15,23,42,.38)}
+html[data-theme="light"] .driver-seq-card{background:rgba(248,250,252,.92)}
+.driver-seq-step{width:max-content;max-width:100%;padding:6px 10px;border-radius:999px;background:rgba(56,189,248,.14);color:var(--accent);font-size:.72rem;font-weight:1000;text-transform:uppercase;letter-spacing:.08em}
+.driver-seq-card h2{margin:0;font-size:clamp(1.35rem,5vw,2rem);line-height:1.05;overflow-wrap:anywhere}
+.driver-seq-card p{margin:0;color:var(--muted);font-size:clamp(.92rem,2.8vw,1.05rem);line-height:1.28;max-width:68ch}
+.driver-seq-primary{min-height:74px!important;font-size:clamp(1.05rem,4vw,1.35rem)!important;font-weight:1000!important;letter-spacing:.02em;border-radius:18px!important;width:100%;white-space:normal!important}
+.driver-seq-secondary-row,.driver-seq-photo-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.driver-seq-secondary-row .btn,.driver-seq-photo-row .btn{min-height:52px;white-space:normal;font-weight:900}
+.driver-seq-rule{padding:9px 10px;border-radius:12px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.28);color:#fbbf24;font-size:.82rem;font-weight:800;line-height:1.25}
+html[data-theme="light"] .driver-seq-rule{color:#92400e;background:rgba(245,158,11,.12)}
+.driver-seq-saving{padding:9px 10px;border-radius:12px;background:rgba(59,130,246,.12);color:var(--accent);font-weight:900}
+.driver-seq-mini{display:grid;gap:4px;padding:10px 12px;border-radius:14px;background:rgba(148,163,184,.1);border:1px solid rgba(148,163,184,.18);font-size:.82rem;color:var(--muted);overflow-wrap:anywhere}
+.driver-seq-mini strong{color:var(--text);font-size:.92rem;line-height:1.2;overflow-wrap:anywhere}
+.driver-seq-shortcuts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.driver-seq-shortcuts button{min-height:46px;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--text);font-weight:900;cursor:pointer}
+.driver-seq-shortcuts button.active,.driver-seq-shortcuts button:focus-visible{border-color:var(--accent);color:var(--accent);background:rgba(56,189,248,.12)}
+body.driver-sequential-mode:not(.driver-show-all) #driverAppView .driver-status-guide,
+body.driver-sequential-mode:not(.driver-show-all) #driverAppView .driver-status-guide + .driver-active-actions,
+body.driver-sequential-mode:not(.driver-show-all) #driverPanelProofs > p.muted.small,
+body.driver-sequential-mode:not(.driver-show-all) #driverPanelProofs .proof-wizard-tabs,
+body.driver-sequential-mode:not(.driver-show-all) #driverPanelProofs .proof-wizard-summary,
+body.driver-sequential-mode:not(.driver-show-all) #driverPanelProofs .proof-wizard-head-actions,
+body.driver-sequential-mode:not(.driver-show-all) #driverPanelReport,
+body.driver-sequential-mode:not(.driver-show-all) #driverFieldNav{
+  display:none!important;
+}
+body.driver-sequential-mode:not(.driver-show-all) #driverPanelProofs .proof-wizard{position:static;padding:10px;border-radius:14px;margin:6px 0 10px}
+body.driver-sequential-mode:not(.driver-show-all) #driverPanelProofs .proof-wizard-head{display:block}
+body.driver-sequential-mode:not(.driver-show-all) #driverPanelProofs .proof-wizard-head strong{font-size:1rem}
+body.driver-sequential-mode:not(.driver-show-all) #driverPanelProofs .proof-wizard-progress{height:7px}
+body.driver-sequential-mode:not(.driver-show-all) .driver-proof-missing-box{display:none!important}
+body.driver-sequential-mode:not(.driver-show-all) .proof-wizard-actions{grid-template-columns:1fr;position:sticky;bottom:10px;border-radius:18px;z-index:90}
+body.driver-sequential-mode:not(.driver-show-all) .proof-wizard-actions .btn{min-height:54px;font-weight:1000}
+body.driver-sequential-mode:not(.driver-show-all) .proof-wizard-actions #driverProofPrevBtn{display:none!important}
+body.driver-sequential-mode:not(.driver-show-all) .proof-phase-grid{grid-template-columns:1fr!important}
+body.driver-sequential-mode:not(.driver-show-all) .proof-section{border-radius:14px}
+body.driver-sequential-mode:not(.driver-show-all) .proof-section summary{font-size:.95rem;font-weight:1000}
+body.driver-sequential-mode:not(.driver-show-all) .driver-image-picker-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+body.driver-sequential-mode:not(.driver-show-all) .driver-image-picker-actions .btn{min-height:54px;flex:unset;font-size:.95rem;font-weight:1000}
+body.driver-sequential-mode:not(.driver-show-all) #driverAppView .panel[id^="driverPanel"].driver-simple-visible{grid-column:1/-1!important;width:100%!important;max-width:760px!important;margin-inline:auto!important}
+body.driver-sequential-mode:not(.driver-show-all) #driverPanelActive.driver-simple-visible{max-width:760px!important}
+body.driver-sequential-mode:not(.driver-show-all) #driverPanelCalls.driver-simple-visible{max-width:860px!important}
+@media(max-width:640px){
+  body.driver-sequential-mode #driverAppView main.content{padding:8px 8px 20px!important}
+  body.driver-sequential-mode #driverSimpleShell.driver-seq-host{top:0;border-radius:0;margin:-8px -8px 8px}
+  .driver-seq-shell{border-radius:0 0 18px 18px;padding:10px}
+  .driver-seq-primary{min-height:78px!important}
+  .driver-seq-secondary-row,.driver-seq-photo-row{grid-template-columns:1fr}
+  .driver-seq-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  body.driver-sequential-mode:not(.driver-show-all) #driverAppView .panel[id^="driverPanel"].driver-simple-visible{max-width:100%!important}
+  body.driver-sequential-mode:not(.driver-show-all) .driver-image-picker-actions{grid-template-columns:1fr}
+}
