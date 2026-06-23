@@ -1,0 +1,19 @@
+{
+  "cliente-chamado.html": "40d0678e6eaae512190e884a8b668ccc5a3867846f3d93146327a9c5e11e4c16",
+  "index.html": "33f65dafb029f9fd6e8acb30b83652dee969131af1c05d0242d2c00b7b48d174",
+  "jm.html": "5ab1086d03b6d52f185986d6ed352f86a22243c7d6172c5ce2f1fe7e8941d8cc",
+  "motorista.html": "323b5793292589c49ce432b91b408fb39dd864eebbf8a583ab76c59e0bbf355a",
+  "relatorio.html": "9a7eaf9a376bfe7e31e6a91bf8ba15373bd51468e70482a19cf5e845fdef7516",
+  "superadmin.html": "b0f372e6eb6747acb4592f83740d7abaaa10c7cd1420871291409e28838c7dec",
+  "css/style.css": "bdc49f9779605d9a74ff321c4b8d22f0c968c02d689e11e9e3ae1c36f571653a",
+  "js/app.js": "53583caeeafea3c38174f28aedecef55b94e73d2dd4ace62282d95df6950fe24",
+  "js/final-ux.js": "5540f2f41e0ba2bf9ba8946ab8556b4bf556d2af9874451ffd113f6f4f34fb89",
+  "js/motorista-final-ux.js": "e207892f00205d90ea9d44887c16c06eec4d8be5132b1dff9d1614549222aada",
+  "js/motorista-simple-flow.js": "f91b1e332f19e2b04f9969e8e89d78c800fe997e9316e8019621e6631dadf6d2",
+  "js/motorista.js": "72a05cfaf799016fe6394c666dc26cda19b2d89b3a908138bd73181c6e4b7f3c",
+  "service-worker.js": "3e0cccc826d1b8776a29732ad32208e8c268b638926e607ec9b1abda857fca7b",
+  "version.json": "de773da9a642da45b21c0bd073ec8de28b1eec5156fd412d1dec8a37cb64e1b1",
+  "tests/run-all.js": "4bb7df59814ce9495325f1664d8f6600231ba0fb3d846c98774b1bee24e203c7",
+  "tests/motorista-justificativa-fotos-v14.test.js": "2b6ab24b9a39995b3bc4832269591d11a601afcadf37bdc4b62ee9f07818ba74",
+  "ENTREGA_FLUXO_OPERACIONAL_V14.md": "0ab60ab1f3f36c5c0f3108f365d09f73a85fee5e42104d7330623f8f1d438b00"
+}

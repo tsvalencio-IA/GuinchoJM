@@ -1,11 +1,11 @@
-/* jm-fluxo-operacional-v13-motorista-sequencial-automatico */
+/* jm-fluxo-operacional-v14-motorista-justificativa-unica-fotos */
 (function () {
   "use strict";
 
   const { $, esc, parseMoney, toast, statusClass, routeKm, mapsRouteUrl, statusKey, statusLabel, isFinalStatus, setupCollapsiblePanels, pointFrom } = window.JM.utils;
   const { auth, db, arrayUnion, getRealtimeDb, rtdbKey } = window.JM.firebase;
   const cfg = window.JM_CONFIG || {};
-  const DRIVER_FLOW_VERSION = "jm-fluxo-operacional-v13-motorista-sequencial-automatico";
+  const DRIVER_FLOW_VERSION = "jm-fluxo-operacional-v14-motorista-justificativa-unica-fotos";
   const state = {
     user: null,
     profile: null,
@@ -1376,6 +1376,26 @@
     }).map((photo) => photo.key);
   }
 
+  function proofPhotoJustificationText(checklist) {
+    const fromInput = $("proofPhotoJustification") ? $("proofPhotoJustification").value.trim() : "";
+    const fromChecklist = String(checklist && (checklist.photoJustification || checklist.evidenceJustification) || "").trim();
+    return fromInput || fromChecklist;
+  }
+
+  function hasPhotoJustification(checklist) {
+    return !!proofPhotoJustificationText(checklist);
+  }
+
+  function groupMissingPhotos(requiredPhotos, call, selectedKeys) {
+    return (requiredPhotos || []).filter((photo) => !hasPhotoType(call, photo.key) && !(selectedKeys || []).includes(photo.key));
+  }
+
+  function proofPhotoJustificationLabel(missingPhotos) {
+    const total = (missingPhotos || []).length;
+    if (!total) return "Fotos/evidências";
+    return total === 1 ? "1 foto/evidência" : total + " fotos/evidências";
+  }
+
   function proofMissingItems(call, checklist, options) {
     options = options || {};
     const items = [];
@@ -1407,11 +1427,17 @@
     ];
     requiredFields.forEach((field) => { if (!String(field.value || "").trim()) items.push(field); });
     const selectedKeys = options.includeSelectedFiles === true ? selectedProofPhotoKeys() : [];
-    requiredProofPhotosForChecklist(currentChecklist).forEach((photo) => {
-      if (!hasPhotoType(call, photo.key) && !selectedKeys.includes(photo.key)) {
-        items.push({ label: "Foto: " + photo.label, hint: "Toque aqui para abrir a etapa e anexar a foto faltante.", target: photo.input, step: PROOF_INPUT_STEP_MAP[photo.input] || "inspecao", group: "Fotos" });
-      }
-    });
+    const missingPhotos = groupMissingPhotos(requiredProofPhotosForChecklist(currentChecklist), call, selectedKeys);
+    if (missingPhotos.length && !hasPhotoJustification(currentChecklist)) {
+      const firstPhoto = missingPhotos[0];
+      items.push({
+        label: proofPhotoJustificationLabel(missingPhotos) + " sem registro",
+        hint: "Envie as fotos ou escreva uma única justificativa para todas.",
+        target: "proofPhotoJustification",
+        step: PROOF_INPUT_STEP_MAP[firstPhoto.input] || "inspecao",
+        group: "Fotos"
+      });
+    }
     const acceptedText = $("signatureAcceptedText") ? $("signatureAcceptedText").value.trim() : "";
     const refusal = $("signatureRefusalReason") ? $("signatureRefusalReason").value.trim() : "";
     const hasNewSignature = !!(signaturePad && signaturePad.dirty);
@@ -2101,6 +2127,7 @@
       if (cfg.justification) fieldValue(cfg.justification, row.justificativa || "");
     });
     fieldValue("proofChecklistNotes", checklist.notes || "");
+    fieldValue("proofPhotoJustification", checklist.photoJustification || checklist.evidenceJustification || "");
     const inspection = checklist.vehicleInspection || {};
     fieldValue("proofFuelLevel", inspection.fuelLevel || "");
     fieldValue("proofOdometer", inspection.odometer || "");
@@ -2893,6 +2920,7 @@
     const previousChecklist = call && call.proofChecklist || {};
     const checklist = {
       notes: $("proofChecklistNotes") ? $("proofChecklistNotes").value.trim() || previousChecklist.notes || "" : previousChecklist.notes || "",
+      photoJustification: $("proofPhotoJustification") ? $("proofPhotoJustification").value.trim() || previousChecklist.photoJustification || previousChecklist.evidenceJustification || "" : previousChecklist.photoJustification || previousChecklist.evidenceJustification || "",
       vehicleInspection: technicalInspectionPayload(),
       damageAssessment: damageAssessmentPayload(),
       updatedAt: new Date().toISOString(),
@@ -3029,13 +3057,14 @@
     const audioInput = $("proofAudioFiles");
     const selectedAudios = audioInput && audioInput.files ? Array.from(audioInput.files).filter(Boolean) : [];
     const missingBeforeUpload = requiredPhotos.filter((photo) => !hasPhotoType(call, photo.key) && !selectedPhotos.some((p) => p.key === photo.key));
-    if (!hasStageTouchedNow && !selectedPhotos.length && !selectedAudios.length && !hasNewSignature && !signatureRefusalReason && !checklist.notes && selectedDamageParts.size === 0) {
-      return setProofSubmitStatus("Toque na etapa que esta registrando agora, marque avarias no desenho ou envie pelo menos uma foto/assinatura/áudio/justificativa.", "danger");
+    const hasPhotoJustificationNow = hasPhotoJustification(checklist);
+    if (!hasStageTouchedNow && !selectedPhotos.length && !selectedAudios.length && !hasNewSignature && !signatureRefusalReason && !checklist.notes && !hasPhotoJustificationNow && selectedDamageParts.size === 0) {
+      return setProofSubmitStatus("Toque na etapa, envie uma prova ou escreva uma justificativa única. Sem prova ou justificativa, não salva.", "danger");
     }
-    if (missingBeforeUpload.length) {
-      setProofSubmitStatus("Faltam fotos obrigatórias para a etapa marcada: " + missingBeforeUpload.map((photo) => photo.label).join(", ") + ". Toque na pendência para ir direto ao campo.", "danger");
+    if (missingBeforeUpload.length && !hasPhotoJustificationNow) {
+      setProofSubmitStatus("Faltam fotos/evidências. Envie as fotos ou escreva uma única justificativa para todas.", "danger");
       renderProofMissingBox(call);
-      focusProofTarget(missingBeforeUpload[0].input, PROOF_INPUT_STEP_MAP[missingBeforeUpload[0].input] || "inspecao");
+      focusProofTarget("proofPhotoJustification", PROOF_INPUT_STEP_MAP[missingBeforeUpload[0].input] || "inspecao");
       return;
     }
 
@@ -3161,6 +3190,7 @@
       setProofSubmitStatus("Salvando provas no chamado...", "info", false);
       const callUpdates = {
         proofChecklist: checklist,
+        proofPhotoJustification: checklist.photoJustification || "",
         damageAssessment: checklist.damageAssessment,
         proofPhotos: proofPhotosMerged,
         proofAudios: proofAudiosMerged,
@@ -3188,6 +3218,7 @@
           protocol: callProtocolLabel(call, callId),
           insurance: call.insurance || "",
           checklist,
+          proofPhotoJustification: checklist.photoJustification || "",
           damageAssessment: checklist.damageAssessment,
           photos: uploadedPhotos,
           audios: uploadedAudios,

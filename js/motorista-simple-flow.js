@@ -1,9 +1,9 @@
-/* JM motorista V13 - sequencial automático
+/* JM motorista V14 - sequencial automático com justificativa única de fotos
    Camada de UIX: uma ação por vez, avanço automático e preservação integral das provas, assinatura, GPS e despesas. */
 (function () {
   "use strict";
 
-  const VERSION = "jm-fluxo-operacional-v13-motorista-sequencial-automatico";
+  const VERSION = "jm-fluxo-operacional-v14-motorista-justificativa-unica-fotos";
   const $ = (id) => document.getElementById(id);
   const qsa = (sel, root) => Array.from((root || document).querySelectorAll(sel));
 
@@ -178,9 +178,13 @@
     if (!item) return "COMPLETAR PROVAS";
     const label = String(item.label || "evidência");
     if (/assin/i.test(label) || item.target === "driverSignatureSection") return "ASSINAR / JUSTIFICAR";
-    if (/foto|frente|traseira|lateral|painel|comprovante/i.test(label)) return "ENVIAR FOTO";
+    if ((item.group || "").toLowerCase() === "fotos" || /foto|frente|traseira|lateral|painel|comprovante/i.test(label)) return "FOTO OU JUSTIFICAR";
     if (/justificar|justificativa/i.test(label)) return "JUSTIFICAR";
     return "COMPLETAR AGORA";
+  }
+
+  function isPhotoMissingItem(item) {
+    return !!item && (String(item.group || "").toLowerCase() === "fotos" || item.target === "proofPhotoJustification" || /foto|evidência|evidencia/i.test(String(item.label || "")));
   }
 
   function nextAction() {
@@ -217,9 +221,9 @@
         title: missing.label || "Completar evidência",
         detail: missing.hint || "Prova ou justificativa obrigatória antes de avançar.",
         primary: missingActionLabel(missing),
-        secondary: "JUSTIFICAR SE NÃO TIVER",
+        secondary: isPhotoMissingItem(missing) ? "JUSTIFICAR FOTOS UMA VEZ" : "JUSTIFICAR SE NÃO TIVER",
         run: () => openProofTarget(missing.target, missing.step),
-        runSecondary: () => openJustificationFor(missing)
+        runSecondary: () => isPhotoMissingItem(missing) ? justifyAllPhotos(missing) : openJustificationFor(missing)
       };
     }
 
@@ -306,6 +310,7 @@
   }
 
   function openJustificationFor(item) {
+    if (isPhotoMissingItem(item)) return openProofTarget("proofPhotoJustification", item && item.step || "inspecao");
     const step = item && item.step || "finalizacao";
     const stageJustification = {
       retirada: "proofStageRetiradaJustification",
@@ -314,6 +319,25 @@
       finalizacao: "signatureRefusalReason"
     }[step] || "proofChecklistNotes";
     openProofTarget(stageJustification, step);
+  }
+
+  async function justifyAllPhotos(item) {
+    const input = $("proofPhotoJustification");
+    if (!input) return openJustificationFor(item);
+    const current = String(input.value || "").trim();
+    const reason = current || window.prompt("Justificativa única para fotos/evidências não enviadas:", "Não bati fotos.");
+    if (!reason) return openProofTarget("proofPhotoJustification", item && item.step || "inspecao");
+    input.value = reason.trim();
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+    if (typeof api().saveProofDraft === "function") {
+      try { await api().saveProofDraft({ silent: true, validate: false }); } catch (_) {}
+    }
+    setTimeout(() => {
+      const next = firstMissingForStatus(currentCall());
+      if (next && next.target !== "proofPhotoJustification") openProofTarget(next.target, next.step);
+      scheduleRender();
+    }, 350);
   }
 
   function choosePhotoInput(inputId, source) {
@@ -343,7 +367,7 @@
     const missing = call ? proofMissing(call) : [];
     const photoTarget = nextPhotoTarget();
     const loading = busy ? '<div class="driver-seq-saving">Salvando...</div>' : '';
-    const proofRule = '<div class="driver-seq-rule">Prova obrigatória: envie a foto/assinatura ou justifique. Nada fica oculto para a central.</div>';
+    const proofRule = '<div class="driver-seq-rule">Envie prova/assinatura ou justifique. Fotos podem ter uma justificativa única.</div>';
 
     shell.innerHTML = `
       <div class="driver-seq-shell ${action.tone || ""}">

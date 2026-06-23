@@ -1,8 +1,8 @@
 {
-  "version": "jm-fluxo-operacional-v13-motorista-sequencial-automatico",
-  "description": "V13 focada no motorista em campo: fluxo sequencial automático, uma ação por vez, botão grande, avanço após OK, provas/assinaturas preservadas e justificativa obrigatória quando a evidência não existir.",
+  "version": "jm-fluxo-operacional-v14-motorista-justificativa-unica-fotos",
+  "description": "V14 focada no motorista em campo: fluxo sequencial automático, uma ação por vez, botão grande, avanço após OK, provas/assinaturas preservadas e justificativa obrigatória quando a evidência não existir.",
   "updatedAt": "2026-06-23T19:30:00Z",
-  "build": "V13",
+  "build": "V14",
   "base": "GuinchoJM-main (2).zip",
   "notes": "Sem alteração em Firebase Rules/RTDB Rules. Mantém GPS, rota, fotos, galeria, Cloudinary, assinatura, despesas, gestor, financeiro e relatórios. A UI do motorista conduz a próxima ação automaticamente e só exibe módulos técnicos quando solicitado."
 }

@@ -2302,7 +2302,7 @@ body.driver-show-all #driverAppView .panel[id^="driverPanel"] { display:block !i
   .driver-proof-stage-intro { padding:12px; }
 }
 
-/* V13 — Motorista sequencial automático: uma ação por vez, prova ou justificativa obrigatória */
+/* V14 — Motorista sequencial automático: uma ação por vez, prova ou justificativa obrigatória */
 body.driver-sequential-mode #driverSimpleShell.driver-seq-host{
   position:sticky;
   top:8px;
@@ -2375,4 +2375,24 @@ body.driver-sequential-mode:not(.driver-show-all) #driverPanelCalls.driver-simpl
   .driver-seq-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr))}
   body.driver-sequential-mode:not(.driver-show-all) #driverAppView .panel[id^="driverPanel"].driver-simple-visible{max-width:100%!important}
   body.driver-sequential-mode:not(.driver-show-all) .driver-image-picker-actions{grid-template-columns:1fr}
+}
+
+/* V14 — Motorista: justificativa única para fotos/evidências */
+.driver-photo-justification-card {
+  border: 1px solid rgba(148, 163, 184, .32);
+  border-radius: 14px;
+  padding: 12px;
+  background: rgba(15, 23, 42, .035);
+}
+.driver-photo-justification-card textarea {
+  min-height: 82px;
+}
+.driver-seq-card .driver-seq-rule {
+  font-size: .88rem;
+  line-height: 1.35;
+}
+@media (max-width: 640px) {
+  .driver-photo-justification-card {
+    padding: 10px;
+  }
 }
