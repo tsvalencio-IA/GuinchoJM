@@ -1,10 +1,8 @@
 {
-  "version": "jm-fluxo-operacional-v7-gestor-responsivo-provas",
-  "description": "V6 comercial: assinaturas com alto contraste, laudos/relatórios profissionais com rodapé thIAguinho, financeiro mais executivo e fluxo logístico V5 preservado.",
-  "updatedAt": "2026-06-15T20:10:00Z",
-  "build": "V6",
-  "base": "JM-FLUXO-LOGISTICO-V5",
-  "notes": "Não altera Firebase Rules/RTDB Rules. Preserva gestor, motorista, cliente, GPS, provas, assinatura, despesas, financeiro e parser IA. Evolui apresentação comercial, laudos e leitura financeira.",
-  "label": "JM V7 gestor responsivo e provas preservadas",
-  "builtAt": "2026-06-23T00:00:00.000Z"
+  "version": "jm-fluxo-operacional-v8-responsive-gestor-provas",
+  "description": "V8 operacional: corrige responsividade real do gestor em zoom/telas diferentes, restaura ações visíveis dos chamados, amplia painel do chamado com cliente/veículo/rota/pagamento e preserva provas do motorista para exibição no gestor.",
+  "updatedAt": "2026-06-23T14:25:00Z",
+  "build": "V8",
+  "base": "GuinchoJM-main enviado pelo usuário",
+  "notes": "Não simplifica fluxos. Não altera Firebase Rules/RTDB Rules. Preserva motorista, GPS, provas, assinatura, despesas, financeiro, relatórios, cliente e superadmin."
 }
