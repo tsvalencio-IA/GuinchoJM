@@ -2108,3 +2108,135 @@ html, body { max-width: 100%; overflow-x: hidden; }
 @media (min-resolution: 1.15dppx) {
   .call-card-client, .call-card-protocol, .dossier-head h3 { overflow-wrap:anywhere; }
 }
+
+
+/* JM V10 — cirurgia real da aba Chamados: responsiva, sem dados escondidos, sem arrasto lateral */
+html, body { width:100%; max-width:100%; overflow-x:hidden !important; }
+.app { width:100%; max-width:none; }
+main, .content { width:100%; max-width:none !important; margin:0 !important; overflow-x:hidden !important; }
+@media (min-width: 981px) {
+  .content { max-width:none !important; margin:0 !important; width:100% !important; }
+}
+
+#view-chamados.view.active { width:100%; max-width:none; overflow-x:hidden; }
+#view-chamados > .grid {
+  width:100%;
+  max-width:none;
+  display:grid;
+  grid-template-columns:minmax(360px, 0.82fr) minmax(520px, 1.18fr);
+  gap:16px;
+  align-items:start;
+}
+#view-chamados > .grid > .panel { min-width:0; width:100%; max-width:100%; }
+#view-chamados > .grid > .panel.col-5,
+#view-chamados > .grid > .panel.col-7 { grid-column:auto !important; }
+#view-chamados > .grid > .panel.col-12 { grid-column:1 / -1 !important; }
+
+#view-chamados .module-toolbar {
+  display:grid;
+  grid-template-columns:minmax(180px, 1.5fr) minmax(130px, .8fr) minmax(130px, .8fr) auto;
+  align-items:stretch;
+}
+#view-chamados .module-toolbar > * { min-width:0; }
+
+.call-board-v5, .call-card-list, .call-card, .call-card-head, .call-card-body, .call-card-grid, .call-card-actions {
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  box-sizing:border-box;
+}
+.call-card-list { max-height:none !important; overflow:visible !important; padding-right:0 !important; }
+.call-board-head { grid-template-columns:minmax(0,1fr); align-items:start; }
+.call-board-head .actions, .call-board-kpis { justify-content:flex-start; }
+.call-board-head .actions { display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); width:100%; }
+.call-board-head .actions .btn { width:100%; min-width:0; white-space:normal; }
+
+.call-card-head {
+  grid-template-columns:minmax(0, 1fr);
+  align-items:start;
+  gap:8px;
+}
+.call-card-main { width:100%; min-width:0; }
+.call-card-protocol, .call-card-client, .call-card-route {
+  white-space:normal !important;
+  overflow:visible !important;
+  text-overflow:clip !important;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+.call-card-status {
+  width:100%;
+  min-width:0 !important;
+  justify-content:flex-start !important;
+  display:flex;
+  flex-wrap:wrap;
+}
+.call-card-toggle { width:100%; min-width:0; justify-content:center; }
+.call-card-body { display:block !important; }
+.call-card.is-collapsed .call-card-body { display:block !important; }
+.call-card.is-collapsed .call-card-grid,
+.call-card.is-collapsed .call-card-flags { display:grid; }
+.call-card.is-collapsed .call-card-actions { display:none !important; }
+.call-card.is-collapsed .call-card-body::after {
+  content:'Chamado minimizado: detalhes essenciais preservados. Clique em Abrir para ações.';
+  display:block;
+  margin-top:8px;
+  color:var(--muted,#94a3b8);
+  font-size:.72rem;
+}
+.call-card-grid { grid-template-columns:repeat(auto-fit, minmax(145px, 1fr)) !important; }
+.call-card-grid > div { min-width:0; }
+.call-card-grid span {
+  white-space:normal !important;
+  overflow:visible !important;
+  text-overflow:clip !important;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+.call-card-actions {
+  display:grid !important;
+  grid-template-columns:repeat(auto-fit, minmax(112px, 1fr)) !important;
+  gap:8px;
+}
+.call-card-actions .btn, .call-card-actions a.btn {
+  min-width:0 !important;
+  width:100%;
+  white-space:normal !important;
+  overflow-wrap:anywhere;
+  justify-content:center;
+}
+
+.call-dossier, .dossier-head, .dossier-grid, .dossier-grid > section { width:100%; max-width:100%; min-width:0; box-sizing:border-box; }
+.dossier-head { display:grid !important; grid-template-columns:minmax(0,1fr); gap:10px; }
+.dossier-head .actions { display:grid !important; grid-template-columns:repeat(auto-fit, minmax(135px, 1fr)); width:100%; justify-content:stretch !important; }
+.dossier-head .actions .btn { width:100%; min-width:0; white-space:normal; justify-content:center; }
+.dossier-grid { grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)) !important; }
+.dossier-grid > section.wide { grid-column:1 / -1 !important; }
+.dossier-grid p, .dossier-grid span, .dossier-grid small, .dossier-grid li { overflow-wrap:anywhere; word-break:break-word; }
+.mini-map, .map, #callDossierRouteMap { width:100%; max-width:100%; min-width:0; }
+.proof-thumbs { grid-template-columns:repeat(auto-fit, minmax(116px, 1fr)) !important; }
+.signature-preview { background:#fff; border:2px solid #334155; filter:contrast(1.75) brightness(.88) saturate(.85); padding:8px; }
+
+@media (max-width: 1450px) {
+  #view-chamados > .grid { grid-template-columns:1fr; }
+  #view-chamados > .grid > .panel.col-7 { order:1; }
+  #view-chamados > .grid > .panel.col-5 { order:2; }
+  #view-chamados > .grid > .panel.col-12 { order:3; }
+}
+@media (max-width: 980px) {
+  .content { padding:14px !important; }
+  #view-chamados .module-toolbar { grid-template-columns:1fr 1fr; }
+  .call-card-actions { grid-template-columns:1fr 1fr !important; }
+  .dossier-grid { grid-template-columns:1fr !important; }
+}
+@media (max-width: 560px) {
+  #view-chamados .module-toolbar, .call-card-actions, .call-board-head .actions, .dossier-head .actions { grid-template-columns:1fr !important; }
+  .call-card-grid { grid-template-columns:1fr !important; }
+  .form-grid { grid-template-columns:1fr !important; }
+}
+@media (min-resolution: 1.1dppx) {
+  #view-chamados > .grid { grid-template-columns:1fr; }
+  #view-chamados > .grid > .panel.col-7 { order:1; }
+  #view-chamados > .grid > .panel.col-5 { order:2; }
+  #view-chamados > .grid > .panel.col-12 { order:3; }
+}

@@ -1,0 +1,382 @@
+{
+  "version": "jm-fluxo-operacional-v8-responsive-gestor-provas",
+  "generatedAt": "2026-06-23T14:45:00Z",
+  "files": [
+    {
+      "file": "ENTREGA_FLUXO_COMERCIAL_V6.md",
+      "sha256": "c15c6c6a0d9df9a4228b540bb6038e8eba476adf8bf7fd0eabe8b60636385885"
+    },
+    {
+      "file": "ENTREGA_FLUXO_LOGISTICO_V5.md",
+      "sha256": "a12c64f68508eb441663fab24a3f1000b932c1b241cfeedf3f819e769f3c1079"
+    },
+    {
+      "file": "ENTREGA_FLUXO_SIMPLIFICADO_V4.md",
+      "sha256": "bebdfb6d96d01372ce216896fbe8eb7fc7ae1fc9c5f3d101e877e51529e676c3"
+    },
+    {
+      "file": "LISTA_ARQUIVOS_V4.txt",
+      "sha256": "672b99ca905aeb20d2a5de59d6aea001e7db721253ba49772783bb4a021b9278"
+    },
+    {
+      "file": "MANIFESTO_SHA256_V4.json",
+      "sha256": "5738120ab6489e81151fed3cc7957be8f492bca0366e2f8efabdcf275c7a751a"
+    },
+    {
+      "file": "MANIFESTO_SHA256_V5.json",
+      "sha256": "61391e4aced8769ba7b79e2b10834f60a2768af5f33991a873931ff62e2a3b70"
+    },
+    {
+      "file": "MANIFESTO_SHA256_V6.json",
+      "sha256": "f8f0558ef9883b4d6e691625d3fdd3abb422bfc989e1f1767f5aa1fbff055d08"
+    },
+    {
+      "file": "README.md",
+      "sha256": "f241c61bfe07ec4c31701c2f7628b831e17d5d5ea2f7b30a737c6e88e5e1065e"
+    },
+    {
+      "file": "README_JM_GUINCHOS.md",
+      "sha256": "6a3dbe648ae7acd7ce698f4c2c48a07a5c8610397afdecd5982d7d6642a1d007"
+    },
+    {
+      "file": "REGRAS_FIREBASE_NAO_PUBLICAR_NESTE_TESTE.txt",
+      "sha256": "ca6ca18dc7865f6452ed95e3ba3e9e79fe981c35a97fd11d0f62bca3e6efca42"
+    },
+    {
+      "file": "TUTORIAL_GABRIELA.html",
+      "sha256": "5dcbb8460490d5752a3a2b82f48741b35fbd251ab27d9c26e10894f957058b85"
+    },
+    {
+      "file": "assets/icon.svg",
+      "sha256": "c91dfbbb8226ecd8f755ea08ded77767bd0efd8eee52e4d3fb41c2abaa5abe56"
+    },
+    {
+      "file": "assets/vehicle-icons/carsv2-map/arrow_base.png",
+      "sha256": "e8745f89af1dc71ce6247c5887d1dbd9e37ba8114ccaaf04fca9ac097efde382"
+    },
+    {
+      "file": "assets/vehicle-icons/carsv2-map/bicycle_base.png",
+      "sha256": "10834bb8b3dfef34e69d5457d09c55241a2115e64b0ec74dd396836361666a7e"
+    },
+    {
+      "file": "assets/vehicle-icons/carsv2-map/boat_base.png",
+      "sha256": "559f5a9bcf3e1d05a4ddb54c739f496f0be474a4beb2deaddb11c08a8b74eb9c"
+    },
+    {
+      "file": "assets/vehicle-icons/carsv2-map/bus_base.png",
+      "sha256": "21221b8cffbf6911d63af6a14998e3f831c2c6d3556c5b0fcb99e7086dadde9f"
+    },
+    {
+      "file": "assets/vehicle-icons/carsv2-map/caminhaoBau_base.png",
+      "sha256": "dc0d55d5e7ae0500532a814f6e1c9f547b06a4fad3038a456a468be52eaf61e8"
+    },
+    {
+      "file": "assets/vehicle-icons/carsv2-map/carroPasseio_base.png",
+      "sha256": "b67045921c4980f85067b0cc6e5fbc11f31261221afc474a5107b181f49e3fc4"
+    },
+    {
+      "file": "assets/vehicle-icons/carsv2-map/carroUtilitario_base.png",
+      "sha256": "a74e582999f5a63c7431139b71abb2bcb44d4320f2746f67c8873c09cf3fc19c"
+    },
+    {
+      "file": "assets/vehicle-icons/carsv2-map/crane_base.png",
+      "sha256": "5b72c765fde8219ff053e33c06c7bfd7ba20178162b36690516649147a8deef8"
+    },
+    {
+      "file": "assets/vehicle-icons/carsv2-map/default_base.png",
+      "sha256": "e8745f89af1dc71ce6247c5887d1dbd9e37ba8114ccaaf04fca9ac097efde382"
+    },
+    {
+      "file": "assets/vehicle-icons/carsv2-map/helicopter_base.png",
+      "sha256": "d68c9572381945ced5b658e6eebc33a3723b37a927ef83cd90965d868b16f38b"
+    },
+    {
+      "file": "assets/vehicle-icons/carsv2-map/motorcycle_base.png",
+      "sha256": "59473e553059f280c6c099d12c82e6b50dbbf0d8795a54799264d65447971b9d"
+    },
+    {
+      "file": "assets/vehicle-icons/carsv2-map/offroad_base.png",
+      "sha256": "966c0496f0e1be522d146c029fd5f8fd869bd1321f1be4d580af754a382cfba2"
+    },
+    {
+      "file": "assets/vehicle-icons/carsv2-map/person_base.png",
+      "sha256": "06e6ff0f2c1e744d3d83d94ea5f46d17016b680b2dfce1247662e6115e519c3f"
+    },
+    {
+      "file": "assets/vehicle-icons/carsv2-map/pet_base.png",
+      "sha256": "05203fdfaa514a165c157e1e02b19333fa15ec7eb1363b81290a2ac1652f76fe"
+    },
+    {
+      "file": "assets/vehicle-icons/carsv2-map/plane_base.png",
+      "sha256": "d312d39c730982aebbdadaa7d705fb3f1bcd34b3efc0671021fe9883115004f6"
+    },
+    {
+      "file": "assets/vehicle-icons/carsv2-map/scooter_base.png",
+      "sha256": "afd328a2b281b86bf0dda395d3bbb880fa9078aff21134374a266104a42af8ea"
+    },
+    {
+      "file": "assets/vehicle-icons/carsv2-map/ship_base.png",
+      "sha256": "bac9cab6acc76e45dc08701d482f2dcadacb69fe42cba7c648139f7e4f4dc24b"
+    },
+    {
+      "file": "assets/vehicle-icons/carsv2-map/tractor_base.png",
+      "sha256": "b9cb7b44ce81088ea0404c06adc71f216218e339f651fb5a19961e6083ec3d9a"
+    },
+    {
+      "file": "assets/vehicle-icons/carsv2-map/truckBau_base.png",
+      "sha256": "301b9164b6e9ebb5b7940e55b112a7a6399b91f2c78773bd814e87fcdf1edb9b"
+    },
+    {
+      "file": "assets/vehicle-icons/carsv2-map/truckCavalo_base.png",
+      "sha256": "2a857eb718fe386f945d7f0aa116132d18511d3caac3d82fc5eb1e1d7f364098"
+    },
+    {
+      "file": "assets/vehicle-icons/carsv2-map/vanUtilitario_base.png",
+      "sha256": "8b3bf859c097f6bb1e5d579eae41925f403d63740d723cf9067619862eeb37c5"
+    },
+    {
+      "file": "capacitor.config.json",
+      "sha256": "5a79264896910f5b4b861a574d2b652fca4b07801f6a396a5a913d35b83e8f4e"
+    },
+    {
+      "file": "cliente-chamado.html",
+      "sha256": "8910255f588c407f4bd936fc81b4e53c582c351cde8a4c051987c6e27ed3537f"
+    },
+    {
+      "file": "css/final-ux.css",
+      "sha256": "a7a5329462b4633b3b41439603485479a319c8e57e9594698053672ba264f1cf"
+    },
+    {
+      "file": "css/style.css",
+      "sha256": "9538b85622d4c59a332a9e79e1c4c39f59348b1c58a2f0e5d11a2f4ebe4ad934"
+    },
+    {
+      "file": "database.rules.json",
+      "sha256": "93b6d4271941360a79db1ac061fdcc3428419da9c5071e731d941ee3c013d2c8"
+    },
+    {
+      "file": "firebase.json",
+      "sha256": "e77167a75de2e3435e93c65215a587a6ecc03ec2feca63e1468255a9a253c3cf"
+    },
+    {
+      "file": "firestore.rules",
+      "sha256": "cc9e2ac5c2143cc458e8f2c1511d27b7051955c3a4e1ffc9ea14b2918b274a38"
+    },
+    {
+      "file": "formulario.html",
+      "sha256": "b2290669ce50e2cc43b8171c8f93fc913f85212de157bb259ab047444c24fd0c"
+    },
+    {
+      "file": "index.html",
+      "sha256": "36754d9351b914f2b2312bf0e279fde4ad688f518d304e11422b6687d61b86cc"
+    },
+    {
+      "file": "jm.html",
+      "sha256": "41240dbc2cb576602471d9aa7140ab7fa34c1ad0a8ca974caf36b4c932a020cc"
+    },
+    {
+      "file": "js/app.js",
+      "sha256": "f27a97efe3e653b95972873cf111728f79153b899d5546e2c8abd3a12a372c6c"
+    },
+    {
+      "file": "js/config.firebase.js",
+      "sha256": "fdcef89a621d8532aca3f2aef9fa51f1a13a1de52ac53f8cb43ab5a38006b24d"
+    },
+    {
+      "file": "js/final-ux.js",
+      "sha256": "190fa4b32f3f4c09abd358f985561256e7b64e7ea9ece6697495f3fe1e18e229"
+    },
+    {
+      "file": "js/firebase.js",
+      "sha256": "46bdfcf3774037af15bcc792fc7960667ea8ddfea22d7767ea4fe124f3e05804"
+    },
+    {
+      "file": "js/google-maps.js",
+      "sha256": "29df3deeab6292fb5b956f046fe585115868d97c26c8bf7ce0e0bf536b293141"
+    },
+    {
+      "file": "js/insurance-parser.js",
+      "sha256": "7edb98a49da601129ee9ce11e2b72dbf04a598293caeb11fedff432bd8e931fb"
+    },
+    {
+      "file": "js/mapa.js",
+      "sha256": "eed802201c94cfe796b1b67e3b6b1b1bb322387ad3c781093d4d21f598fbf0bc"
+    },
+    {
+      "file": "js/motorista-final-ux.js",
+      "sha256": "727381b1ff7feecd89dfc7b7628c248b81eec34d2182b6c8bc4aee078bea0c72"
+    },
+    {
+      "file": "js/motorista-simple-flow.js",
+      "sha256": "160076324cbf864e65f72a342b8ebd556d562715df5437110bac44b21e74e718"
+    },
+    {
+      "file": "js/motorista.js",
+      "sha256": "7d6c8eb8d2d5e0f23c17eba7b57dce83f639322de5dc706cbf8e3ec00ee9476b"
+    },
+    {
+      "file": "js/superadmin-public-config.js",
+      "sha256": "d127b1d54b34daaa94a2a6c35cbd4141394848dd8372fac185468927632d2833"
+    },
+    {
+      "file": "js/superadmin.js",
+      "sha256": "fa5bb1eae15ee985414843ec72d2270a2ea3bfe4989717172399902776d5d848"
+    },
+    {
+      "file": "js/toll-plazas.js",
+      "sha256": "c62ee6a94599239ba19044d923351e189bc9b353d84a24a9b89ca853ba6ee837"
+    },
+    {
+      "file": "js/tracker.js",
+      "sha256": "9e0c9f0f04ce9938c88cf8db30d3b09103d4e091bebf60d46ea475e3bb1ceed2"
+    },
+    {
+      "file": "js/utils.js",
+      "sha256": "1cc37e482c3d8aa0002e915b2dc12fbeb07816f15cf0bf66c6310cf8cf7418b9"
+    },
+    {
+      "file": "manifest.json",
+      "sha256": "b7f10273d6afcab4cb7ad7fbbcaa66c3470c72658f541f56cede1a87dca3b570"
+    },
+    {
+      "file": "motorista.html",
+      "sha256": "b0b24f904453fe2b3b429e840153314b1ded2c8cc9adba0b50dce1412d7c4fba"
+    },
+    {
+      "file": "package.json",
+      "sha256": "52d65640a988fd67b4550263c7736e70ef77e56df419df9307f40791fe64aff4"
+    },
+    {
+      "file": "railway.json",
+      "sha256": "f006a44769dc8eb4972266c83c73bc2010863a09ef43f3f6c0c5eb5cd699cebc"
+    },
+    {
+      "file": "relatorio.html",
+      "sha256": "3beeda4f3d9392be17977156cd35da90b9b667310ecfe05e35727952a3983237"
+    },
+    {
+      "file": "server.js",
+      "sha256": "121cbf6d0b7cd1ce0327cf89d8da4f2b924ec0acc0d9ae052d7e8d65b534eb6c"
+    },
+    {
+      "file": "service-worker.js",
+      "sha256": "62bd94827dbfe0c27e71a23ca22638ea727c47447b7ee9c8d6163fb096a1b0d3"
+    },
+    {
+      "file": "superadmin.html",
+      "sha256": "3d3e0bc0c28e026dbccd2402fb1ce86675862541e47c3bb203ceb147b5ae5823"
+    },
+    {
+      "file": "tests/browser-smoke.html",
+      "sha256": "93d0a05e91a14270f2597afb36fb88f1486dede91f21f4eaff17985906dc7f51"
+    },
+    {
+      "file": "tests/central-cards-v5.test.js",
+      "sha256": "249ae152abb3760554755d8575a292ec4ddad6fd29019d589b43de23a9d2302e"
+    },
+    {
+      "file": "tests/commercial-v6.test.js",
+      "sha256": "d3726d5c24fd423d33bf5e9ae501f4a498ce47299652c95db7117e17775e04d8"
+    },
+    {
+      "file": "tests/final-phases.test.js",
+      "sha256": "8ec16ef1004107da001e27b1735b93ac198bfccf7aeed4fae55a80534ab9877d"
+    },
+    {
+      "file": "tests/financeiro-rota-manual-hotfix.test.js",
+      "sha256": "b7c75aaa95b249fcbdda0f7577b79f3cb460669ac25aeeb54015d34303a37279"
+    },
+    {
+      "file": "tests/geocode-brasil.test.js",
+      "sha256": "cb7149093ec7945db14a46d886a4b17dd72f5ec7006b83122868ba28e9a2d8ae"
+    },
+    {
+      "file": "tests/insurance-parser-adbc-v5.test.js",
+      "sha256": "8d174aa9d5df684a508b120439bca7ae5c8826cdc0c08f35177fd172ca07f64b"
+    },
+    {
+      "file": "tests/insurance-parser-base-occurrence-destination.test.js",
+      "sha256": "65994d889049d24442a21e173baa88d323df6b7dc6c3c137338272d067624124"
+    },
+    {
+      "file": "tests/insurance-parser.test.js",
+      "sha256": "587c32f531bd546ce7b5952a7f948a65278341185dce2b3a4b1c2b67ac752612"
+    },
+    {
+      "file": "tests/login-gestor.test.js",
+      "sha256": "4dfb532a17aa847c063bd8ce0b102290061c00acb048dcac65f598fd0fe47d24"
+    },
+    {
+      "file": "tests/login-responsiveness-browser.html",
+      "sha256": "bbd29c5b7d1effcb4bd248aad1573223dd3916d3988b3a082f8810aad5d38d34"
+    },
+    {
+      "file": "tests/login-ui-responsiveness.test.js",
+      "sha256": "41c407f97c58691ef61ad2e0096ebbd96e5a657c7c67fb8023a109e004eabdb2"
+    },
+    {
+      "file": "tests/motorista-pendencias-v32-7-6.test.js",
+      "sha256": "690dd35fb4dd07625ca4cb17d7e9af876873913dc1f7e4bad5895cab2c33f318"
+    },
+    {
+      "file": "tests/motorista-pendencias-v32-7-7.test.js",
+      "sha256": "5a250ac1f35ac7a00427bd502e390992d102ca78482b6bae1a5c2c97bc36024e"
+    },
+    {
+      "file": "tests/motorista-signature-header.test.js",
+      "sha256": "0ec899f92f66f13ad1e5e19316da88bf3f07237fed89cbdb44bf5088766b9f2b"
+    },
+    {
+      "file": "tests/phase1-motorista.test.js",
+      "sha256": "b6dcf8557e01fc51525d4ba60b3c79a9aa98025349902390cf4ae867788ebe85"
+    },
+    {
+      "file": "tests/phase2-motorista.test.js",
+      "sha256": "a039597f3524f6f56f170f17663ae265dca43bd4cf9edc0994dc456c52b8dcce"
+    },
+    {
+      "file": "tests/responsive-v8.test.js",
+      "sha256": "35b975fd4642c74f9ce9ae0129193c0b4afefaf9dc7573adb90f49b506eee03e"
+    },
+    {
+      "file": "tests/run-all.js",
+      "sha256": "18b02a5f09c12a4f2b0460bc74b5e146a5ceecb3e3cfb5d8d753a3a78c81be4a"
+    },
+    {
+      "file": "tests/version-cache.test.js",
+      "sha256": "3d0b29f88ef864ff788ac987671897762b52654448f4315af2b3852852781962"
+    },
+    {
+      "file": "tutorial-assets/renders/01-login-gestao.png",
+      "sha256": "6dc4538c58b49cba92d919a9c6707ebd030f79b52d313d4666701708db507329"
+    },
+    {
+      "file": "tutorial-assets/renders/02-central-operacional.png",
+      "sha256": "d9ed352d7f2aa38032930b5a3e3ceb23da315a67d3441fb2c9f4e01ae877f31e"
+    },
+    {
+      "file": "tutorial-assets/renders/03-novo-chamado-rota.png",
+      "sha256": "f5f9fcb7334bd312ae650a48f27b6b5e2a3307db50c57e3766eecaf9b4445687"
+    },
+    {
+      "file": "tutorial-assets/renders/04-assistente-ia.png",
+      "sha256": "217a3a085fc42086c7f1dec965bbe13adcc9051f45cd1d9b4b3e63a50e73ffa6"
+    },
+    {
+      "file": "tutorial-assets/renders/05-mapa-tracker.png",
+      "sha256": "410200914c3350ebc33b720b3bb8952245e8c84b502e2bd91204054537b340d2"
+    },
+    {
+      "file": "tutorial-assets/renders/06-financeiro.png",
+      "sha256": "99234a271117d72bb364806bf7b6ea10a70ceba9761c3e4e4e96067b0f2d6038"
+    },
+    {
+      "file": "tutorial-assets/renders/07-evidencias-motorista.png",
+      "sha256": "3c22a4d0463d41bca832aeb3f42237291a117e3f2973d3e166a7ec4cb8004685"
+    },
+    {
+      "file": "version.json",
+      "sha256": "446083c4933dff6e07ed56ed75eadca0f1f4e25de50c4e6c1effe1a86624d94c"
+    }
+  ]
+}

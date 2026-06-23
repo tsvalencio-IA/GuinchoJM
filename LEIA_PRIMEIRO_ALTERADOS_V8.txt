@@ -1,0 +1,14 @@
+ZIP SOMENTE ALTERADOS V8 - ESTRUTURA CORRETA
+
+Copie/substitua estes arquivos na raiz do repositório mantendo as pastas:
+- ENTREGA_FLUXO_OPERACIONAL_V8.md
+- MANIFESTO_SHA256_V8.json
+- css/style.css
+- js/app.js
+- service-worker.js
+- tests/responsive-v8.test.js
+- tests/run-all.js
+- tests/version-cache.test.js
+- version.json
+
+Não contém arquivos completos não alterados. Não publique o ZIP antigo JM-FLUXO-OPERACIONAL-V8-ALTERADOS.zip, pois ele estava com paths incorretos.

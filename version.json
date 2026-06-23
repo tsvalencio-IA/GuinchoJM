@@ -1,8 +1,8 @@
 {
-  "version": "jm-fluxo-operacional-v8-responsive-gestor-provas",
-  "description": "V8 operacional: corrige responsividade real do gestor em zoom/telas diferentes, restaura ações visíveis dos chamados, amplia painel do chamado com cliente/veículo/rota/pagamento e preserva provas do motorista para exibição no gestor.",
-  "updatedAt": "2026-06-23T14:25:00Z",
-  "build": "V8",
-  "base": "GuinchoJM-main enviado pelo usuário",
-  "notes": "Não simplifica fluxos. Não altera Firebase Rules/RTDB Rules. Preserva motorista, GPS, provas, assinatura, despesas, financeiro, relatórios, cliente e superadmin."
+  "version": "jm-fluxo-operacional-v10-cirurgico-responsivo",
+  "description": "V10 cirúrgica: reorganiza a aba Chamados com responsividade real, elimina corte visual em zoom/telas críticas, mantém dados essenciais visíveis mesmo minimizados e preserva fluxos existentes.",
+  "updatedAt": "2026-06-23T18:20:00Z",
+  "build": "V10",
+  "base": "GuinchoJM-main (1).zip enviado pelo usuário",
+  "notes": "Sem alteração em Firebase Rules/RTDB Rules. Correção focada em UI/UX gestor da aba Chamados, mantendo motorista, GPS, provas, assinatura, financeiro, parser, cliente e superadmin."
 }

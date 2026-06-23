@@ -6,7 +6,7 @@ const root = path.resolve(__dirname, "..");
 const html = fs.readFileSync(path.join(root, "motorista.html"), "utf8");
 const js = fs.readFileSync(path.join(root, "js/motorista.js"), "utf8");
 const css = fs.readFileSync(path.join(root, "css/final-ux.css"), "utf8");
-const version = "jm-fluxo-comercial-v6-laudos-financeiro";
+const version = "jm-fluxo-operacional-v10-cirurgico-responsivo";
 [
   "driverRuntimeDetails", "driverRuntimeSummary", "driverRuntimeDot",
   "driverOpenSignatureBtn", "driverSignatureSection", "signatureStateBadge",

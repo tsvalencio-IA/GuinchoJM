@@ -1,10 +1,11 @@
+/* jm-fluxo-operacional-v10-cirurgico-responsivo */
 (function () {
   "use strict";
 
   const { $, esc, parseMoney, toast, statusClass, routeKm, mapsRouteUrl, statusKey, statusLabel, isFinalStatus, setupCollapsiblePanels, pointFrom } = window.JM.utils;
   const { auth, db, arrayUnion, getRealtimeDb, rtdbKey } = window.JM.firebase;
   const cfg = window.JM_CONFIG || {};
-  const DRIVER_FLOW_VERSION = "jm-fluxo-comercial-v6-laudos-financeiro";
+  const DRIVER_FLOW_VERSION = "jm-fluxo-operacional-v10-cirurgico-responsivo";
   const state = {
     user: null,
     profile: null,
