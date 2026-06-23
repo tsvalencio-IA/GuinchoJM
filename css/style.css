@@ -2240,3 +2240,14 @@ main, .content { width:100%; max-width:none !important; margin:0 !important; ove
   #view-chamados > .grid > .panel.col-5 { order:2; }
   #view-chamados > .grid > .panel.col-12 { order:3; }
 }
+
+/* JM V11 — motorista: câmera + galeria sem remover fluxo existente */
+.driver-image-picker-wrap{display:flex;flex-direction:column;gap:.45rem;width:100%}
+.driver-native-file-input,.driver-gallery-file-input{position:absolute!important;left:-9999px!important;width:1px!important;height:1px!important;opacity:.01!important;pointer-events:none!important}
+.driver-image-picker-actions{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;width:100%}
+.driver-image-picker-actions .btn{min-height:44px;flex:1 1 180px;white-space:normal;text-align:center;justify-content:center}
+.driver-image-picker-status{display:flex;flex-direction:column;gap:.2rem;padding:.55rem .65rem;border:1px dashed rgba(148,163,184,.45);border-radius:12px;background:rgba(15,23,42,.03)}
+.driver-image-picker-save{display:flex;flex-wrap:wrap;gap:.45rem}
+.driver-image-save-link,.proof-upload-save-link{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:.45rem .7rem;border-radius:10px;text-decoration:none;font-weight:700;border:1px solid rgba(37,99,235,.24);background:rgba(37,99,235,.08)}
+.proof-upload-save-link{width:max-content;margin-top:.35rem;font-size:.82rem}
+@media (max-width:520px){.driver-image-picker-actions .btn{flex-basis:100%}.driver-image-picker-status{font-size:.9rem}}

@@ -1,8 +1,8 @@
 {
-  "version": "jm-fluxo-operacional-v10-cirurgico-responsivo",
-  "description": "V10 cirúrgica: reorganiza a aba Chamados com responsividade real, elimina corte visual em zoom/telas críticas, mantém dados essenciais visíveis mesmo minimizados e preserva fluxos existentes.",
-  "updatedAt": "2026-06-23T18:20:00Z",
-  "build": "V10",
+  "version": "jm-fluxo-operacional-v11-fotos-camera-galeria",
+  "description": "V11 cirúrgica no painel motorista: adiciona opção clara de tirar foto agora ou escolher da galeria para provas, relatório e despesas, com link para salvar cópia no celular quando o navegador permitir, preservando upload, provas, assinatura, GPS, financeiro e gestor.",
+  "updatedAt": "2026-06-23T18:40:00Z",
+  "build": "V11",
   "base": "GuinchoJM-main (1).zip enviado pelo usuário",
-  "notes": "Sem alteração em Firebase Rules/RTDB Rules. Correção focada em UI/UX gestor da aba Chamados, mantendo motorista, GPS, provas, assinatura, financeiro, parser, cliente e superadmin."
+  "notes": "Sem alteração em Firebase Rules/RTDB Rules. Correção focada no input de imagens do motorista, mantendo os mesmos IDs e fluxo de upload existente."
 }

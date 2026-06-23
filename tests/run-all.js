@@ -8,5 +8,6 @@ for (const test of tests) {
   if (result.status !== 0) process.exit(result.status || 1);
 }
   require('./financeiro-rota-manual-hotfix.test.js');
+  require('./motorista-fotos-camera-galeria-v11.test.js');
 console.log("ALL TESTS PASSED");
 

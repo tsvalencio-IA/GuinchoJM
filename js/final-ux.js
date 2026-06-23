@@ -537,4 +537,4 @@
   else bootstrap();
 })();
 
-/* jm-fluxo-operacional-v10-cirurgico-responsivo */
+/* jm-fluxo-operacional-v11-fotos-camera-galeria */

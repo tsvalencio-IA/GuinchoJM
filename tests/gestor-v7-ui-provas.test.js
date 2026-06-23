@@ -25,6 +25,6 @@ assert.ok(motorista.includes('db.collection("calls").doc(callId).set(callUpdates
 assert.ok(css.includes("JM V7"), "CSS V7 responsivo ausente");
 assert.ok(css.includes("grid-template-columns: repeat(auto-fit"), "cards responsivos ausentes");
 assert.ok(css.includes("overflow-wrap:anywhere"), "quebra de texto responsiva ausente");
-assert.ok(jm.includes("jm-fluxo-operacional-v10-cirurgico-responsivo"), "jm.html sem versão V7");
+assert.ok(jm.includes("jm-fluxo-operacional-v11-fotos-camera-galeria"), "jm.html sem versão V7");
 
 console.log("PASS gestor-v7-ui-provas.test.js");

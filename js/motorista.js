@@ -1,11 +1,11 @@
-/* jm-fluxo-operacional-v10-cirurgico-responsivo */
+/* jm-fluxo-operacional-v11-fotos-camera-galeria */
 (function () {
   "use strict";
 
   const { $, esc, parseMoney, toast, statusClass, routeKm, mapsRouteUrl, statusKey, statusLabel, isFinalStatus, setupCollapsiblePanels, pointFrom } = window.JM.utils;
   const { auth, db, arrayUnion, getRealtimeDb, rtdbKey } = window.JM.firebase;
   const cfg = window.JM_CONFIG || {};
-  const DRIVER_FLOW_VERSION = "jm-fluxo-operacional-v10-cirurgico-responsivo";
+  const DRIVER_FLOW_VERSION = "jm-fluxo-operacional-v11-fotos-camera-galeria";
   const state = {
     user: null,
     profile: null,
@@ -456,6 +456,7 @@
         else child.dataset.proofCommon = "true";
       }
     });
+    setupDriverImagePickers();
     setupProofFilePreviews();
     renderProofWizard();
   }
@@ -554,6 +555,122 @@
     proofPreviewUrls.clear();
   }
 
+
+
+  function inputLabelText(input) {
+    const field = input && input.closest('div, label, .wide');
+    const label = field && field.querySelector('label');
+    return (label && label.textContent || input && input.id || 'foto').trim();
+  }
+
+  function copyFilesToInput(targetInput, files) {
+    if (!targetInput || !files) return false;
+    try {
+      const transfer = new DataTransfer();
+      Array.from(files).forEach((file) => transfer.items.add(file));
+      targetInput.files = transfer.files;
+      return true;
+    } catch (err) {
+      console.warn('Não foi possível copiar arquivos para o input principal.', err);
+      return false;
+    }
+  }
+
+  function renderDriverImagePickerStatus(input) {
+    const wrap = input && input.closest('.driver-image-picker-wrap');
+    if (!wrap) return;
+    const status = wrap.querySelector('.driver-image-picker-status');
+    const saveBox = wrap.querySelector('.driver-image-picker-save');
+    const files = Array.from(input.files || []);
+    if (status) {
+      status.innerHTML = files.length
+        ? files.map((file) => `<span>${esc(file.name || 'foto selecionada')} · ${Math.max(1, Math.round((file.size || 0) / 1024))} KB</span>`).join('')
+        : '<span>Nenhuma foto selecionada.</span>';
+    }
+    if (saveBox) {
+      saveBox.innerHTML = '';
+      files.filter((file) => /^image\//i.test(file.type || '')).forEach((file, index) => {
+        let url = '';
+        try { url = URL.createObjectURL(file); } catch (_) {}
+        if (!url) return;
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = file.name || (`foto-jm-${Date.now()}-${index + 1}.jpg`);
+        a.textContent = 'Salvar no celular';
+        a.className = 'btn ghost driver-image-save-link';
+        a.dataset.revokeUrl = url;
+        saveBox.appendChild(a);
+      });
+    }
+  }
+
+  function setupDriverImagePickers() {
+    const imageInputs = Array.from(document.querySelectorAll('input[type="file"][accept*="image"]'));
+    imageInputs.forEach((input) => {
+      if (!input.id || input.dataset.driverImagePickerReady === 'true') return;
+      input.dataset.driverImagePickerReady = 'true';
+      input.dataset.driverOriginalCapture = input.getAttribute('capture') || '';
+      input.setAttribute('capture', 'environment');
+      input.classList.add('driver-native-file-input');
+      input.setAttribute('aria-label', inputLabelText(input));
+
+      const wrap = document.createElement('div');
+      wrap.className = 'driver-image-picker-wrap';
+      wrap.dataset.sourceInput = input.id;
+      input.parentNode.insertBefore(wrap, input);
+      wrap.appendChild(input);
+
+      const actions = document.createElement('div');
+      actions.className = 'driver-image-picker-actions';
+
+      const cameraBtn = document.createElement('button');
+      cameraBtn.type = 'button';
+      cameraBtn.className = 'btn primary driver-image-camera-btn';
+      cameraBtn.textContent = 'Tirar foto agora';
+      cameraBtn.addEventListener('click', () => input.click());
+
+      const galleryBtn = document.createElement('button');
+      galleryBtn.type = 'button';
+      galleryBtn.className = 'btn ghost driver-image-gallery-btn';
+      galleryBtn.textContent = 'Escolher da galeria';
+
+      const galleryInput = document.createElement('input');
+      galleryInput.type = 'file';
+      galleryInput.accept = input.getAttribute('accept') || 'image/*';
+      if (input.multiple) galleryInput.multiple = true;
+      galleryInput.className = 'driver-gallery-file-input';
+      galleryInput.tabIndex = -1;
+      galleryInput.setAttribute('aria-hidden', 'true');
+      galleryBtn.addEventListener('click', () => galleryInput.click());
+      galleryInput.addEventListener('change', () => {
+        const copied = copyFilesToInput(input, galleryInput.files);
+        if (copied) input.dispatchEvent(new Event('change', { bubbles: true }));
+        renderDriverImagePickerStatus(input);
+      });
+
+      const help = document.createElement('p');
+      help.className = 'small muted driver-image-picker-help';
+      help.textContent = 'Use a câmera ou escolha uma imagem existente. Após selecionar, você pode salvar uma cópia no celular quando o navegador permitir.';
+
+      const status = document.createElement('div');
+      status.className = 'driver-image-picker-status small muted';
+      status.innerHTML = '<span>Nenhuma foto selecionada.</span>';
+
+      const saveBox = document.createElement('div');
+      saveBox.className = 'driver-image-picker-save';
+
+      actions.appendChild(cameraBtn);
+      actions.appendChild(galleryBtn);
+      wrap.appendChild(actions);
+      wrap.appendChild(galleryInput);
+      wrap.appendChild(help);
+      wrap.appendChild(status);
+      wrap.appendChild(saveBox);
+
+      input.addEventListener('change', () => renderDriverImagePickerStatus(input));
+    });
+  }
+
   function setupProofFilePreviews() {
     const inputs = REQUIRED_PHOTOS.map((item) => $(item.input)).filter(Boolean);
     const audio = $("proofAudioFiles");
@@ -611,6 +728,7 @@
         <div class="proof-upload-info"><strong>${esc(item.name)}</strong><small>${Math.max(1, Math.round((item.size || 0) / 1024))} KB · ${esc(statusLabelText)}</small>
           <div class="proof-upload-progress"><span style="width:${Math.max(0, Math.min(100, Number(item.progress || 0)))}%"></span></div>
           ${item.error ? `<em>${esc(item.error)}</em>` : ""}
+          ${isImage && item.previewUrl ? `<a class="proof-upload-save-link" href="${esc(item.previewUrl)}" download="${esc(item.name || 'foto-jm.jpg')}">Salvar no celular</a>` : ""}
         </div>
       </article>`;
     }).join("");
@@ -3159,6 +3277,7 @@
     validateCompleteProofPackage
   };
   setupProofStageButtons();
+  setupDriverImagePickers();
   setupProofWizardLayout();
   setupSignaturePad();
   if ($("driverOpenSignatureBtn")) $("driverOpenSignatureBtn").onclick = openSignatureCapture;
