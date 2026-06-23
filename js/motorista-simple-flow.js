@@ -1,9 +1,9 @@
-/* JM motorista V14 - sequencial automático com justificativa única de fotos
-   Camada de UIX: uma ação por vez, avanço automático e preservação integral das provas, assinatura, GPS e despesas. */
+/* JM motorista V16 - Modo Rua automático
+   Uma ação por vez: botão grande, pouca leitura, avanço automático e preservação integral de provas, assinatura, GPS, despesas e modo técnico. */
 (function () {
   "use strict";
 
-  const VERSION = "jm-fluxo-operacional-v14-motorista-justificativa-unica-fotos";
+  const VERSION = "jm-fluxo-operacional-v16-motorista-modo-rua";
   const $ = (id) => document.getElementById(id);
   const qsa = (sel, root) => Array.from((root || document).querySelectorAll(sel));
 
@@ -17,22 +17,13 @@
   };
 
   const STATUS_LABEL = {
-    despachado: "Atendimento liberado",
+    despachado: "Liberado",
     motorista_a_caminho: "Indo para a ocorrência",
-    motorista_no_local: "No local da ocorrência",
+    motorista_no_local: "Na ocorrência",
     veiculo_carregado: "Veículo carregado",
     em_transporte: "Em transporte",
-    entregue: "Entregue no destino",
+    entregue: "No destino",
     finalizado: "Finalizado"
-  };
-
-  const NEXT_LABEL = {
-    motorista_a_caminho: "INICIAR DESLOCAMENTO",
-    motorista_no_local: "CHEGUEI NA OCORRÊNCIA",
-    veiculo_carregado: "VEÍCULO CARREGADO",
-    em_transporte: "INICIAR TRANSPORTE",
-    entregue: "CHEGUEI NO DESTINO",
-    finalizado: "FINALIZAR ATENDIMENTO"
   };
 
   const PROOF_STEP_INDEX = {
@@ -70,12 +61,18 @@
     despesas: "driverPanelExpense"
   };
 
+  const PHOTO_INPUTS_BY_STEP = {
+    retirada: ["proofPhotoFront", "proofPhotoRear", "proofPhotoRight", "proofPhotoLeft", "proofPhotoDashboard"],
+    inspecao: ["proofPhotoFront", "proofPhotoRear", "proofPhotoRight", "proofPhotoLeft", "proofPhotoDashboard", "proofPhotoDamage"],
+    carregamento: ["proofPhotoLoadAfter", "proofPhotoFront", "proofPhotoRear", "proofPhotoRight", "proofPhotoLeft", "proofPhotoDashboard"],
+    transporte: ["proofPhotoLoadAfter"],
+    entrega: ["proofPhotoDeliveryFront", "proofPhotoDeliveryRear", "proofPhotoDeliveryRight", "proofPhotoDeliveryLeft", "proofPhotoDeliveryDashboard", "proofPhotoFinal"],
+    finalizacao: ["proofPhotoFinal"]
+  };
+
   let renderTimer = null;
   let busy = false;
-
-  function text(el) {
-    return String(el && el.textContent || "").replace(/\s+/g, " ").trim();
-  }
+  let lastPhotoInputId = "";
 
   function api() {
     return window.JM && window.JM.motorista || {};
@@ -99,12 +96,20 @@
       .replace(/^_|_$/g, "");
   }
 
-  function callTitle(call) {
-    if (!call) return "Nenhum atendimento selecionado";
-    const proto = call.protocol || call.codigo || call.id || "Atendimento";
+  function shortAddress(value, fallback) {
+    const raw = String(value || fallback || "").replace(/\s+/g, " ").trim();
+    return raw.length > 64 ? raw.slice(0, 61) + "..." : raw;
+  }
+
+  function routeTitle(call) {
+    if (!call) return "Nenhum chamado selecionado";
     const origin = call.originAddress || call.origem || call.origin || call.pickupAddress || "Origem";
     const dest = call.destinationAddress || call.destino || call.destination || call.dropoffAddress || "Destino";
-    return `${proto} · ${origin} → ${dest}`;
+    return `${shortAddress(origin, "Origem")} → ${shortAddress(dest, "Destino")}`;
+  }
+
+  function esc(value) {
+    return String(value == null ? "" : value).replace(/[&<>"']/g, (ch) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[ch]));
   }
 
   function setVisiblePanel(panelId, options) {
@@ -117,10 +122,6 @@
       panel.classList.toggle("driver-simple-visible", visible);
       panel.classList.toggle("driver-simple-hidden", !visible);
       panel.setAttribute("aria-hidden", visible ? "false" : "true");
-    });
-    qsa("[data-driver-target], [data-driver-shortcut]").forEach((btn) => {
-      const btnTarget = btn.getAttribute("data-driver-target") || btn.getAttribute("data-driver-shortcut");
-      btn.classList.toggle("active", btnTarget === target);
     });
     if (!options || options.scroll !== false) {
       const panel = $(target);
@@ -137,9 +138,74 @@
     }
   }
 
+  function proofMissing(call) {
+    try {
+      if (call && typeof api().proofMissingItems === "function") return api().proofMissingItems(call) || [];
+    } catch (_) {}
+    return [];
+  }
+
+  function preferredStepsForStatus(status) {
+    return {
+      motorista_no_local: ["retirada", "inspecao", "carregamento"],
+      veiculo_carregado: ["carregamento", "transporte"],
+      em_transporte: ["transporte"],
+      entregue: ["entrega", "finalizacao"]
+    }[status] || null;
+  }
+
+  function isPhotoMissingItem(item) {
+    const group = String(item && item.group || "").toLowerCase();
+    const label = String(item && item.label || "");
+    return !!item && (group === "fotos" || item.target === "proofPhotoJustification" || /foto|fotos|evid[eê]ncia|imagem|comprovante/i.test(label));
+  }
+
+  function isSignatureMissingItem(item) {
+    const label = String(item && item.label || "");
+    return !!item && (/assin/i.test(label) || item.target === "driverSignatureSection" || item.target === "signatureAcceptedText" || item.target === "signatureRefusalReason");
+  }
+
+  function firstMissingForStatus(call) {
+    const missing = proofMissing(call);
+    if (!missing.length) return null;
+    const status = normalizeStatus(call);
+    const preferred = preferredStepsForStatus(status);
+    const list = preferred ? missing.filter((item) => preferred.includes(item.step)) : missing;
+    const scoped = list.length ? list : missing;
+    return scoped.find(isPhotoMissingItem) || scoped.find(isSignatureMissingItem) || scoped[0];
+  }
+
+  function nextPhotoInputIdForStep(step) {
+    const order = PHOTO_INPUTS_BY_STEP[step] || PHOTO_INPUTS_BY_STEP.inspecao;
+    const found = order.find((id) => !!$(id));
+    if (found) return found;
+    const any = qsa('input[type="file"][accept*="image"]').find((input) => input.id && !/Expense|Report/i.test(input.id));
+    return any && any.id || "";
+  }
+
+  function choosePhotoInput(inputId, source) {
+    const input = inputId && $(inputId);
+    if (!input) return false;
+    lastPhotoInputId = inputId;
+    setProofStep(proofStepForInput(inputId), { scroll: false });
+    const wrap = input.closest && input.closest(".driver-image-picker-wrap");
+    const btn = wrap && wrap.querySelector(source === "gallery" ? ".driver-image-gallery-btn" : ".driver-image-camera-btn");
+    if (btn) { btn.click(); return true; }
+    input.click();
+    return true;
+  }
+
+  function proofStepForInput(inputId) {
+    for (const step of Object.keys(PHOTO_INPUTS_BY_STEP)) {
+      if ((PHOTO_INPUTS_BY_STEP[step] || []).includes(inputId)) return step;
+    }
+    return "inspecao";
+  }
+
   function openProofTarget(target, step) {
+    setProofStep(step || "inspecao", { scroll: false });
+    document.body.classList.add("driver-focus-technical");
     setVisiblePanel(PANEL_BY_STEP.provas, { scroll: false });
-    if (step) setProofStep(step, { scroll: false });
     setTimeout(() => {
       if (target && typeof api().focusProofTarget === "function") {
         try { api().focusProofTarget(target, step); return; } catch (_) {}
@@ -153,134 +219,31 @@
     }, 80);
   }
 
-  function proofMissing(call) {
-    try {
-      if (call && typeof api().proofMissingItems === "function") return api().proofMissingItems(call) || [];
-    } catch (_) {}
-    return [];
+  function openJustificationFor(item) {
+    if (isPhotoMissingItem(item)) return justifyAllPhotos(item);
+    const step = item && item.step || "finalizacao";
+    const target = {
+      retirada: "proofStageRetiradaJustification",
+      carregamento: "proofStageCarregamentoJustification",
+      entrega: "proofStageEntregaJustification",
+      finalizacao: "signatureRefusalReason"
+    }[step] || item && item.target || "proofChecklistNotes";
+    openProofTarget(target, step);
   }
 
-  function firstMissingForStatus(call) {
-    const missing = proofMissing(call);
-    if (!missing.length) return null;
-    const status = normalizeStatus(call);
-    const preferredSteps = {
-      motorista_no_local: ["retirada", "inspecao", "carregamento"],
-      veiculo_carregado: ["carregamento", "transporte"],
-      em_transporte: ["transporte", "entrega"],
-      entregue: ["entrega", "finalizacao"]
-    }[status];
-    if (!preferredSteps) return missing[0];
-    return missing.find((item) => preferredSteps.includes(item.step)) || missing[0];
-  }
-
-  function missingActionLabel(item) {
-    if (!item) return "COMPLETAR PROVAS";
-    const label = String(item.label || "evidência");
-    if (/assin/i.test(label) || item.target === "driverSignatureSection") return "ASSINAR / JUSTIFICAR";
-    if ((item.group || "").toLowerCase() === "fotos" || /foto|frente|traseira|lateral|painel|comprovante/i.test(label)) return "FOTO OU JUSTIFICAR";
-    if (/justificar|justificativa/i.test(label)) return "JUSTIFICAR";
-    return "COMPLETAR AGORA";
-  }
-
-  function isPhotoMissingItem(item) {
-    return !!item && (String(item.group || "").toLowerCase() === "fotos" || item.target === "proofPhotoJustification" || /foto|evidência|evidencia/i.test(String(item.label || "")));
-  }
-
-  function nextAction() {
-    const call = currentCall();
-    if (!call) {
-      return {
-        tone: "warn",
-        step: "Selecionar chamado",
-        title: "Escolha o atendimento",
-        detail: "Toque em um chamado para liberar rota, GPS, provas, assinatura e despesas.",
-        primary: "VER MEUS CHAMADOS",
-        run: () => setVisiblePanel(PANEL_BY_STEP.chamados)
-      };
+  async function justifyAllPhotos(item) {
+    const input = $("proofPhotoJustification");
+    if (!input) return openProofTarget("proofPhotoJustification", item && item.step || "inspecao");
+    const current = String(input.value || "").trim();
+    const reason = current || window.prompt("Justifique as fotos/evidências desta etapa uma única vez:", "Não bati fotos.");
+    if (!reason) return;
+    input.value = reason.trim();
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+    if (typeof api().saveProofDraft === "function") {
+      try { await api().saveProofDraft({ silent: true, validate: false }); } catch (_) {}
     }
-
-    const status = normalizeStatus(call);
-    if (status === "finalizado") {
-      return {
-        tone: "done",
-        step: "Finalizado",
-        title: "Atendimento finalizado",
-        detail: "Nada mais é obrigatório. As provas e assinatura ficam disponíveis para a central.",
-        primary: "VER CHAMADOS",
-        run: () => setVisiblePanel(PANEL_BY_STEP.chamados)
-      };
-    }
-
-    const missing = firstMissingForStatus(call);
-    if (missing && ["motorista_no_local", "veiculo_carregado", "entregue"].includes(status)) {
-      const stepTitle = PROOF_STEP_TITLES[missing.step] || "Provas";
-      return {
-        tone: "proof",
-        step: stepTitle,
-        title: missing.label || "Completar evidência",
-        detail: missing.hint || "Prova ou justificativa obrigatória antes de avançar.",
-        primary: missingActionLabel(missing),
-        secondary: isPhotoMissingItem(missing) ? "JUSTIFICAR FOTOS UMA VEZ" : "JUSTIFICAR SE NÃO TIVER",
-        run: () => openProofTarget(missing.target, missing.step),
-        runSecondary: () => isPhotoMissingItem(missing) ? justifyAllPhotos(missing) : openJustificationFor(missing)
-      };
-    }
-
-    const next = STATUS_NEXT[status] || "motorista_a_caminho";
-    const statusSpecific = {
-      motorista_a_caminho: {
-        step: "Deslocamento",
-        title: "Ir até a ocorrência",
-        detail: "Abra a rota e mantenha a localização ativa. Ao chegar, toque no botão grande.",
-        primary: NEXT_LABEL[next],
-        secondary: "ABRIR ROTA",
-        runSecondary: () => runRoute(call)
-      },
-      motorista_no_local: {
-        step: "Chegada",
-        title: "Você chegou na ocorrência?",
-        detail: "Confirme chegada para iniciar as provas do veículo.",
-        primary: NEXT_LABEL[next]
-      },
-      veiculo_carregado: {
-        step: "Provas",
-        title: "Registrar retirada e carregamento",
-        detail: "Antes do transporte, registre as fotos/condições ou justifique o que não for possível.",
-        primary: "ABRIR PROVAS",
-        run: () => openProofTarget(null, "retirada")
-      },
-      em_transporte: {
-        step: "Transporte",
-        title: "Iniciar transporte ao destino",
-        detail: "Com o veículo carregado, abra a rota para o destino e mantenha o GPS ativo.",
-        primary: NEXT_LABEL[next],
-        secondary: "ABRIR ROTA",
-        runSecondary: () => runRoute(call)
-      },
-      entregue: {
-        step: "Destino",
-        title: "Chegou ao destino?",
-        detail: "Confirme chegada para registrar entrega, assinatura e foto final.",
-        primary: NEXT_LABEL[next]
-      },
-      finalizado: {
-        step: "Entrega",
-        title: "Finalizar com provas e assinatura",
-        detail: "Se o cliente não assinar, registre justificativa. Sem prova ou justificativa, o sistema bloqueia.",
-        primary: NEXT_LABEL[next],
-        secondary: "ASSINATURA",
-        runSecondary: () => openProofTarget("driverSignatureSection", "finalizacao")
-      }
-    }[next] || {
-      step: STATUS_LABEL[status] || "Atendimento",
-      title: "Avançar etapa",
-      detail: "Toque no botão grande para salvar e avançar uma etapa.",
-      primary: NEXT_LABEL[next] || "AVANÇAR"
-    };
-
-    if (!statusSpecific.run) statusSpecific.run = () => runStatus(call, next);
-    return Object.assign({ tone: "status" }, statusSpecific);
+    setTimeout(scheduleRender, 250);
   }
 
   function runRoute(call) {
@@ -296,67 +259,158 @@
     render();
     try {
       if (typeof api().setStatus === "function") await api().setStatus(call.id, next);
-      setTimeout(() => {
-        busy = false;
-        render();
-      }, 650);
+      setTimeout(() => { busy = false; render(); }, 650);
     } catch (err) {
       busy = false;
-      if (window.JM && window.JM.utils && typeof window.JM.utils.toast === "function") {
-        window.JM.utils.toast("Não consegui avançar: " + (err && err.message || "erro"), "danger");
-      }
+      const msg = "Não consegui avançar: " + (err && err.message || "erro");
+      if (window.JM && window.JM.utils && typeof window.JM.utils.toast === "function") window.JM.utils.toast(msg, "danger");
+      else alert(msg);
       render();
     }
   }
 
-  function openJustificationFor(item) {
-    if (isPhotoMissingItem(item)) return openProofTarget("proofPhotoJustification", item && item.step || "inspecao");
-    const step = item && item.step || "finalizacao";
-    const stageJustification = {
-      retirada: "proofStageRetiradaJustification",
-      carregamento: "proofStageCarregamentoJustification",
-      entrega: "proofStageEntregaJustification",
-      finalizacao: "signatureRefusalReason"
-    }[step] || "proofChecklistNotes";
-    openProofTarget(stageJustification, step);
-  }
-
-  async function justifyAllPhotos(item) {
-    const input = $("proofPhotoJustification");
-    if (!input) return openJustificationFor(item);
-    const current = String(input.value || "").trim();
-    const reason = current || window.prompt("Justificativa única para fotos/evidências não enviadas:", "Não bati fotos.");
-    if (!reason) return openProofTarget("proofPhotoJustification", item && item.step || "inspecao");
-    input.value = reason.trim();
-    input.dispatchEvent(new Event("input", { bubbles: true }));
-    input.dispatchEvent(new Event("change", { bubbles: true }));
-    if (typeof api().saveProofDraft === "function") {
-      try { await api().saveProofDraft({ silent: true, validate: false }); } catch (_) {}
+  function actionForMissing(call, missing) {
+    if (isPhotoMissingItem(missing)) {
+      const step = missing.step || "inspecao";
+      const inputId = nextPhotoInputIdForStep(step);
+      const title = step === "entrega" ? "Registrar fotos da entrega" : step === "carregamento" ? "Registrar foto do carregamento" : "Registrar fotos da retirada";
+      return {
+        tone: "proof-photo",
+        step: PROOF_STEP_TITLES[step] || "Fotos",
+        title,
+        detail: "Envie foto agora ou justifique uma vez se não tiver fotos.",
+        primary: "TIRAR FOTO",
+        secondary: "GALERIA",
+        third: "NÃO TENHO FOTOS",
+        run: () => choosePhotoInput(inputId, "camera") || openProofTarget(missing.target, step),
+        runSecondary: () => choosePhotoInput(inputId, "gallery") || openProofTarget(missing.target, step),
+        runThird: () => justifyAllPhotos(missing)
+      };
     }
-    setTimeout(() => {
-      const next = firstMissingForStatus(currentCall());
-      if (next && next.target !== "proofPhotoJustification") openProofTarget(next.target, next.step);
-      scheduleRender();
-    }, 350);
+
+    if (isSignatureMissingItem(missing)) {
+      return {
+        tone: "proof-signature",
+        step: "Assinatura",
+        title: "Coletar assinatura",
+        detail: "Cliente assina na tela. Se não assinar, justifique uma vez.",
+        primary: "ASSINAR NA TELA",
+        secondary: "JUSTIFICAR SEM ASSINATURA",
+        run: () => openProofTarget("driverSignatureSection", "finalizacao"),
+        runSecondary: () => openProofTarget("signatureRefusalReason", "finalizacao")
+      };
+    }
+
+    return {
+      tone: "proof-field",
+      step: PROOF_STEP_TITLES[missing.step] || "Provas",
+      title: missing.label || "Completar informação",
+      detail: "Complete este item para avançar. Se não for possível, use justificativa.",
+      primary: "RESOLVER AGORA",
+      secondary: "JUSTIFICAR",
+      run: () => openProofTarget(missing.target, missing.step),
+      runSecondary: () => openJustificationFor(missing)
+    };
   }
 
-  function choosePhotoInput(inputId, source) {
-    const input = inputId && $(inputId);
-    if (!input) return false;
-    const wrap = input.closest && input.closest(".driver-image-picker-wrap");
-    const btn = wrap && wrap.querySelector(source === "gallery" ? ".driver-image-gallery-btn" : ".driver-image-camera-btn");
-    if (btn) { btn.click(); return true; }
-    input.click();
-    return true;
-  }
-
-  function nextPhotoTarget() {
+  function nextAction() {
     const call = currentCall();
+    if (!call) {
+      return {
+        tone: "warn",
+        step: "Chamado",
+        title: "Escolha o atendimento",
+        detail: "Toque para ver seus chamados e iniciar o trabalho.",
+        primary: "VER CHAMADOS",
+        run: () => setVisiblePanel(PANEL_BY_STEP.chamados)
+      };
+    }
+
+    const status = normalizeStatus(call);
+    if (status === "finalizado") {
+      return {
+        tone: "done",
+        step: "Finalizado",
+        title: "Atendimento finalizado",
+        detail: "As provas ficam disponíveis para a central.",
+        primary: "VER CHAMADOS",
+        run: () => setVisiblePanel(PANEL_BY_STEP.chamados)
+      };
+    }
+
     const missing = firstMissingForStatus(call);
-    if (!missing) return null;
-    const target = missing.target && $(missing.target) ? missing.target : null;
-    if (target && $(target).matches && $(target).matches('input[type="file"]')) return { inputId: target, item: missing };
-    return null;
+    if (missing && ["motorista_no_local", "veiculo_carregado", "entregue"].includes(status)) return actionForMissing(call, missing);
+
+    if (status === "despachado" || status === "motorista_a_caminho") {
+      return {
+        tone: "route",
+        step: "Ocorrência",
+        title: status === "despachado" ? "Iniciar deslocamento" : "Chegou na ocorrência?",
+        detail: status === "despachado" ? "Abra a rota e vá até o local." : "Confirme somente quando estiver no local.",
+        primary: status === "despachado" ? "INICIAR DESLOCAMENTO" : "CHEGUEI",
+        secondary: "ABRIR ROTA",
+        run: () => runStatus(call, STATUS_NEXT[status] || "motorista_a_caminho"),
+        runSecondary: () => runRoute(call)
+      };
+    }
+
+    if (status === "motorista_no_local") {
+      return {
+        tone: "load",
+        step: "Retirada",
+        title: "Veículo carregado?",
+        detail: "Depois de registrar as provas, confirme o carregamento.",
+        primary: "VEÍCULO CARREGADO",
+        run: () => runStatus(call, "veiculo_carregado")
+      };
+    }
+
+    if (status === "veiculo_carregado") {
+      return {
+        tone: "transport",
+        step: "Transporte",
+        title: "Levar ao destino",
+        detail: "Abra a rota do destino e inicie o transporte.",
+        primary: "INICIAR TRANSPORTE",
+        secondary: "ABRIR ROTA",
+        run: () => runStatus(call, "em_transporte"),
+        runSecondary: () => runRoute(call)
+      };
+    }
+
+    if (status === "em_transporte") {
+      return {
+        tone: "destination",
+        step: "Destino",
+        title: "Chegou no destino?",
+        detail: "Confirme chegada para registrar entrega e assinatura.",
+        primary: "CHEGUEI NO DESTINO",
+        secondary: "ABRIR ROTA",
+        run: () => runStatus(call, "entregue"),
+        runSecondary: () => runRoute(call)
+      };
+    }
+
+    if (status === "entregue") {
+      return {
+        tone: "finish",
+        step: "Finalização",
+        title: "Finalizar atendimento",
+        detail: "Finalize quando fotos/assinatura estiverem enviadas ou justificadas.",
+        primary: "FINALIZAR",
+        run: () => runStatus(call, "finalizado")
+      };
+    }
+
+    const next = STATUS_NEXT[status] || "motorista_a_caminho";
+    return {
+      tone: "status",
+      step: STATUS_LABEL[status] || "Atendimento",
+      title: "Avançar atendimento",
+      detail: "Toque para salvar e ir para o próximo passo.",
+      primary: "CONTINUAR",
+      run: () => runStatus(call, next)
+    };
   }
 
   function render() {
@@ -364,67 +418,58 @@
     if (!shell) return;
     const action = nextAction();
     const call = currentCall();
-    const missing = call ? proofMissing(call) : [];
-    const photoTarget = nextPhotoTarget();
-    const loading = busy ? '<div class="driver-seq-saving">Salvando...</div>' : '';
-    const proofRule = '<div class="driver-seq-rule">Envie prova/assinatura ou justifique. Fotos podem ter uma justificativa única.</div>';
+    const missingCount = call ? proofMissing(call).length : 0;
+    const status = normalizeStatus(call);
+    const busyHtml = busy ? '<div class="driver-street-saving">Salvando...</div>' : '';
+    const showProofHint = /proof/.test(action.tone || "");
 
     shell.innerHTML = `
-      <div class="driver-seq-shell ${action.tone || ""}">
-        <div class="driver-seq-top">
-          <span>Modo motorista automático</span>
-          <button class="btn" id="driverSimpleShowAllBtn" type="button">Módulos técnicos</button>
+      <section class="driver-street ${esc(action.tone || "")}" aria-live="polite">
+        <div class="driver-street-head">
+          <span class="driver-street-badge">MODO RUA</span>
+          <button class="btn ghost driver-street-tech" id="driverStreetTechBtn" type="button">Detalhes</button>
         </div>
-        <article class="driver-seq-card">
-          <div class="driver-seq-step">${esc(action.step || "Próxima ação")}</div>
+        <div class="driver-street-route">${esc(routeTitle(call))}</div>
+        <article class="driver-street-card">
+          <small>${esc(action.step || "Agora")}</small>
           <h2>${esc(action.title || "O que fazer agora")}</h2>
-          <p>${esc(action.detail || "Toque no botão grande para continuar.")}</p>
-          ${loading}
-          <button class="btn good driver-seq-primary" id="driverSeqPrimaryBtn" type="button">${esc(action.primary || "CONTINUAR")}</button>
-          <div class="driver-seq-secondary-row">
-            ${action.secondary ? `<button class="btn driver-seq-secondary" id="driverSeqSecondaryBtn" type="button">${esc(action.secondary)}</button>` : ""}
-            <button class="btn" id="driverSeqExpenseBtn" type="button">Despesa rápida</button>
+          <p>${esc(action.detail || "Toque no botão principal para continuar.")}</p>
+          ${busyHtml}
+          <button class="btn good driver-street-primary" id="driverStreetPrimaryBtn" type="button">${esc(action.primary || "CONTINUAR")}</button>
+          <div class="driver-street-actions">
+            ${action.secondary ? `<button class="btn driver-street-secondary" id="driverStreetSecondaryBtn" type="button">${esc(action.secondary)}</button>` : ""}
+            ${action.third ? `<button class="btn danger driver-street-third" id="driverStreetThirdBtn" type="button">${esc(action.third)}</button>` : ""}
+            <button class="btn" id="driverStreetExpenseBtn" type="button">DESPESA</button>
           </div>
-          ${photoTarget ? `<div class="driver-seq-photo-row"><button class="btn primary" id="driverSeqCameraBtn" type="button">Tirar foto</button><button class="btn" id="driverSeqGalleryBtn" type="button">Galeria</button></div>` : ""}
-          ${proofRule}
+          ${showProofHint ? '<div class="driver-street-hint">Sem fotos? Justifique uma vez. Sem assinatura? Justifique uma vez.</div>' : ''}
         </article>
-        <div class="driver-seq-mini">
-          <strong>${esc(callTitle(call)).slice(0, 220)}</strong>
-          <span>Status: ${esc(STATUS_LABEL[normalizeStatus(call)] || normalizeStatus(call))}</span>
-          <span>Pendências: ${missing.length}</span>
+        <div class="driver-street-foot">
+          <span>Status: ${esc(STATUS_LABEL[status] || status)}</span>
+          <span>Pendências: ${missingCount}</span>
         </div>
-        <nav class="driver-seq-shortcuts" aria-label="Atalhos rápidos">
-          <button data-driver-target="driverPanelCalls" type="button">Chamados</button>
-          <button data-driver-target="driverPanelMap" type="button">Rota</button>
-          <button data-driver-target="driverPanelProofs" type="button">Provas</button>
-          <button data-driver-target="driverPanelExpense" type="button">Despesa</button>
-        </nav>
-      </div>`;
+      </section>`;
 
-    $("driverSeqPrimaryBtn")?.addEventListener("click", () => action.run && action.run());
-    $("driverSeqSecondaryBtn")?.addEventListener("click", () => action.runSecondary && action.runSecondary());
-    $("driverSeqExpenseBtn")?.addEventListener("click", () => setVisiblePanel(PANEL_BY_STEP.despesas));
-    $("driverSimpleShowAllBtn")?.addEventListener("click", () => {
+    $("driverStreetPrimaryBtn")?.addEventListener("click", () => action.run && action.run());
+    $("driverStreetSecondaryBtn")?.addEventListener("click", () => action.runSecondary && action.runSecondary());
+    $("driverStreetThirdBtn")?.addEventListener("click", () => action.runThird && action.runThird());
+    $("driverStreetExpenseBtn")?.addEventListener("click", () => {
+      document.body.classList.add("driver-focus-technical");
+      setVisiblePanel(PANEL_BY_STEP.despesas);
+    });
+    $("driverStreetTechBtn")?.addEventListener("click", () => {
       document.body.classList.toggle("driver-show-all");
+      document.body.classList.toggle("driver-focus-technical", document.body.classList.contains("driver-show-all"));
       render();
     });
-    $("driverSeqCameraBtn")?.addEventListener("click", () => choosePhotoInput(photoTarget && photoTarget.inputId, "camera"));
-    $("driverSeqGalleryBtn")?.addEventListener("click", () => choosePhotoInput(photoTarget && photoTarget.inputId, "gallery"));
-    qsa(".driver-seq-shortcuts [data-driver-target]").forEach((btn) => btn.addEventListener("click", () => setVisiblePanel(btn.dataset.driverTarget)));
 
-    if (!document.body.classList.contains("driver-show-all")) {
-      const panel = action.step === "Selecionar chamado" ? PANEL_BY_STEP.chamados : (action.tone === "proof" ? PANEL_BY_STEP.provas : PANEL_BY_STEP.atendimento);
-      setVisiblePanel(panel, { scroll: false });
+    if (!document.body.classList.contains("driver-show-all") && !document.body.classList.contains("driver-focus-technical")) {
+      setVisiblePanel(PANEL_BY_STEP.atendimento, { scroll: false });
     }
-  }
-
-  function esc(value) {
-    return String(value == null ? "" : value).replace(/[&<>"']/g, (ch) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[ch]));
   }
 
   function scheduleRender() {
     clearTimeout(renderTimer);
-    renderTimer = setTimeout(render, 150);
+    renderTimer = setTimeout(render, 120);
   }
 
   function installShell() {
@@ -433,7 +478,7 @@
     if (!grid) return;
     const shell = document.createElement("section");
     shell.id = "driverSimpleShell";
-    shell.className = "panel col-12 driver-simple-shell driver-seq-host no-collapse";
+    shell.className = "panel col-12 driver-simple-shell driver-street-host no-collapse";
     grid.insertBefore(shell, grid.firstElementChild);
   }
 
@@ -447,24 +492,24 @@
         const step = SELECT_TO_STEP[id];
         if (!value || value === "pendente") return scheduleRender();
         setProofStep(step, { scroll: false });
-        // Se for uma etapa que precisa de explicação, não avança sem justificativa.
         if (["avaria", "intercorrencia", "recusa", "justificado"].includes(value)) {
           openJustificationFor({ step });
           scheduleRender();
           return;
         }
-        // OK: salva rascunho e aponta automaticamente para a próxima pendência.
         if (value === "ok" && typeof api().saveProofDraft === "function") {
           try { await api().saveProofDraft({ silent: true, validate: false }); } catch (_) {}
           setTimeout(() => {
             const missing = firstMissingForStatus(currentCall());
-            if (missing) openProofTarget(missing.target, missing.step);
-            else if (typeof api().setProofWizardStep === "function") {
+            if (missing) {
+              if (isPhotoMissingItem(missing) || isSignatureMissingItem(missing)) render();
+              else openProofTarget(missing.target, missing.step);
+            } else if (typeof api().setProofWizardStep === "function") {
               const currentIndex = PROOF_STEP_INDEX[step] || 0;
               api().setProofWizardStep(Math.min(5, currentIndex + 1));
             }
             scheduleRender();
-          }, 450);
+          }, 350);
         }
       });
     });
@@ -474,10 +519,9 @@
       input.dataset.seqFileBound = "true";
       input.addEventListener("change", () => {
         if (!input.files || !input.files.length) return scheduleRender();
+        lastPhotoInputId = input.id || lastPhotoInputId;
         const saveBtn = $("driverSaveProofDraftBtn");
-        if (saveBtn && !document.body.classList.contains("driver-show-all")) {
-          setTimeout(() => saveBtn.click(), 250);
-        }
+        if (saveBtn && !document.body.classList.contains("driver-show-all")) setTimeout(() => saveBtn.click(), 250);
         scheduleRender();
       });
     });
@@ -487,7 +531,7 @@
     const ids = [
       "driverActiveCallBox", "driverHeaderActiveCall", "driverLocationStatus",
       "driverProofMissingBox", "driverStatusGuideTitle", "proofWizardTitle",
-      "proofUploadQueue", "driverProofStatus"
+      "proofUploadQueue", "driverProofStatus", "driverCallsList"
     ];
     ids.forEach((id) => {
       const el = $(id);
@@ -498,13 +542,13 @@
   }
 
   function init() {
-    document.body.classList.add("driver-simple-mode", "driver-sequential-mode");
+    document.body.classList.add("driver-simple-mode", "driver-sequential-mode", "driver-street-mode");
     installShell();
     installAutoStepAdvance();
     observeLightly();
     render();
-    setInterval(() => { installAutoStepAdvance(); observeLightly(); scheduleRender(); }, 2500);
-    console.log("JM motorista sequencial automático", VERSION);
+    setInterval(() => { installAutoStepAdvance(); observeLightly(); scheduleRender(); }, 2200);
+    console.log("JM motorista modo rua", VERSION);
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

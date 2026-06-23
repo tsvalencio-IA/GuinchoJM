@@ -1,11 +1,11 @@
-/* jm-fluxo-operacional-v14-motorista-justificativa-unica-fotos */
+/* jm-fluxo-operacional-v16-motorista-modo-rua */
 (function () {
   "use strict";
 
   const { $, esc, parseMoney, toast, statusClass, routeKm, mapsRouteUrl, statusKey, statusLabel, isFinalStatus, setupCollapsiblePanels, pointFrom } = window.JM.utils;
   const { auth, db, arrayUnion, getRealtimeDb, rtdbKey } = window.JM.firebase;
   const cfg = window.JM_CONFIG || {};
-  const DRIVER_FLOW_VERSION = "jm-fluxo-operacional-v14-motorista-justificativa-unica-fotos";
+  const DRIVER_FLOW_VERSION = "jm-fluxo-operacional-v16-motorista-modo-rua";
   const state = {
     user: null,
     profile: null,
@@ -563,17 +563,34 @@
     return (label && label.textContent || input && input.id || 'foto').trim();
   }
 
+  const driverImageFallbackFiles = {};
+
+  function inputFiles(input) {
+    if (!input) return [];
+    const nativeFiles = Array.from(input.files || []).filter(Boolean);
+    if (nativeFiles.length) return nativeFiles;
+    return Array.from(driverImageFallbackFiles[input.id] || []).filter(Boolean);
+  }
+
   function copyFilesToInput(targetInput, files) {
     if (!targetInput || !files) return false;
+    const list = Array.from(files || []).filter(Boolean);
+    driverImageFallbackFiles[targetInput.id] = list;
     try {
       const transfer = new DataTransfer();
-      Array.from(files).forEach((file) => transfer.items.add(file));
+      list.forEach((file) => transfer.items.add(file));
       targetInput.files = transfer.files;
       return true;
     } catch (err) {
-      console.warn('Não foi possível copiar arquivos para o input principal.', err);
-      return false;
+      console.warn('O navegador não permitiu copiar arquivos para o input principal; usando fila interna segura.', err);
+      return list.length > 0;
     }
+  }
+
+  function clearInputFiles(input) {
+    if (!input) return;
+    try { input.value = ''; } catch (_) {}
+    if (input.id && driverImageFallbackFiles[input.id]) delete driverImageFallbackFiles[input.id];
   }
 
   function renderDriverImagePickerStatus(input) {
@@ -581,7 +598,7 @@
     if (!wrap) return;
     const status = wrap.querySelector('.driver-image-picker-status');
     const saveBox = wrap.querySelector('.driver-image-picker-save');
-    const files = Array.from(input.files || []);
+    const files = inputFiles(input);
     if (status) {
       status.innerHTML = files.length
         ? files.map((file) => `<span>${esc(file.name || 'foto selecionada')} · ${Math.max(1, Math.round((file.size || 0) / 1024))} KB</span>`).join('')
@@ -680,7 +697,7 @@
       input.dataset.previewBound = "true";
       input.addEventListener("change", () => {
         Array.from(proofUploadState.keys()).filter((key) => key.startsWith(input.id + ":")).forEach((key) => proofUploadState.delete(key));
-        const files = Array.from(input.files || []);
+        const files = inputFiles(input);
         files.forEach((file, index) => {
           const key = proofUploadItemKey(input.id, file, index);
           let previewUrl = "";
@@ -1372,7 +1389,7 @@
   function selectedProofPhotoKeys() {
     return REQUIRED_PHOTOS.filter((photo) => {
       const input = $(photo.input);
-      return !!(input && input.files && input.files[0]);
+      return !!(input && inputFiles(input)[0]);
     }).map((photo) => photo.key);
   }
 
@@ -3052,7 +3069,7 @@
     const existingPhotos = proofPhotos(call);
     const selectedPhotos = REQUIRED_PHOTOS.filter((photo) => {
       const input = $(photo.input);
-      return !!(input && input.files && input.files[0]);
+      return !!(input && inputFiles(input)[0]);
     });
     const audioInput = $("proofAudioFiles");
     const selectedAudios = audioInput && audioInput.files ? Array.from(audioInput.files).filter(Boolean) : [];
@@ -3061,8 +3078,8 @@
     if (!hasStageTouchedNow && !selectedPhotos.length && !selectedAudios.length && !hasNewSignature && !signatureRefusalReason && !checklist.notes && !hasPhotoJustificationNow && selectedDamageParts.size === 0) {
       return setProofSubmitStatus("Toque na etapa, envie uma prova ou escreva uma justificativa única. Sem prova ou justificativa, não salva.", "danger");
     }
-    if (missingBeforeUpload.length && !hasPhotoJustificationNow) {
-      setProofSubmitStatus("Faltam fotos/evidências. Envie as fotos ou escreva uma única justificativa para todas.", "danger");
+    if (missingBeforeUpload.length && !hasPhotoJustificationNow && !selectedPhotos.length) {
+      setProofSubmitStatus("Faltam fotos/evidências. Envie pelo menos uma foto agora ou escreva uma única justificativa para todas.", "danger");
       renderProofMissingBox(call);
       focusProofTarget("proofPhotoJustification", PROOF_INPUT_STEP_MAP[missingBeforeUpload[0].input] || "inspecao");
       return;
@@ -3086,7 +3103,7 @@
       for (let i = 0; i < selectedPhotos.length; i += 1) {
         const photo = selectedPhotos[i];
         const input = $(photo.input);
-        const file = input && input.files && input.files[0];
+        const file = input && inputFiles(input)[0];
         if (!file) continue;
         const uploadKey = proofUploadItemKey(photo.input, file, 0);
         setProofUploadItem(uploadKey, { status: "compressing", progress: 2, error: "" });
@@ -3237,7 +3254,7 @@
 
       REQUIRED_PHOTOS.forEach((photo) => {
         const input = $(photo.input);
-        if (input) input.value = "";
+        clearInputFiles(input);
       });
       if ($("proofAudioFiles")) $("proofAudioFiles").value = "";
       fieldValue("signatureRefusalReason", "");

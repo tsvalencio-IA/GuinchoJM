@@ -1,4 +1,4 @@
-const CACHE_NAME = "jm-fluxo-operacional-v14-motorista-justificativa-unica-fotos";
+const CACHE_NAME = "jm-fluxo-operacional-v16-motorista-modo-rua";
 const ASSETS = [
   "./",
   "./index.html",
