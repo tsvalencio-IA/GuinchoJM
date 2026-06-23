@@ -1,0 +1,16 @@
+"use strict";
+const fs = require("fs");
+const path = require("path");
+const assert = require("assert");
+const root = path.resolve(__dirname, "..");
+const html = fs.readFileSync(path.join(root,"motorista.html"),"utf8");
+const css = fs.readFileSync(path.join(root,"css/style.css"),"utf8");
+const js = fs.readFileSync(path.join(root,"js/motorista-simple-flow.js"),"utf8");
+assert.ok(html.includes("js/motorista-simple-flow.js"), "motorista.html deve carregar a camada de UX simples");
+assert.ok(js.includes("driver-simple-mode"), "camada simples deve ativar modo motorista");
+assert.ok(js.includes("driverPanelProofs"), "atalho de provas precisa existir");
+assert.ok(js.includes("transporte"), "etapa transporte precisa ter orientação específica");
+assert.ok(css.includes("driver-simple-hidden"), "CSS precisa esconder módulos fora da tela atual");
+assert.ok(css.includes("driver-proof-stage-intro"), "CSS precisa destacar a etapa atual");
+assert.ok(css.includes("driver-show-all"), "modo técnico precisa preservar acesso ao fluxo completo");
+console.log("PASS motorista-uix-v12.test.js");

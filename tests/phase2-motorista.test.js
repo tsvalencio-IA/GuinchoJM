@@ -6,7 +6,7 @@ const js = fs.readFileSync(path.join(root, 'js/motorista.js'), 'utf8');
 const html = fs.readFileSync(path.join(root, 'motorista.html'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'css/style.css'), 'utf8');
 const rules = fs.readFileSync(path.join(root, 'firestore.rules'), 'utf8');
-const version = 'jm-fluxo-operacional-v11-fotos-camera-galeria';
+const version = 'jm-fluxo-operacional-v12-motorista-uix-20-10';
 
 [
   'STATUS_FLOW', 'renderStatusGuide', 'refreshQuickStatusOptions',

@@ -6,7 +6,7 @@ const css = fs.readFileSync(path.join(root, 'css', 'style.css'), 'utf8');
 const app = fs.readFileSync(path.join(root, 'js', 'app.js'), 'utf8');
 const jm = fs.readFileSync(path.join(root, 'jm.html'), 'utf8');
 function assert(cond,msg){ if(!cond){ console.error('FAIL:',msg); process.exit(1);} }
-assert(jm.includes('jm-fluxo-operacional-v11-fotos-camera-galeria'), 'jm.html deve carregar versão V10');
+assert(jm.includes('jm-fluxo-operacional-v12-motorista-uix-20-10'), 'jm.html deve carregar versão V10');
 assert(css.includes('JM V10'), 'CSS V10 ausente');
 assert(css.includes('#view-chamados > .grid'), 'layout específico da aba chamados ausente');
 assert(css.includes('grid-template-columns:1fr'), 'breakpoint de empilhamento ausente');

@@ -9,5 +9,6 @@ for (const test of tests) {
 }
   require('./financeiro-rota-manual-hotfix.test.js');
   require('./motorista-fotos-camera-galeria-v11.test.js');
+  require('./motorista-uix-v12.test.js');
 console.log("ALL TESTS PASSED");
 

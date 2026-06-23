@@ -1,4 +1,4 @@
-const CACHE_NAME = "jm-fluxo-operacional-v11-fotos-camera-galeria";
+const CACHE_NAME = "jm-fluxo-operacional-v12-motorista-uix-20-10";
 const ASSETS = [
   "./",
   "./index.html",
@@ -25,6 +25,7 @@ const ASSETS = [
   "./css/final-ux.css",
   "./js/final-ux.js",
   "./js/motorista-final-ux.js",
+  "./js/motorista-simple-flow.js",
   "./js/superadmin-public-config.js",
   "./assets/icon.svg"
 ];
