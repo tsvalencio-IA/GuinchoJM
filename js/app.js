@@ -10,7 +10,7 @@
   const { auth, secondaryAuth, db, ts, arrayUnion, emailIsAdmin, getRealtimeDb, rtdbKey } = window.JM.firebase;
   const cfg = window.JM_CONFIG || {};
   const SYSTEM_SIGNATURE = "Powered by thIAguinho Soluções Digitais";
-  const LOGIN_FLOW_VERSION = "jm-fluxo-operacional-v16-motorista-modo-rua";
+  const LOGIN_FLOW_VERSION = "jm-fluxo-operacional-v17-motorista-modo-rua-com-acessos";
   let trackerTimer = null;
   let trackerBusy = false;
   let mapRefreshTimer = null;
@@ -4840,7 +4840,7 @@ Rota: ${url}`;
       technician: original.technician || "",
       originDetails: original.originDetails || null,
       destinationDetails: original.destinationDetails || null,
-      parserVersion: "jm-fluxo-operacional-v16-motorista-modo-rua"
+      parserVersion: "jm-fluxo-operacional-v17-motorista-modo-rua-com-acessos"
     };
     return { original, reviewed };
   }
@@ -4863,7 +4863,7 @@ Rota: ${url}`;
       aiGenerated: true,
       aiReviewed: true,
       aiCreatedAt: now,
-      aiParserVersion: "jm-fluxo-operacional-v16-motorista-modo-rua",
+      aiParserVersion: "jm-fluxo-operacional-v17-motorista-modo-rua-com-acessos",
       cliente: reviewed.customerName || reviewed.requester || reviewed.billingClient || "Cliente não informado",
       phone: reviewed.customerPhone || "",
       serviceType: reviewed.serviceType || "Seguradora",
@@ -5034,7 +5034,7 @@ Rota: ${url}`;
           tariffSummary: reviewed.tariffSummary,
           mapLinks: original.mapLinks || [],
           rawText: draft.rawText || "",
-          parserVersion: "jm-fluxo-operacional-v16-motorista-modo-rua"
+          parserVersion: "jm-fluxo-operacional-v17-motorista-modo-rua-com-acessos"
         },
         rawPayload: draft.rawText || "",
         payload: Object.assign({}, original, reviewed),

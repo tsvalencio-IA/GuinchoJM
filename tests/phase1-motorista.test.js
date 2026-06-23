@@ -5,7 +5,7 @@ const html = fs.readFileSync(path.join(root, 'motorista.html'), 'utf8');
 const js = fs.readFileSync(path.join(root, 'js/motorista.js'), 'utf8');
 const cfg = fs.readFileSync(path.join(root, 'js/config.firebase.js'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'css/style.css'), 'utf8');
-const version = 'jm-fluxo-operacional-v16-motorista-modo-rua';
+const version = 'jm-fluxo-operacional-v17-motorista-modo-rua-com-acessos';
 
 function expect(condition, message) {
   if (!condition) throw new Error(message);

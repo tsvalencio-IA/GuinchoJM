@@ -2464,3 +2464,86 @@ body.driver-street-mode.driver-focus-technical:not(.driver-show-all) #driverAppV
   .driver-street { max-width: 860px; }
   .driver-street-actions .btn { flex-basis: 180px; }
 }
+
+/* V17 Motorista: Modo Rua simples com acessos preservados
+   Não esconder funções críticas: chamados, mapa/GPS, provas, despesas e etapas ficam a um toque. */
+.driver-street-head-actions {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+.driver-street-back {
+  min-height:36px;
+  padding-inline:12px;
+  font-size:.78rem;
+  border-radius:999px;
+}
+.driver-street-dock {
+  display:grid;
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  gap:8px;
+  width:100%;
+}
+.driver-street-dock-btn {
+  min-height:58px;
+  border-radius:16px;
+  border:1px solid rgba(148,163,184,.28);
+  background:rgba(15,23,42,.72);
+  color:var(--text);
+  display:grid;
+  gap:2px;
+  align-content:center;
+  justify-items:center;
+  text-align:center;
+  padding:7px 5px;
+  cursor:pointer;
+  box-shadow:0 8px 18px rgba(0,0,0,.12);
+}
+.driver-street-dock-btn strong {
+  font-size:.82rem;
+  line-height:1.05;
+  font-weight:1000;
+}
+.driver-street-dock-btn span {
+  font-size:.68rem;
+  line-height:1.05;
+  color:var(--muted);
+  font-weight:800;
+}
+.driver-street-dock-btn:focus-visible,
+.driver-street-dock-btn:hover {
+  outline:none;
+  border-color:var(--accent);
+  background:rgba(56,189,248,.12);
+}
+html[data-theme="light"] .driver-street-dock-btn { background:rgba(255,255,255,.94); }
+body.driver-street-mode.driver-focus-technical:not(.driver-show-all) #driverSimpleShell {
+  position:sticky;
+  top:0;
+  z-index:130;
+}
+body.driver-street-mode.driver-focus-technical:not(.driver-show-all) #driverAppView .grid {
+  display:grid !important;
+}
+body.driver-street-mode.driver-focus-technical:not(.driver-show-all) #driverAppView .panel[id^="driverPanel"].driver-simple-visible {
+  margin-top:10px;
+}
+body.driver-street-mode.driver-show-all #driverAppView .grid {
+  display:grid !important;
+}
+body.driver-street-mode.driver-show-all #driverAppView .panel[id^="driverPanel"] {
+  grid-column:span 12 !important;
+  width:100% !important;
+  max-width:100% !important;
+}
+@media (max-width:840px) {
+  .driver-street-dock { grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .driver-street-dock-btn { min-height:56px; }
+}
+@media (max-width:420px) {
+  .driver-street-dock { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .driver-street-head-actions { width:100%; display:grid; grid-template-columns:1fr 1fr; }
+  .driver-street-head-actions .btn { width:100%; }
+}

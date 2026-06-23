@@ -1,9 +1,9 @@
-/* JM motorista V16 - Modo Rua automático
-   Uma ação por vez: botão grande, pouca leitura, avanço automático e preservação integral de provas, assinatura, GPS, despesas e modo técnico. */
+/* JM motorista V17 - Modo Rua com acessos preservados
+   Uma ação por vez na tela principal, mas sem remover acesso a Chamados, Mapa/GPS, Provas, Despesas e Etapas anteriores. */
 (function () {
   "use strict";
 
-  const VERSION = "jm-fluxo-operacional-v16-motorista-modo-rua";
+  const VERSION = "jm-fluxo-operacional-v17-motorista-modo-rua-com-acessos";
   const $ = (id) => document.getElementById(id);
   const qsa = (sel, root) => Array.from((root || document).querySelectorAll(sel));
 
@@ -116,6 +116,15 @@
     const app = $("driverAppView");
     if (!app) return;
     const target = panelId || PANEL_BY_STEP.atendimento;
+    const opts = options || {};
+
+    /* V17: abrir um módulo técnico não pode parecer função removida.
+       O Modo Rua continua limpo, mas Chamados/Mapa/GPS/Provas/Despesas ficam acessíveis por atalhos. */
+    if (target !== PANEL_BY_STEP.atendimento && opts.technical !== false) {
+      document.body.classList.add("driver-focus-technical");
+      document.body.classList.remove("driver-show-all");
+    }
+
     app.dataset.simplePanel = target;
     qsa(".panel[id^='driverPanel']", app).forEach((panel) => {
       const visible = panel.id === target;
@@ -123,7 +132,7 @@
       panel.classList.toggle("driver-simple-hidden", !visible);
       panel.setAttribute("aria-hidden", visible ? "false" : "true");
     });
-    if (!options || options.scroll !== false) {
+    if (!opts || opts.scroll !== false) {
       const panel = $(target);
       if (panel) {
         try { panel.scrollIntoView({ behavior: "smooth", block: "start" }); } catch (_) {}
@@ -193,6 +202,21 @@
     if (btn) { btn.click(); return true; }
     input.click();
     return true;
+  }
+
+  function returnToStreetMode() {
+    document.body.classList.remove("driver-focus-technical", "driver-show-all");
+    setVisiblePanel(PANEL_BY_STEP.atendimento, { scroll: false, technical: false });
+    scheduleRender();
+    const shell = $("driverSimpleShell");
+    if (shell) {
+      try { shell.scrollIntoView({ behavior: "smooth", block: "start" }); } catch (_) {}
+    }
+  }
+
+  function openDriverModule(panelId) {
+    setVisiblePanel(panelId, { scroll: true, technical: true });
+    scheduleRender();
   }
 
   function proofStepForInput(inputId) {
@@ -427,7 +451,10 @@
       <section class="driver-street ${esc(action.tone || "")}" aria-live="polite">
         <div class="driver-street-head">
           <span class="driver-street-badge">MODO RUA</span>
-          <button class="btn ghost driver-street-tech" id="driverStreetTechBtn" type="button">Detalhes</button>
+          <div class="driver-street-head-actions">
+            ${document.body.classList.contains("driver-focus-technical") ? '<button class="btn good driver-street-back" id="driverStreetBackBtn" type="button">VOLTAR AO PASSO</button>' : ''}
+            <button class="btn ghost driver-street-tech" id="driverStreetTechBtn" type="button">VER TUDO</button>
+          </div>
         </div>
         <div class="driver-street-route">${esc(routeTitle(call))}</div>
         <article class="driver-street-card">
@@ -443,6 +470,14 @@
           </div>
           ${showProofHint ? '<div class="driver-street-hint">Sem fotos? Justifique uma vez. Sem assinatura? Justifique uma vez.</div>' : ''}
         </article>
+        <nav class="driver-street-dock" aria-label="Acessos rápidos do motorista">
+          <button class="driver-street-dock-btn" data-street-panel="${PANEL_BY_STEP.chamados}" type="button"><strong>Chamados</strong><span>trocar OS</span></button>
+          <button class="driver-street-dock-btn" data-street-panel="${PANEL_BY_STEP.rota}" type="button"><strong>Mapa</strong><span>rota</span></button>
+          <button class="driver-street-dock-btn" data-street-panel="${PANEL_BY_STEP.gps}" type="button"><strong>GPS</strong><span>localização</span></button>
+          <button class="driver-street-dock-btn" data-street-panel="${PANEL_BY_STEP.provas}" type="button"><strong>Provas</strong><span>fotos/assin.</span></button>
+          <button class="driver-street-dock-btn" data-street-panel="${PANEL_BY_STEP.despesas}" type="button"><strong>Despesa</strong><span>rápida</span></button>
+          <button class="driver-street-dock-btn" data-street-panel="${PANEL_BY_STEP.atendimento}" data-street-all="true" type="button"><strong>Etapas</strong><span>histórico</span></button>
+        </nav>
         <div class="driver-street-foot">
           <span>Status: ${esc(STATUS_LABEL[status] || status)}</span>
           <span>Pendências: ${missingCount}</span>
@@ -452,18 +487,27 @@
     $("driverStreetPrimaryBtn")?.addEventListener("click", () => action.run && action.run());
     $("driverStreetSecondaryBtn")?.addEventListener("click", () => action.runSecondary && action.runSecondary());
     $("driverStreetThirdBtn")?.addEventListener("click", () => action.runThird && action.runThird());
-    $("driverStreetExpenseBtn")?.addEventListener("click", () => {
-      document.body.classList.add("driver-focus-technical");
-      setVisiblePanel(PANEL_BY_STEP.despesas);
-    });
+    $("driverStreetExpenseBtn")?.addEventListener("click", () => openDriverModule(PANEL_BY_STEP.despesas));
+    $("driverStreetBackBtn")?.addEventListener("click", returnToStreetMode);
     $("driverStreetTechBtn")?.addEventListener("click", () => {
       document.body.classList.toggle("driver-show-all");
       document.body.classList.toggle("driver-focus-technical", document.body.classList.contains("driver-show-all"));
+      if (!document.body.classList.contains("driver-show-all")) setVisiblePanel(PANEL_BY_STEP.atendimento, { scroll: false, technical: false });
       render();
+    });
+    qsa(".driver-street-dock-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (btn.dataset.streetAll === "true") {
+          document.body.classList.add("driver-show-all", "driver-focus-technical");
+          render();
+          return;
+        }
+        openDriverModule(btn.dataset.streetPanel || PANEL_BY_STEP.atendimento);
+      });
     });
 
     if (!document.body.classList.contains("driver-show-all") && !document.body.classList.contains("driver-focus-technical")) {
-      setVisiblePanel(PANEL_BY_STEP.atendimento, { scroll: false });
+      setVisiblePanel(PANEL_BY_STEP.atendimento, { scroll: false, technical: false });
     }
   }
 

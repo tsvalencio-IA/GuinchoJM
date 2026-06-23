@@ -1,11 +1,11 @@
-/* jm-fluxo-operacional-v16-motorista-modo-rua */
+/* jm-fluxo-operacional-v17-motorista-modo-rua-com-acessos */
 (function () {
   "use strict";
 
   const { $, esc, parseMoney, toast, statusClass, routeKm, mapsRouteUrl, statusKey, statusLabel, isFinalStatus, setupCollapsiblePanels, pointFrom } = window.JM.utils;
   const { auth, db, arrayUnion, getRealtimeDb, rtdbKey } = window.JM.firebase;
   const cfg = window.JM_CONFIG || {};
-  const DRIVER_FLOW_VERSION = "jm-fluxo-operacional-v16-motorista-modo-rua";
+  const DRIVER_FLOW_VERSION = "jm-fluxo-operacional-v17-motorista-modo-rua-com-acessos";
   const state = {
     user: null,
     profile: null,
