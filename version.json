@@ -1,8 +1,8 @@
 {
-  "version": "jm-fluxo-operacional-v17-motorista-modo-rua-com-acessos",
-  "description": "V17 preserva o Modo Rua simples do motorista, mas recoloca acesso explícito e rápido a Chamados, Mapa, GPS, Provas, Despesas e Etapas/Histórico. Facilita sem remover funções.",
-  "updatedAt": "2026-06-23T21:20:00Z",
-  "build": "V17",
-  "base": "V16 + hotfix de acessos do motorista",
-  "notes": "Não altera Firebase Rules, RTDB Rules, financeiro, gestor, Cloudinary ou salvamento original. Corrige a sensação de funções removidas no motorista."
+  "version": "jm-fluxo-operacional-v19-motorista-popular-um-botao",
+  "description": "V19 transforma o motorista em modo popular de uma ação por vez: botão grande, poucos textos, menu Mais para acesso completo, fotos/assinatura/despesa preservadas e sem remover o modo técnico.",
+  "updatedAt": "2026-06-24T20:55:00Z",
+  "build": "V19",
+  "base": "V18 provas inteligentes",
+  "notes": "Não altera Firebase Rules, RTDB Rules, Cloudinary, financeiro ou gestor. A mudança é UIX do motorista: menos leitura, menos botões visíveis, acesso completo preservado no menu Mais."
 }

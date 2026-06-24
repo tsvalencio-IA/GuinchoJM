@@ -1,4 +1,4 @@
-const CACHE_NAME = "jm-fluxo-operacional-v17-motorista-modo-rua-com-acessos";
+const CACHE_NAME = "jm-fluxo-operacional-v19-motorista-popular-um-botao";
 const ASSETS = [
   "./",
   "./index.html",

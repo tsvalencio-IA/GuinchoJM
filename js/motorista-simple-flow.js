@@ -1,9 +1,9 @@
-/* JM motorista V17 - Modo Rua com acessos preservados
-   Uma ação por vez na tela principal, mas sem remover acesso a Chamados, Mapa/GPS, Provas, Despesas e Etapas anteriores. */
+/* JM motorista V19 - Modo motorista popular
+   Uma ação por vez, poucos botões, acesso completo preservado no menu Mais. */
 (function () {
   "use strict";
 
-  const VERSION = "jm-fluxo-operacional-v17-motorista-modo-rua-com-acessos";
+  const VERSION = "jm-fluxo-operacional-v19-motorista-popular-um-botao";
   const $ = (id) => document.getElementById(id);
   const qsa = (sel, root) => Array.from((root || document).querySelectorAll(sel));
 
@@ -270,6 +270,36 @@
     setTimeout(scheduleRender, 250);
   }
 
+  async function justifySignatureFast() {
+    const input = $("signatureRefusalReason");
+    if (!input) return openProofTarget("signatureRefusalReason", "finalizacao");
+    const current = String(input.value || "").trim();
+    const reason = current || window.prompt("Por que não teve assinatura?", "Cliente não assinou.");
+    if (!reason) return;
+    input.value = reason.trim();
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+    if (typeof api().saveProofDraft === "function") {
+      try { await api().saveProofDraft({ silent: true, validate: false }); } catch (_) {}
+    }
+    setTimeout(scheduleRender, 250);
+  }
+
+  function openSignatureOnly() {
+    document.body.classList.add("driver-signature-only");
+    openProofTarget("driverSignatureSection", "finalizacao");
+  }
+
+  function closeMenu() {
+    document.body.classList.remove("driver-popular-menu-open");
+    scheduleRender();
+  }
+
+  function toggleMenu() {
+    document.body.classList.toggle("driver-popular-menu-open");
+    scheduleRender();
+  }
+
   function runRoute(call) {
     const id = call && call.id;
     if (!id) return;
@@ -301,11 +331,11 @@
       return {
         tone: "proof-photo",
         step: PROOF_STEP_TITLES[step] || "Fotos",
-        title,
-        detail: "Envie foto agora ou justifique uma vez se não tiver fotos.",
+        title: "Foto do veículo",
+        detail: "Tire a foto ou escolha da galeria.",
         primary: "TIRAR FOTO",
         secondary: "GALERIA",
-        third: "NÃO TENHO FOTOS",
+        third: "SEM FOTO",
         run: () => choosePhotoInput(inputId, "camera") || openProofTarget(missing.target, step),
         runSecondary: () => choosePhotoInput(inputId, "gallery") || openProofTarget(missing.target, step),
         runThird: () => justifyAllPhotos(missing)
@@ -316,21 +346,21 @@
       return {
         tone: "proof-signature",
         step: "Assinatura",
-        title: "Coletar assinatura",
-        detail: "Cliente assina na tela. Se não assinar, justifique uma vez.",
-        primary: "ASSINAR NA TELA",
-        secondary: "JUSTIFICAR SEM ASSINATURA",
-        run: () => openProofTarget("driverSignatureSection", "finalizacao"),
-        runSecondary: () => openProofTarget("signatureRefusalReason", "finalizacao")
+        title: "Assinatura",
+        detail: "Peça para o cliente assinar.",
+        primary: "ASSINAR",
+        secondary: "NÃO ASSINOU",
+        run: () => openSignatureOnly(),
+        runSecondary: () => justifySignatureFast()
       };
     }
 
     return {
       tone: "proof-field",
       step: PROOF_STEP_TITLES[missing.step] || "Provas",
-      title: missing.label || "Completar informação",
-      detail: "Complete este item para avançar. Se não for possível, use justificativa.",
-      primary: "RESOLVER AGORA",
+      title: "Resolver pendência",
+      detail: missing.label || "Falta uma informação.",
+      primary: "ABRIR",
       secondary: "JUSTIFICAR",
       run: () => openProofTarget(missing.target, missing.step),
       runSecondary: () => openJustificationFor(missing)
@@ -343,9 +373,9 @@
       return {
         tone: "warn",
         step: "Chamado",
-        title: "Escolha o atendimento",
-        detail: "Toque para ver seus chamados e iniciar o trabalho.",
-        primary: "VER CHAMADOS",
+        title: "Escolha uma OS",
+        detail: "",
+        primary: "MEUS CHAMADOS",
         run: () => setVisiblePanel(PANEL_BY_STEP.chamados)
       };
     }
@@ -355,9 +385,9 @@
       return {
         tone: "done",
         step: "Finalizado",
-        title: "Atendimento finalizado",
-        detail: "As provas ficam disponíveis para a central.",
-        primary: "VER CHAMADOS",
+        title: "Finalizado",
+        detail: "",
+        primary: "MEUS CHAMADOS",
         run: () => setVisiblePanel(PANEL_BY_STEP.chamados)
       };
     }
@@ -369,8 +399,8 @@
       return {
         tone: "route",
         step: "Ocorrência",
-        title: status === "despachado" ? "Iniciar deslocamento" : "Chegou na ocorrência?",
-        detail: status === "despachado" ? "Abra a rota e vá até o local." : "Confirme somente quando estiver no local.",
+        title: status === "despachado" ? "Ir para o local" : "Já chegou?",
+        detail: status === "despachado" ? "" : "",
         primary: status === "despachado" ? "INICIAR DESLOCAMENTO" : "CHEGUEI",
         secondary: "ABRIR ROTA",
         run: () => runStatus(call, STATUS_NEXT[status] || "motorista_a_caminho"),
@@ -382,8 +412,8 @@
       return {
         tone: "load",
         step: "Retirada",
-        title: "Veículo carregado?",
-        detail: "Depois de registrar as provas, confirme o carregamento.",
+        title: "Carregou o veículo?",
+        detail: "",
         primary: "VEÍCULO CARREGADO",
         run: () => runStatus(call, "veiculo_carregado")
       };
@@ -394,7 +424,7 @@
         tone: "transport",
         step: "Transporte",
         title: "Levar ao destino",
-        detail: "Abra a rota do destino e inicie o transporte.",
+        detail: "",
         primary: "INICIAR TRANSPORTE",
         secondary: "ABRIR ROTA",
         run: () => runStatus(call, "em_transporte"),
@@ -407,7 +437,7 @@
         tone: "destination",
         step: "Destino",
         title: "Chegou no destino?",
-        detail: "Confirme chegada para registrar entrega e assinatura.",
+        detail: "",
         primary: "CHEGUEI NO DESTINO",
         secondary: "ABRIR ROTA",
         run: () => runStatus(call, "entregue"),
@@ -419,8 +449,8 @@
       return {
         tone: "finish",
         step: "Finalização",
-        title: "Finalizar atendimento",
-        detail: "Finalize quando fotos/assinatura estiverem enviadas ou justificadas.",
+        title: "Finalizar",
+        detail: "",
         primary: "FINALIZAR",
         run: () => runStatus(call, "finalizado")
       };
@@ -430,8 +460,8 @@
     return {
       tone: "status",
       step: STATUS_LABEL[status] || "Atendimento",
-      title: "Avançar atendimento",
-      detail: "Toque para salvar e ir para o próximo passo.",
+      title: "Continuar",
+      detail: "",
       primary: "CONTINUAR",
       run: () => runStatus(call, next)
     };
@@ -444,64 +474,60 @@
     const call = currentCall();
     const missingCount = call ? proofMissing(call).length : 0;
     const status = normalizeStatus(call);
-    const busyHtml = busy ? '<div class="driver-street-saving">Salvando...</div>' : '';
-    const showProofHint = /proof/.test(action.tone || "");
+    const busyHtml = busy ? '<div class="driver-popular-saving">Salvando...</div>' : '';
+    const detailHtml = action.detail ? `<p>${esc(action.detail)}</p>` : "";
+    const menuOpen = document.body.classList.contains("driver-popular-menu-open");
+    const route = routeTitle(call);
 
     shell.innerHTML = `
-      <section class="driver-street ${esc(action.tone || "")}" aria-live="polite">
-        <div class="driver-street-head">
-          <span class="driver-street-badge">MODO RUA</span>
-          <div class="driver-street-head-actions">
-            ${document.body.classList.contains("driver-focus-technical") ? '<button class="btn good driver-street-back" id="driverStreetBackBtn" type="button">VOLTAR AO PASSO</button>' : ''}
-            <button class="btn ghost driver-street-tech" id="driverStreetTechBtn" type="button">VER TUDO</button>
+      <section class="driver-popular ${esc(action.tone || "")}" aria-live="polite">
+        <div class="driver-popular-top">
+          <div>
+            <span class="driver-popular-badge">MOTORISTA</span>
+            <strong class="driver-popular-route">${esc(route)}</strong>
           </div>
+          <button class="driver-popular-menu-btn" id="driverPopularMenuBtn" type="button">MAIS</button>
         </div>
-        <div class="driver-street-route">${esc(routeTitle(call))}</div>
-        <article class="driver-street-card">
+        ${menuOpen ? `
+          <div class="driver-popular-menu" id="driverPopularMenu">
+            <button data-street-panel="${PANEL_BY_STEP.chamados}" type="button">Chamados</button>
+            <button data-street-panel="${PANEL_BY_STEP.rota}" type="button">Mapa</button>
+            <button data-street-panel="${PANEL_BY_STEP.gps}" type="button">GPS</button>
+            <button data-street-panel="${PANEL_BY_STEP.provas}" type="button">Fotos</button>
+            <button data-street-panel="${PANEL_BY_STEP.despesas}" type="button">Despesa</button>
+            <button data-street-panel="${PANEL_BY_STEP.atendimento}" data-street-all="true" type="button">Detalhes</button>
+          </div>` : ""}
+        <article class="driver-popular-card">
           <small>${esc(action.step || "Agora")}</small>
-          <h2>${esc(action.title || "O que fazer agora")}</h2>
-          <p>${esc(action.detail || "Toque no botão principal para continuar.")}</p>
+          <h1>${esc(action.title || "O que fazer agora?")}</h1>
+          ${detailHtml}
           ${busyHtml}
-          <button class="btn good driver-street-primary" id="driverStreetPrimaryBtn" type="button">${esc(action.primary || "CONTINUAR")}</button>
-          <div class="driver-street-actions">
-            ${action.secondary ? `<button class="btn driver-street-secondary" id="driverStreetSecondaryBtn" type="button">${esc(action.secondary)}</button>` : ""}
-            ${action.third ? `<button class="btn danger driver-street-third" id="driverStreetThirdBtn" type="button">${esc(action.third)}</button>` : ""}
-            <button class="btn" id="driverStreetExpenseBtn" type="button">DESPESA</button>
+          <button class="driver-popular-primary" id="driverStreetPrimaryBtn" type="button">${esc(action.primary || "CONTINUAR")}</button>
+          <div class="driver-popular-actions">
+            ${action.secondary ? `<button id="driverStreetSecondaryBtn" type="button">${esc(action.secondary)}</button>` : ""}
+            ${action.third ? `<button class="warn" id="driverStreetThirdBtn" type="button">${esc(action.third)}</button>` : ""}
           </div>
-          ${showProofHint ? '<div class="driver-street-hint">Sem fotos? Justifique uma vez. Sem assinatura? Justifique uma vez.</div>' : ''}
+          <button class="driver-popular-expense" id="driverStreetExpenseBtn" type="button">DESPESA RÁPIDA</button>
         </article>
-        <nav class="driver-street-dock" aria-label="Acessos rápidos do motorista">
-          <button class="driver-street-dock-btn" data-street-panel="${PANEL_BY_STEP.chamados}" type="button"><strong>Chamados</strong><span>trocar OS</span></button>
-          <button class="driver-street-dock-btn" data-street-panel="${PANEL_BY_STEP.rota}" type="button"><strong>Mapa</strong><span>rota</span></button>
-          <button class="driver-street-dock-btn" data-street-panel="${PANEL_BY_STEP.gps}" type="button"><strong>GPS</strong><span>localização</span></button>
-          <button class="driver-street-dock-btn" data-street-panel="${PANEL_BY_STEP.provas}" type="button"><strong>Provas</strong><span>fotos/assin.</span></button>
-          <button class="driver-street-dock-btn" data-street-panel="${PANEL_BY_STEP.despesas}" type="button"><strong>Despesa</strong><span>rápida</span></button>
-          <button class="driver-street-dock-btn" data-street-panel="${PANEL_BY_STEP.atendimento}" data-street-all="true" type="button"><strong>Etapas</strong><span>histórico</span></button>
-        </nav>
-        <div class="driver-street-foot">
-          <span>Status: ${esc(STATUS_LABEL[status] || status)}</span>
-          <span>Pendências: ${missingCount}</span>
+        <div class="driver-popular-foot">
+          <span>${esc(STATUS_LABEL[status] || status)}</span>
+          ${missingCount ? `<span>Faltam ${missingCount}</span>` : '<span>Tudo ok</span>'}
         </div>
       </section>`;
 
     $("driverStreetPrimaryBtn")?.addEventListener("click", () => action.run && action.run());
     $("driverStreetSecondaryBtn")?.addEventListener("click", () => action.runSecondary && action.runSecondary());
     $("driverStreetThirdBtn")?.addEventListener("click", () => action.runThird && action.runThird());
-    $("driverStreetExpenseBtn")?.addEventListener("click", () => openDriverModule(PANEL_BY_STEP.despesas));
-    $("driverStreetBackBtn")?.addEventListener("click", returnToStreetMode);
-    $("driverStreetTechBtn")?.addEventListener("click", () => {
-      document.body.classList.toggle("driver-show-all");
-      document.body.classList.toggle("driver-focus-technical", document.body.classList.contains("driver-show-all"));
-      if (!document.body.classList.contains("driver-show-all")) setVisiblePanel(PANEL_BY_STEP.atendimento, { scroll: false, technical: false });
-      render();
-    });
-    qsa(".driver-street-dock-btn").forEach((btn) => {
+    $("driverStreetExpenseBtn")?.addEventListener("click", () => { closeMenu(); openDriverModule(PANEL_BY_STEP.despesas); });
+    $("driverPopularMenuBtn")?.addEventListener("click", toggleMenu);
+    qsa(".driver-popular-menu button").forEach((btn) => {
       btn.addEventListener("click", () => {
         if (btn.dataset.streetAll === "true") {
           document.body.classList.add("driver-show-all", "driver-focus-technical");
-          render();
+          closeMenu();
           return;
         }
+        closeMenu();
         openDriverModule(btn.dataset.streetPanel || PANEL_BY_STEP.atendimento);
       });
     });
@@ -586,7 +612,7 @@
   }
 
   function init() {
-    document.body.classList.add("driver-simple-mode", "driver-sequential-mode", "driver-street-mode");
+    document.body.classList.add("driver-simple-mode", "driver-sequential-mode", "driver-street-mode", "driver-popular-mode");
     installShell();
     installAutoStepAdvance();
     observeLightly();

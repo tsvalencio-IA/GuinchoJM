@@ -1,0 +1,16 @@
+const fs = require('fs');
+const assert = require('assert');
+const js = fs.readFileSync('js/motorista-simple-flow.js','utf8');
+const css = fs.readFileSync('css/style.css','utf8');
+const html = fs.readFileSync('motorista.html','utf8');
+assert(js.includes('jm-fluxo-operacional-v19-motorista-popular-um-botao'), 'motorista-simple-flow sem V19');
+assert(js.includes('driver-popular-mode'), 'classe popular não instalada');
+assert(js.includes('MEUS CHAMADOS'), 'ação de chamados popular ausente');
+assert(js.includes('TIRAR FOTO'), 'ação tirar foto ausente');
+assert(js.includes('SEM FOTO'), 'ação sem foto ausente');
+assert(js.includes('NÃO ASSINOU'), 'ação sem assinatura ausente');
+assert(js.includes('driver-popular-menu'), 'menu MAIS não existe');
+assert(css.includes('driver-popular-primary'), 'CSS botão principal V19 ausente');
+assert(css.includes('driver-signature-only'), 'modo assinatura focado ausente');
+assert(html.includes('jm-fluxo-operacional-v19-motorista-popular-um-botao'), 'motorista.html não carrega V19');
+console.log('motorista-popular-v19 ok');

@@ -1,11 +1,11 @@
-/* jm-fluxo-operacional-v17-motorista-modo-rua-com-acessos */
+/* jm-fluxo-operacional-v19-motorista-popular-um-botao */
 (function () {
   "use strict";
 
   const { $, esc, parseMoney, toast, statusClass, routeKm, mapsRouteUrl, statusKey, statusLabel, isFinalStatus, setupCollapsiblePanels, pointFrom } = window.JM.utils;
   const { auth, db, arrayUnion, getRealtimeDb, rtdbKey } = window.JM.firebase;
   const cfg = window.JM_CONFIG || {};
-  const DRIVER_FLOW_VERSION = "jm-fluxo-operacional-v17-motorista-modo-rua-com-acessos";
+  const DRIVER_FLOW_VERSION = "jm-fluxo-operacional-v19-motorista-popular-um-botao";
   const state = {
     user: null,
     profile: null,
@@ -721,31 +721,70 @@
     });
   }
 
+  function removeProofQueuedFile(key) {
+    const item = proofUploadState.get(key);
+    if (!item) return;
+    const input = item.inputId && $(item.inputId);
+    if (input) {
+      const current = inputFiles(input);
+      let removed = false;
+      const next = current.filter((file) => {
+        if (!removed && (file.name || "arquivo") === item.name && Number(file.size || 0) === Number(item.size || 0)) {
+          removed = true;
+          return false;
+        }
+        return true;
+      });
+      if (next.length) copyFilesToInput(input, next);
+      else clearInputFiles(input);
+      renderDriverImagePickerStatus(input);
+    }
+    const url = proofPreviewUrls.get(key) || item.previewUrl;
+    if (url) { try { URL.revokeObjectURL(url); } catch (_) {} }
+    proofPreviewUrls.delete(key);
+    proofUploadState.delete(key);
+    renderProofUploadQueue();
+  }
+
+  function retryProofQueuedFile(key) {
+    const item = proofUploadState.get(key);
+    if (!item) return;
+    setProofUploadItem(key, { status: "selected", progress: 0, error: "" });
+    const submit = document.querySelector("#driverProofForm button[type='submit']");
+    if (submit) submit.scrollIntoView({ behavior: "smooth", block: "center" });
+    setProofSubmitStatus("Arquivo pronto para tentar novamente. Toque em CONCLUIR E SALVAR PROVAS.", "info");
+  }
+
   function renderProofUploadQueue() {
     const box = $("proofUploadQueue");
     if (!box) return;
     const items = Array.from(proofUploadState.values());
     if (!items.length) {
-      box.innerHTML = '<span class="muted small">Os arquivos escolhidos aparecerão aqui com miniatura, tamanho e progresso individual.</span>';
+      box.innerHTML = '<span class="muted small">Escolha uma foto ou áudio. Cada arquivo aparece aqui com prévia, status, opção de remover e tentar novamente.</span>';
       return;
     }
     box.innerHTML = items.map((item) => {
       const isImage = /^image\//i.test(item.type || "");
       const isAudio = /^audio\//i.test(item.type || "");
       const statusLabelText = {
-        selected: "Selecionado",
+        selected: "Pronto para enviar",
         compressing: "Preparando",
         uploading: "Enviando",
         success: "Salvo",
         error: "Falhou"
       }[item.status] || item.status || "Aguardando";
       const media = isImage && item.previewUrl ? `<img src="${esc(item.previewUrl)}" alt="Prévia ${esc(item.name)}">` : isAudio && item.previewUrl ? `<audio controls preload="metadata" src="${esc(item.previewUrl)}"></audio>` : '<span class="proof-file-icon">ARQ</span>';
+      const retry = item.status === "error" ? `<button type="button" class="btn small warn" data-proof-retry-file="${esc(item.key)}">Tentar novamente</button>` : "";
       return `<article class="proof-upload-card ${esc(item.status || "selected")}">
         <div class="proof-upload-media">${media}</div>
         <div class="proof-upload-info"><strong>${esc(item.name)}</strong><small>${Math.max(1, Math.round((item.size || 0) / 1024))} KB · ${esc(statusLabelText)}</small>
           <div class="proof-upload-progress"><span style="width:${Math.max(0, Math.min(100, Number(item.progress || 0)))}%"></span></div>
           ${item.error ? `<em>${esc(item.error)}</em>` : ""}
-          ${isImage && item.previewUrl ? `<a class="proof-upload-save-link" href="${esc(item.previewUrl)}" download="${esc(item.name || 'foto-jm.jpg')}">Salvar no celular</a>` : ""}
+          <div class="proof-upload-actions">
+            ${retry}
+            <button type="button" class="btn small ghost" data-proof-remove-file="${esc(item.key)}">Remover</button>
+            ${isImage && item.previewUrl ? `<a class="proof-upload-save-link" href="${esc(item.previewUrl)}" download="${esc(item.name || 'foto-jm.jpg')}">Salvar no celular</a>` : ""}
+          </div>
         </div>
       </article>`;
     }).join("");
@@ -761,7 +800,45 @@
     const photos = proofPhotos(call);
     const audios = proofAudios(call);
     const signatures = Object.values(call.phaseSignatures || {}).filter(Boolean).length + (call.customerSignature ? 1 : 0);
-    box.innerHTML = `<strong>Evidências já salvas</strong><div class="proof-saved-stats"><span>${photos.length} foto(s)</span><span>${audios.length} áudio(s)</span><span>${signatures} assinatura(s)/aceite(s)</span><span>Status: ${esc(proofStatusFor(call))}</span></div>`;
+    const photoCards = photos.length ? `<div class="proof-saved-grid">${photos.map((photo, index) => {
+      const url = photo.cloudinaryUrl || photo.url || photo.secure_url || "";
+      return `<article class="proof-saved-card">
+        ${url ? `<img src="${esc(url)}" alt="${esc(photo.label || 'Foto salva')}">` : '<span class="proof-file-icon">IMG</span>'}
+        <div><strong>${esc(photo.label || photo.type || 'Foto')}</strong><small>${esc(photo.uploadedAt || photo.createdAt || '')}</small></div>
+        <button type="button" class="btn small ghost" data-proof-delete-saved-photo="${index}">Excluir</button>
+      </article>`;
+    }).join('')}</div>` : '<span class="muted small">Nenhuma foto salva ainda.</span>';
+    box.innerHTML = `<strong>Evidências já salvas</strong><div class="proof-saved-stats"><span>${photos.length} foto(s)</span><span>${audios.length} áudio(s)</span><span>${signatures} assinatura(s)/aceite(s)</span><span>Status: ${esc(proofStatusFor(call))}</span></div>${photoCards}<p class="small muted">Para trocar uma foto, envie uma nova foto da mesma etapa. Para remover do chamado, use Excluir.</p>`;
+  }
+
+  async function deleteSavedProofPhoto(index) {
+    const call = selectedCall();
+    if (!call) return toast("Selecione o atendimento atual antes de excluir uma foto.", "danger");
+    const photos = proofPhotos(call);
+    const idx = Number(index);
+    if (!Number.isInteger(idx) || idx < 0 || idx >= photos.length) return;
+    const photo = photos[idx];
+    if (!confirm("Excluir esta foto do chamado? A imagem pode continuar no Cloudinary, mas deixa de aparecer no sistema.")) return;
+    const nextPhotos = photos.filter((_, i) => i !== idx);
+    const now = new Date().toISOString();
+    const nextCall = Object.assign({}, call, { proofPhotos: nextPhotos });
+    const checklist = nextCall.proofChecklist || collectProofChecklist(nextCall);
+    const validation = validateCompleteProofPackage(nextCall, checklist);
+    const updates = {
+      proofPhotos: nextPhotos,
+      proofStatus: validation.ok ? "completo" : "parcial",
+      proofMissingPhotos: validation.missing.filter((item) => item.group === "Fotos").map((item) => item.label.replace(/^Foto:\s*/, "")),
+      proofUpdatedAt: now,
+      proofUpdatedBy: state.user && state.user.uid || "",
+      timeline: arrayUnion({ at: now, by: state.profile.nome || state.user.email, text: "Motorista removeu foto/evidência: " + (photo.label || photo.type || "foto") }),
+      updatedAt: now
+    };
+    await db.collection("calls").doc(call.id).set(updates, { merge: true });
+    await syncPublicCallFromDriver(call, updates).catch((err) => console.warn("Falha ao atualizar espelho público", err));
+    state.calls[call.id] = Object.assign({}, call, updates);
+    renderSavedEvidenceSummary(state.calls[call.id]);
+    renderProofWizard();
+    setProofSubmitStatus("Foto removida do chamado. Se necessário, envie uma nova ou use justificativa única.", "success");
   }
 
   function getMediaDuration(file) {
@@ -3100,62 +3177,81 @@
     try {
       const gps = await getCurrentPositionSafe();
       const uploadedPhotos = [];
+      const failedUploads = [];
+      const uploadedPhotoInputIds = new Set();
       for (let i = 0; i < selectedPhotos.length; i += 1) {
         const photo = selectedPhotos[i];
         const input = $(photo.input);
         const file = input && inputFiles(input)[0];
         if (!file) continue;
         const uploadKey = proofUploadItemKey(photo.input, file, 0);
-        setProofUploadItem(uploadKey, { status: "compressing", progress: 2, error: "" });
-        setProofSubmitStatus(`Enviando ${i + 1}/${selectedPhotos.length}: ${photo.label}...`, "info", false);
-        const asset = await uploadToCloudinaryAsset(file, {
-          folder: "provas/" + callId,
-          onProgress: (progress) => setProofUploadItem(uploadKey, { status: "uploading", progress })
-        });
-        setProofUploadItem(uploadKey, { status: "success", progress: 100 });
-        if (!asset || !asset.cloudinaryUrl) throw new Error("Upload sem URL retornada para " + photo.label + ".");
-        uploadedPhotos.push(Object.assign({}, asset, {
-          type: photo.key,
-          label: photo.label,
-          callId,
-          uploadedBy: state.user.uid,
-          uploadedByName: state.profile.nome || state.user.email
-        }));
+        try {
+          setProofUploadItem(uploadKey, { status: "compressing", progress: 2, error: "" });
+          setProofSubmitStatus(`Enviando ${i + 1}/${selectedPhotos.length}: ${photo.label}...`, "info", false);
+          const asset = await uploadToCloudinaryAsset(file, {
+            folder: "provas/" + callId,
+            onProgress: (progress) => setProofUploadItem(uploadKey, { status: "uploading", progress })
+          });
+          if (!asset || !asset.cloudinaryUrl) throw new Error("Upload sem URL retornada para " + photo.label + ".");
+          setProofUploadItem(uploadKey, { status: "success", progress: 100, error: "" });
+          uploadedPhotoInputIds.add(photo.input);
+          uploadedPhotos.push(Object.assign({}, asset, {
+            type: photo.key,
+            label: photo.label,
+            callId,
+            uploadedBy: state.user.uid,
+            uploadedByName: state.profile.nome || state.user.email
+          }));
+        } catch (uploadErr) {
+          const detail = uploadErr && (uploadErr.code || uploadErr.message) || "falha de rede";
+          failedUploads.push({ kind: "photo", label: photo.label, key: uploadKey, detail });
+          setProofUploadItem(uploadKey, { status: "error", progress: 0, error: detail });
+          console.warn("Falha ao enviar foto", photo.label, uploadErr);
+        }
       }
 
       const existingAudios = proofAudios(call);
       const uploadedAudios = [];
+      let audioUploadFailed = false;
       for (let i = 0; i < selectedAudios.length; i += 1) {
         const file = selectedAudios[i];
         const uploadKey = proofUploadItemKey("proofAudioFiles", file, i);
-        const duration = await getMediaDuration(file);
-        setProofUploadItem(uploadKey, { status: "uploading", progress: 1, error: "" });
-        setProofSubmitStatus(`Enviando áudio ${i + 1}/${selectedAudios.length}: ${file.name || "áudio"}...`, "info", false);
-        const asset = await uploadToCloudinaryAsset(file, {
-          folder: "audios/" + callId,
-          resourceType: "auto",
-          onProgress: (progress) => setProofUploadItem(uploadKey, { status: "uploading", progress })
-        });
-        setProofUploadItem(uploadKey, { status: "success", progress: 100 });
-        if (!asset || !asset.cloudinaryUrl) throw new Error("Upload sem URL retornada para áudio " + (file.name || (i + 1)) + ".");
-        uploadedAudios.push(Object.assign({}, asset, {
-          id: "audio_" + Date.now() + "_" + i,
-          type: "audio",
-          label: file.name || "Áudio do atendimento",
-          filename: file.name || "audio",
-          mimeType: file.type || "audio",
-          duration,
-          bytes: asset.bytes || file.size || 0,
-          callId,
-          vehicleId: call.vehicleId || "",
-          driverId: state.user.uid,
-          uploadedBy: state.user.uid,
-          uploadedByName: state.profile.nome || state.user.email,
-          senderType: "driver",
-          visibility: "internal",
-          approvedForClient: false,
-          approvedForInsurance: false
-        }));
+        try {
+          const duration = await getMediaDuration(file);
+          setProofUploadItem(uploadKey, { status: "uploading", progress: 1, error: "" });
+          setProofSubmitStatus(`Enviando áudio ${i + 1}/${selectedAudios.length}: ${file.name || "áudio"}...`, "info", false);
+          const asset = await uploadToCloudinaryAsset(file, {
+            folder: "audios/" + callId,
+            resourceType: "auto",
+            onProgress: (progress) => setProofUploadItem(uploadKey, { status: "uploading", progress })
+          });
+          if (!asset || !asset.cloudinaryUrl) throw new Error("Upload sem URL retornada para áudio " + (file.name || (i + 1)) + ".");
+          setProofUploadItem(uploadKey, { status: "success", progress: 100, error: "" });
+          uploadedAudios.push(Object.assign({}, asset, {
+            id: "audio_" + Date.now() + "_" + i,
+            type: "audio",
+            label: file.name || "Áudio do atendimento",
+            filename: file.name || "audio",
+            mimeType: file.type || "audio",
+            duration,
+            bytes: asset.bytes || file.size || 0,
+            callId,
+            vehicleId: call.vehicleId || "",
+            driverId: state.user.uid,
+            uploadedBy: state.user.uid,
+            uploadedByName: state.profile.nome || state.user.email,
+            senderType: "driver",
+            visibility: "internal",
+            approvedForClient: false,
+            approvedForInsurance: false
+          }));
+        } catch (uploadErr) {
+          audioUploadFailed = true;
+          const detail = uploadErr && (uploadErr.code || uploadErr.message) || "falha de rede";
+          failedUploads.push({ kind: "audio", label: file.name || "Áudio", key: uploadKey, detail });
+          setProofUploadItem(uploadKey, { status: "error", progress: 0, error: detail });
+          console.warn("Falha ao enviar áudio", file && file.name, uploadErr);
+        }
       }
       const proofAudiosMerged = existingAudios.concat(uploadedAudios);
       const replacedTypes = new Set(uploadedPhotos.map((photo) => photo.type));
@@ -3164,22 +3260,28 @@
       const phaseSignatures = Object.assign({}, call.phaseSignatures || {});
       const sigBlob = await signatureBlob();
       if (sigBlob) {
-        setProofSubmitStatus("Enviando assinatura do cliente...", "info", false);
-        const sigAsset = await uploadToCloudinaryAsset(sigBlob, { folder: "assinaturas/" + callId, fileName: "assinatura-" + callId + ".png" });
-        if (!sigAsset || !sigAsset.cloudinaryUrl) throw new Error("A assinatura foi enviada, mas não retornou URL.");
-        const signatureData = Object.assign({}, sigAsset, {
-          signatureUrl: sigAsset.cloudinaryUrl || "",
-          name: $("signatureCustomerName").value.trim(),
-          document: $("signatureCustomerDoc").value.trim(),
-          acceptedText,
-          signedAt: new Date().toISOString(),
-          gps,
-          phase: signaturePhase,
-          driverId: state.user.uid,
-          driverName: state.profile.nome || state.user.email
-        });
-        phaseSignatures[signaturePhase] = signatureData;
-        customerSignature = signaturePhase === "entrega" || signaturePhase === "finalizacao" ? signatureData : (customerSignature || signatureData);
+        try {
+          setProofSubmitStatus("Enviando assinatura do cliente...", "info", false);
+          const sigAsset = await uploadToCloudinaryAsset(sigBlob, { folder: "assinaturas/" + callId, fileName: "assinatura-" + callId + ".png" });
+          if (!sigAsset || !sigAsset.cloudinaryUrl) throw new Error("A assinatura foi enviada, mas não retornou URL.");
+          const signatureData = Object.assign({}, sigAsset, {
+            signatureUrl: sigAsset.cloudinaryUrl || "",
+            name: $("signatureCustomerName").value.trim(),
+            document: $("signatureCustomerDoc").value.trim(),
+            acceptedText,
+            signedAt: new Date().toISOString(),
+            gps,
+            phase: signaturePhase,
+            driverId: state.user.uid,
+            driverName: state.profile.nome || state.user.email
+          });
+          phaseSignatures[signaturePhase] = signatureData;
+          customerSignature = signaturePhase === "entrega" || signaturePhase === "finalizacao" ? signatureData : (customerSignature || signatureData);
+        } catch (uploadErr) {
+          const detail = uploadErr && (uploadErr.code || uploadErr.message) || "falha de rede";
+          failedUploads.push({ kind: "signature", label: "Assinatura", key: "signature", detail });
+          console.warn("Falha ao enviar assinatura", uploadErr);
+        }
       } else if (customerSignature) {
         customerSignature = Object.assign({}, customerSignature, { acceptedText, reusedAt: new Date().toISOString() });
       } else if (signatureRefusalReason) {
@@ -3253,27 +3355,34 @@
       }
 
       REQUIRED_PHOTOS.forEach((photo) => {
-        const input = $(photo.input);
-        clearInputFiles(input);
+        if (uploadedPhotoInputIds.has(photo.input)) {
+          const input = $(photo.input);
+          clearInputFiles(input);
+        }
       });
-      if ($("proofAudioFiles")) $("proofAudioFiles").value = "";
-      fieldValue("signatureRefusalReason", "");
-      if (signaturePad) {
-        signaturePad.ctx.clearRect(0, 0, signaturePad.canvas.width, signaturePad.canvas.height);
-        signaturePad.dirty = false;
-        signaturePad.drawing = false;
+      if ($("proofAudioFiles") && selectedAudios.length && !audioUploadFailed) $("proofAudioFiles").value = "";
+      if (!failedUploads.some((item) => item.kind === "signature")) {
+        fieldValue("signatureRefusalReason", "");
+        if (signaturePad && sigBlob) {
+          signaturePad.ctx.clearRect(0, 0, signaturePad.canvas.width, signaturePad.canvas.height);
+          signaturePad.dirty = false;
+          signaturePad.drawing = false;
+        }
       }
       state.calls[callId] = Object.assign({}, call, callUpdates);
       loadProofFormForCall(callId, state.calls[callId]);
       renderSavedEvidenceSummary(state.calls[callId]);
       renderProofWizard();
       const audioText = uploadedAudios.length ? (uploadedAudios.length + " áudio(s) salvo(s)") : "";
-      const savedLabels = [proofPhotoLabelList(uploadedPhotos), audioText].filter(Boolean).join("; ") || "nenhuma foto/áudio novo, dados atualizados";
+      const savedLabels = [proofPhotoLabelList(uploadedPhotos), audioText].filter(Boolean).join("; ") || "dados atualizados";
       const missingText = missingAfterUpload.length ? " Faltam para ficar completo: " + missingAfterUpload.map((photo) => photo.label).join(", ") + "." : "";
-      const okMsg = nextProofStatus === "completo"
+      const failText = failedUploads.length
+        ? " " + failedUploads.length + " arquivo(s) não subiram por rede/Cloudinary e continuam na tela para remover ou tentar novamente."
+        : "";
+      const okMsg = nextProofStatus === "completo" && !failedUploads.length
         ? "Provas completas e salvas. O chamado já pode ser finalizado." + auditWarning
-        : "Etapa salva: " + savedLabels + "." + missingText + " As demais etapas podem continuar pendentes até o atendimento chegar nelas." + auditWarning;
-      setProofSubmitStatus(okMsg, auditWarning ? "warn" : "success");
+        : "Etapa salva: " + savedLabels + "." + missingText + failText + " As demais etapas podem continuar pendentes até o atendimento chegar nelas." + auditWarning;
+      setProofSubmitStatus(okMsg, failedUploads.length || auditWarning ? "warn" : "success");
     } catch (err) {
       const detail = err && (err.code || err.message) || "falha operacional";
       proofUploadState.forEach((item, key) => {
@@ -3284,6 +3393,28 @@
       submit.disabled = false;
       submit.textContent = submit.dataset.originalText || "Concluir e salvar provas";
       setPendingOperations(-1);
+    }
+  });
+
+  document.addEventListener("click", (event) => {
+    const removeBtn = event.target.closest("[data-proof-remove-file]");
+    if (removeBtn) {
+      event.preventDefault();
+      removeProofQueuedFile(removeBtn.dataset.proofRemoveFile);
+      return;
+    }
+    const retryBtn = event.target.closest("[data-proof-retry-file]");
+    if (retryBtn) {
+      event.preventDefault();
+      retryProofQueuedFile(retryBtn.dataset.proofRetryFile);
+      return;
+    }
+    const deleteSavedPhotoBtn = event.target.closest("[data-proof-delete-saved-photo]");
+    if (deleteSavedPhotoBtn) {
+      event.preventDefault();
+      deleteSavedProofPhoto(deleteSavedPhotoBtn.dataset.proofDeleteSavedPhoto).catch((err) => {
+        setProofSubmitStatus("Não consegui excluir a foto: " + (err && (err.code || err.message) || "erro desconhecido"), "danger");
+      });
     }
   });
 
