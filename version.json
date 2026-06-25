@@ -1,5 +1,5 @@
 {
-  "version": "jm-fluxo-operacional-v27-motorista-ux-provas",
+  "version": "jm-fluxo-operacional-v28-motorista-hotfix",
   "description": "V26 força atualização de cache/versionamento após V25: query strings, service worker, version.json e testes passam para uma versão nova para impedir o navegador de continuar lendo arquivos com ?v=V21.",
   "updatedAt": "2026-06-25T15:45:00Z",
   "build": "V26",

@@ -1,11 +1,12 @@
-/* jm-fluxo-operacional-v27-motorista-ux-provas */
+/* jm-fluxo-operacional-v28-motorista-hotfix */
 (function () {
   "use strict";
 
   const { $, esc, parseMoney, toast, statusClass, routeKm, mapsRouteUrl, statusKey, statusLabel, isFinalStatus, setupCollapsiblePanels, pointFrom } = window.JM.utils;
   const { auth, db, arrayUnion, getRealtimeDb, rtdbKey } = window.JM.firebase;
   const cfg = window.JM_CONFIG || {};
-  const DRIVER_FLOW_VERSION = "jm-fluxo-operacional-v27-motorista-ux-provas";
+  const qsa = (sel, root) => Array.from((root || document).querySelectorAll(sel));
+  const DRIVER_FLOW_VERSION = "jm-fluxo-operacional-v28-motorista-hotfix";
   const state = {
     user: null,
     profile: null,
@@ -2190,10 +2191,11 @@
   }
 
   function buildRefusalSignatureData(call, reason, phase) {
-    const gps = lastDriverPosition ? {
-      lat: lastDriverPosition.lat || lastDriverPosition.latitude || null,
-      lng: lastDriverPosition.lng || lastDriverPosition.longitude || null,
-      accuracy: lastDriverPosition.accuracy || null
+    const driverPoint = state.driverLivePoint || lastDriverPhoneWrite || null;
+    const gps = driverPoint ? {
+      lat: driverPoint.lat || driverPoint.latitude || null,
+      lng: driverPoint.lng || driverPoint.longitude || null,
+      accuracy: driverPoint.accuracy || null
     } : null;
     return {
       refused: true,
@@ -2591,7 +2593,7 @@
     const finalizedCount = finalizedCalls().length;
     const calls = listedDriverCalls().sort((a, b) => String(b.createdAt || b.closedAt || "").localeCompare(String(a.createdAt || a.closedAt || "")));
     const toolbar = '<div class="driver-call-view-toggle" role="tablist" aria-label="Filtro de chamados">' +
-      '<button type="button" class="' + (state.callsView !== "finalizados" ? "active" : "") + '" onclick="JM.motorista.setCallsView(\'ativos\')">Em andamento <b>' + activeCount + '</b></button>' +
+      '<button type="button" class="' + (state.callsView !== "finalizados" ? "active" : "") + '" onclick="JM.motorista.setCallsView(\'ativos\')">Chamados em andamento <b>' + activeCount + '</b></button>' +
       '<button type="button" class="' + (state.callsView === "finalizados" ? "active" : "") + '" onclick="JM.motorista.setCallsView(\'finalizados\')">Finalizados <b>' + finalizedCount + '</b></button>' +
       '</div>';
     $("driverCallsBox").innerHTML = toolbar + (calls.length ? calls.map((call) => {
@@ -3263,6 +3265,21 @@
     }
   }
 
+  async function submitProof(options) {
+    const form = $("driverProofForm");
+    if (!form) {
+      setProofSubmitStatus("Formulário de provas não encontrado.", "danger");
+      return false;
+    }
+    if (options && options.safeDispatch === false) {
+      form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+      return true;
+    }
+    if (typeof form.requestSubmit === "function") form.requestSubmit();
+    else form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+    return true;
+  }
+
   $("driverProofForm") && ($("driverProofForm").onsubmit = async (e) => {
     e.preventDefault();
     const submit = e.submitter || document.querySelector("#driverProofForm button[type='submit']");
@@ -3731,6 +3748,7 @@
     openSignatureCapture,
     setProofWizardStep,
     saveProofDraft,
+    submitProof,
     resetProofs,
     state,
     proofMissingItems,

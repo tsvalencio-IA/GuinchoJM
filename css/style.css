@@ -2905,3 +2905,33 @@ html[data-theme="light"] body.driver-popular-mode .driver-popular-missing-btn {
   .proof-wizard-actions #driverResetStageProofsBtn,
   .proof-wizard-actions #driverResetAllProofsBtn { grid-column: 1 / -1; }
 }
+
+/* jm-fluxo-operacional-v28-motorista-hotfix — contraste final motorista */
+body.driver-popular-mode .driver-popular-primary {
+  background-color: #15803d !important;
+  background-image: linear-gradient(135deg, #15803d, #16a34a) !important;
+  color: #ffffff !important;
+  border-color: #166534 !important;
+  text-shadow: none !important;
+}
+html[data-theme="light"] body.driver-popular-mode .driver-popular-primary {
+  background-color: #15803d !important;
+  background-image: linear-gradient(135deg, #15803d, #16a34a) !important;
+  color: #ffffff !important;
+  border-color: #166534 !important;
+  text-shadow: none !important;
+}
+html[data-theme="light"] body.driver-popular-mode .driver-popular.finish .driver-popular-primary,
+body.driver-popular-mode .driver-popular.finish .driver-popular-primary {
+  background-color: #14532d !important;
+  background-image: linear-gradient(135deg, #14532d, #15803d) !important;
+  color: #ffffff !important;
+}
+.driver-call-view-toggle button,
+html[data-theme="light"] .driver-call-view-toggle button {
+  color: #0f172a;
+}
+html[data-theme="dark"] .driver-call-view-toggle button,
+body.driver-popular-mode .driver-call-view-toggle button {
+  color: #f8fafc;
+}
