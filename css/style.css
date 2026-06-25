@@ -2789,3 +2789,119 @@ html[data-theme="light"] .driver-topbar { background-color: #f4f7fb; color: #0f1
 .driver-popular-primary { background-color: #15803d; }
 html[data-theme="light"] .driver-popular-primary { background-color: #15803d; color: #ffffff; }
 .driver-popular-menu [data-driver-finalized] { border-color: rgba(245,158,11,.42); }
+
+/* V27 — Motorista: contraste coerente claro/escuro e ações práticas */
+body.driver-popular-mode .driver-popular-card,
+body.driver-popular-mode .signature-capture-card {
+  color: #f8fafc;
+}
+body.driver-popular-mode .driver-popular-route,
+body.driver-popular-mode .driver-popular-card p,
+body.driver-popular-mode .driver-popular-foot,
+body.driver-popular-mode .muted,
+body.driver-popular-mode .small {
+  color: #cbd5e1 !important;
+}
+body.driver-popular-mode .driver-popular-menu-btn,
+body.driver-popular-mode .driver-popular-actions button,
+body.driver-popular-mode .driver-popular-shortcuts button,
+body.driver-popular-mode .driver-popular-expense,
+body.driver-popular-mode .signature-refusal-actions .btn,
+body.driver-popular-mode #driverResetStageProofsBtn,
+body.driver-popular-mode #driverResetAllProofsBtn {
+  background: #123241 !important;
+  color: #f8fafc !important;
+  border-color: rgba(125, 211, 252, .35) !important;
+  text-shadow: none !important;
+}
+body.driver-popular-mode .driver-popular-actions button.warn,
+body.driver-popular-mode .driver-popular-shortcuts button.danger,
+body.driver-popular-mode #driverResetStageProofsBtn,
+body.driver-popular-mode #driverResetAllProofsBtn {
+  background: #334155 !important;
+  color: #ffffff !important;
+  border-color: rgba(248, 113, 113, .45) !important;
+}
+body.driver-popular-mode .driver-popular-primary {
+  background: linear-gradient(135deg, #15803d, #16a34a) !important;
+  color: #ffffff !important;
+}
+body.driver-popular-mode .driver-popular-missing-btn {
+  background: #f59e0b !important;
+  color: #111827 !important;
+  border-color: #b45309 !important;
+}
+body.driver-popular-mode .driver-popular-badge {
+  color: #99f6e4 !important;
+  border-color: rgba(45,212,191,.45) !important;
+}
+html[data-theme="light"] body.driver-popular-mode .driver-popular,
+html[data-theme="light"] body.driver-popular-mode .driver-popular-card,
+html[data-theme="light"] body.driver-popular-mode .signature-capture-card {
+  color: #0f172a !important;
+}
+html[data-theme="light"] body.driver-popular-mode .driver-popular-route,
+html[data-theme="light"] body.driver-popular-mode .driver-popular-card p,
+html[data-theme="light"] body.driver-popular-mode .driver-popular-foot,
+html[data-theme="light"] body.driver-popular-mode .muted,
+html[data-theme="light"] body.driver-popular-mode .small {
+  color: #334155 !important;
+}
+html[data-theme="light"] body.driver-popular-mode .driver-popular-badge {
+  background: #ccfbf1 !important;
+  color: #0f766e !important;
+  border-color: #99f6e4 !important;
+}
+html[data-theme="light"] body.driver-popular-mode .driver-popular-menu-btn,
+html[data-theme="light"] body.driver-popular-mode .driver-popular-actions button,
+html[data-theme="light"] body.driver-popular-mode .driver-popular-shortcuts button,
+html[data-theme="light"] body.driver-popular-mode .driver-popular-expense,
+html[data-theme="light"] body.driver-popular-mode .signature-refusal-actions .btn {
+  background: #e2e8f0 !important;
+  color: #0f172a !important;
+  border-color: #94a3b8 !important;
+  box-shadow: none !important;
+}
+html[data-theme="light"] body.driver-popular-mode .driver-popular-actions button.warn,
+html[data-theme="light"] body.driver-popular-mode .driver-popular-shortcuts button.danger,
+html[data-theme="light"] body.driver-popular-mode #driverResetStageProofsBtn,
+html[data-theme="light"] body.driver-popular-mode #driverResetAllProofsBtn {
+  background: #334155 !important;
+  color: #ffffff !important;
+  border-color: #1f2937 !important;
+}
+html[data-theme="light"] body.driver-popular-mode .driver-popular-primary {
+  background: linear-gradient(135deg, #16a34a, #22c55e) !important;
+  color: #ffffff !important;
+}
+html[data-theme="light"] body.driver-popular-mode .driver-popular-missing-btn {
+  background: #fbbf24 !important;
+  color: #111827 !important;
+  border-color: #d97706 !important;
+}
+.signature-refusal-box {
+  padding: 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(148,163,184,.25);
+  background: rgba(15,23,42,.18);
+}
+.signature-refusal-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 8px 0 10px;
+}
+.signature-refusal-actions .btn {
+  min-height: 46px;
+  border-radius: 14px;
+  font-weight: 900;
+}
+.signature-refusal-actions .btn.active,
+.signature-refusal-actions .btn:focus-visible {
+  outline: 3px solid rgba(245,158,11,.5);
+}
+@media (max-width: 640px) {
+  .signature-refusal-actions { grid-template-columns: 1fr; }
+  .proof-wizard-actions #driverResetStageProofsBtn,
+  .proof-wizard-actions #driverResetAllProofsBtn { grid-column: 1 / -1; }
+}

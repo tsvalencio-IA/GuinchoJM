@@ -1,4 +1,4 @@
-const CACHE_NAME = "jm-fluxo-operacional-v26-cache-refresh";
+const CACHE_NAME = "jm-fluxo-operacional-v27-motorista-ux-provas";
 const ASSETS = [
   "./",
   "./index.html",

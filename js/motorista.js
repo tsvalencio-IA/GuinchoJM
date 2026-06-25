@@ -1,11 +1,11 @@
-/* jm-fluxo-operacional-v26-cache-refresh */
+/* jm-fluxo-operacional-v27-motorista-ux-provas */
 (function () {
   "use strict";
 
   const { $, esc, parseMoney, toast, statusClass, routeKm, mapsRouteUrl, statusKey, statusLabel, isFinalStatus, setupCollapsiblePanels, pointFrom } = window.JM.utils;
   const { auth, db, arrayUnion, getRealtimeDb, rtdbKey } = window.JM.firebase;
   const cfg = window.JM_CONFIG || {};
-  const DRIVER_FLOW_VERSION = "jm-fluxo-operacional-v26-cache-refresh";
+  const DRIVER_FLOW_VERSION = "jm-fluxo-operacional-v27-motorista-ux-provas";
   const state = {
     user: null,
     profile: null,
@@ -1221,10 +1221,10 @@
     const phases = call && call.phaseSignatures || {};
     return !!(
       ((signature.signatureUrl || signature.cloudinaryUrl) && signature.acceptedText) ||
-      (signature.refused && signature.refusalReason && signature.acceptedText) ||
+      (signature.refused && signature.refusalReason) ||
       ["retirada", "entrega", "finalizacao"].some((phase) => {
         const item = phases[phase] || {};
-        return ((item.signatureUrl || item.cloudinaryUrl) && item.acceptedText) || (item.refused && item.refusalReason && item.acceptedText);
+        return ((item.signatureUrl || item.cloudinaryUrl) && item.acceptedText) || (item.refused && item.refusalReason);
       })
     );
   }
@@ -1239,7 +1239,7 @@
     return !!(
       row.justificativa ||
       ((item.signatureUrl || item.cloudinaryUrl) && item.acceptedText) ||
-      (item.refused && item.refusalReason && item.acceptedText) ||
+      (item.refused && item.refusalReason) ||
       ((fallback.signatureUrl || fallback.cloudinaryUrl) && fallback.acceptedText) ||
       (fallback.refused && fallback.refusalReason && fallback.acceptedText)
     );
@@ -1531,7 +1531,11 @@
       { label: "Responsável pela entrega", hint: "Informe quem recebeu o veículo.", target: "proofDeliveryResponsibleName", step: "entrega", value: inspection.deliveryResponsible && inspection.deliveryResponsible.name, group: "Entrega" },
       { label: "Documento da entrega", hint: "Informe CPF/RG de quem recebeu.", target: "proofDeliveryResponsibleDoc", step: "entrega", value: inspection.deliveryResponsible && inspection.deliveryResponsible.document, group: "Entrega" }
     ];
-    requiredFields.forEach((field) => { if (!String(field.value || "").trim()) items.push(field); });
+    const refusalResolved = hasSignatureRefusalEvidence(call);
+    requiredFields.forEach((field) => {
+      if (refusalResolved && /Responsável|Documento/i.test(field.label || "") && /Retirada|Entrega/i.test(field.group || "")) return;
+      if (!String(field.value || "").trim()) items.push(field);
+    });
     const selectedKeys = options.includeSelectedFiles === true ? selectedProofPhotoKeys() : [];
     const missingPhotos = groupMissingPhotos(requiredProofPhotosForChecklist(currentChecklist), call, selectedKeys);
     if (missingPhotos.length && !hasPhotoJustification(currentChecklist)) {
@@ -1550,8 +1554,8 @@
     if (!hasSignature(call) && !hasNewSignature && !refusal) {
       items.push({ label: "Assinatura ou justificativa", hint: "Cliente assina na tela; se não assinar, escreva o motivo.", target: "driverSignatureSection", step: "finalizacao", group: "Assinatura" });
     }
-    if ((hasNewSignature || refusal) && !acceptedText) {
-      items.push({ label: "Aceite textual", hint: "O texto de aceite precisa estar preenchido para salvar a assinatura/recusa.", target: "signatureAcceptedText", step: "finalizacao", group: "Assinatura" });
+    if (hasNewSignature && !acceptedText) {
+      items.push({ label: "Aceite textual", hint: "O texto de aceite precisa estar preenchido para salvar a assinatura.", target: "signatureAcceptedText", step: "finalizacao", group: "Assinatura" });
     }
     return items;
   }
@@ -2162,6 +2166,52 @@
     if ($(id)) $(id).value = value == null ? "" : value;
   }
 
+
+  function signatureRefusalText() {
+    return $("signatureRefusalReason") ? $("signatureRefusalReason").value.trim() : "";
+  }
+
+  function signatureAcceptedTextValue() {
+    const raw = $("signatureAcceptedText") ? $("signatureAcceptedText").value.trim() : "";
+    return raw || "Assinatura não coletada. Motorista registrou justificativa operacional.";
+  }
+
+  function hasSignatureRefusalEvidence(call) {
+    if (signatureRefusalText()) return true;
+    const signature = call && call.customerSignature || {};
+    const phases = call && call.phaseSignatures || {};
+    return !!(
+      (signature && signature.refused && signature.refusalReason) ||
+      ["retirada", "entrega", "finalizacao"].some((phase) => {
+        const item = phases[phase] || {};
+        return item && item.refused && item.refusalReason;
+      })
+    );
+  }
+
+  function buildRefusalSignatureData(call, reason, phase) {
+    const gps = lastDriverPosition ? {
+      lat: lastDriverPosition.lat || lastDriverPosition.latitude || null,
+      lng: lastDriverPosition.lng || lastDriverPosition.longitude || null,
+      accuracy: lastDriverPosition.accuracy || null
+    } : null;
+    return {
+      refused: true,
+      signatureStatus: "recusada",
+      signatureUrl: "",
+      cloudinaryUrl: "",
+      name: "",
+      document: "",
+      acceptedText: signatureAcceptedTextValue(),
+      refusalReason: String(reason || "Cliente não quis assinar").trim(),
+      signedAt: new Date().toISOString(),
+      gps,
+      phase: phase || "finalizacao",
+      driverId: state.user && state.user.uid || "",
+      driverName: state.profile && (state.profile.nome || state.user && state.user.email) || ""
+    };
+  }
+
   function loadDamageAssessmentPayload(damage) {
     damage = damage || {};
     const parts = Array.isArray(damage.parts) ? damage.parts : [];
@@ -2246,6 +2296,11 @@
     fieldValue("proofPickupResponsibleDoc", inspection.pickupResponsible && inspection.pickupResponsible.document || "");
     fieldValue("proofDeliveryResponsibleName", inspection.deliveryResponsible && inspection.deliveryResponsible.name || "");
     fieldValue("proofDeliveryResponsibleDoc", inspection.deliveryResponsible && inspection.deliveryResponsible.document || "");
+    const signaturePhaseForLoad = $("signaturePhase") ? $("signaturePhase").value : "finalizacao";
+    const savedSignatureForLoad = call.phaseSignatures && call.phaseSignatures[signaturePhaseForLoad] || call.customerSignature || null;
+    if (savedSignatureForLoad && savedSignatureForLoad.refused && savedSignatureForLoad.refusalReason) {
+      fieldValue("signatureRefusalReason", savedSignatureForLoad.refusalReason || "");
+    }
     loadDamageAssessmentPayload(checklist.damageAssessment || call.damageAssessment || {});
     renderSavedEvidenceSummary(call);
     restoreProofWizardStep(call);
@@ -3152,7 +3207,7 @@
       if (!hasDamage) return { ok: false, message: "Explique a avaria, intercorrência, recusa ou justificativa desta etapa." };
     }
     if (strict && step.key === "finalizacao") {
-      const hasSignatureEvidence = !!(signaturePad && signaturePad.dirty) || !!($("signatureRefusalReason") && $("signatureRefusalReason").value.trim()) || !!(selectedCall() && hasSignature(selectedCall()));
+      const hasSignatureEvidence = !!(signaturePad && signaturePad.dirty) || hasSignatureRefusalEvidence(selectedCall()) || !!(selectedCall() && hasSignature(selectedCall()));
       if (!hasSignatureEvidence) return { ok: false, message: "Na finalização, registre a assinatura ou uma justificativa de recusa/ausência." };
     }
     return { ok: true, message: "" };
@@ -3173,8 +3228,19 @@
     if (button) { button.disabled = true; button.textContent = "Salvando rascunho..."; }
     try {
       const now = new Date().toISOString();
+      const signatureRefusalReasonDraft = signatureRefusalText();
+      const signaturePhaseDraft = $("signaturePhase") ? $("signaturePhase").value : "finalizacao";
+      let draftCustomerSignature = call.customerSignature || null;
+      let draftPhaseSignatures = Object.assign({}, call.phaseSignatures || {});
+      if (signatureRefusalReasonDraft) {
+        const refusalData = buildRefusalSignatureData(call, signatureRefusalReasonDraft, signaturePhaseDraft);
+        draftPhaseSignatures[signaturePhaseDraft] = refusalData;
+        draftCustomerSignature = signaturePhaseDraft === "entrega" || signaturePhaseDraft === "finalizacao" ? refusalData : (draftCustomerSignature || refusalData);
+      }
       const updates = {
         proofChecklist: checklist,
+        customerSignature: draftCustomerSignature,
+        phaseSignatures: draftPhaseSignatures,
         damageAssessment: checklist.damageAssessment,
         proofStatus: proofStatusFor(Object.assign({}, call, { proofChecklist: checklist })) === "pendente" ? "parcial" : proofStatusFor(Object.assign({}, call, { proofChecklist: checklist })),
         proofUpdatedAt: now,
@@ -3208,8 +3274,8 @@
     const signatureRefusalReason = $("signatureRefusalReason") ? $("signatureRefusalReason").value.trim() : "";
     const signaturePhase = $("signaturePhase") ? $("signaturePhase").value : "finalizacao";
     const hasNewSignature = !!(signaturePad && signaturePad.dirty);
-    if ((hasNewSignature || signatureRefusalReason) && !acceptedText) {
-      setProofSubmitStatus("O aceite textual é obrigatório quando houver assinatura ou justificativa de recusa.", "danger");
+    if (hasNewSignature && !acceptedText) {
+      setProofSubmitStatus("O aceite textual é obrigatório quando houver assinatura.", "danger");
       focusProofTarget("signatureAcceptedText", "finalizacao");
       return;
     }
@@ -3388,19 +3454,7 @@
       } else if (customerSignature) {
         customerSignature = Object.assign({}, customerSignature, { acceptedText, reusedAt: new Date().toISOString() });
       } else if (signatureRefusalReason) {
-        const signatureData = {
-          refused: true,
-          signatureUrl: "",
-          name: $("signatureCustomerName").value.trim(),
-          document: $("signatureCustomerDoc").value.trim(),
-          acceptedText,
-          refusalReason: signatureRefusalReason,
-          signedAt: new Date().toISOString(),
-          gps,
-          phase: signaturePhase,
-          driverId: state.user.uid,
-          driverName: state.profile.nome || state.user.email
-        };
+        const signatureData = Object.assign(buildRefusalSignatureData(call, signatureRefusalReason, signaturePhase), { gps });
         phaseSignatures[signaturePhase] = signatureData;
         customerSignature = signaturePhase === "entrega" || signaturePhase === "finalizacao" ? signatureData : (customerSignature || signatureData);
       }
@@ -3538,6 +3592,131 @@
   };
   if ($("driverSaveProofDraftBtn")) $("driverSaveProofDraftBtn").onclick = () => saveProofDraft();
 
+
+  function photosForProofScope(call, scope, phase) {
+    const current = proofPhotos(call);
+    if (scope === "all") return [];
+    const keysForPhase = new Set(REQUIRED_PHOTOS.filter((photo) => {
+      const step = PROOF_INPUT_STEP_MAP[photo.input] || "inspecao";
+      const mappedPhase = PROOF_WIZARD_STEPS.find((item) => item.key === step)?.phase || step;
+      return mappedPhase === phase;
+    }).map((photo) => photo.key));
+    return current.filter((photo) => !keysForPhase.has(photo && photo.type));
+  }
+
+  function resetProofUploadsUi() {
+    proofUploadState.clear();
+    REQUIRED_PHOTOS.forEach((photo) => clearInputFiles($(photo.input)));
+    if ($("proofAudioFiles")) $("proofAudioFiles").value = "";
+    if (signaturePad && signaturePad.canvas) {
+      try { signaturePad.ctx.clearRect(0, 0, signaturePad.canvas.width, signaturePad.canvas.height); } catch (_) {}
+      signaturePad.dirty = false;
+      signaturePad.drawing = false;
+    }
+  }
+
+  async function resetProofs(scope) {
+    const call = requireActiveCall(scope === "all" ? "zerar as provas" : "reiniciar a etapa");
+    if (!call) return false;
+    scope = scope === "all" ? "all" : "stage";
+    const step = PROOF_WIZARD_STEPS[state.proofWizardStep] || PROOF_WIZARD_STEPS[0];
+    const phase = step.phase || "finalizacao";
+    const now = new Date().toISOString();
+    const previousChecklist = call.proofChecklist || {};
+    let nextChecklist;
+    let nextPhotos;
+    let nextAudios;
+    let nextPhaseSignatures;
+    let nextCustomerSignature;
+    let nextDamage;
+    let msg;
+
+    if (scope === "all") {
+      nextChecklist = {};
+      nextPhotos = [];
+      nextAudios = [];
+      nextPhaseSignatures = {};
+      nextCustomerSignature = null;
+      nextDamage = { parts: [], details: "" };
+      msg = "Motorista zerou todas as provas do atendimento para recomeçar.";
+    } else {
+      nextChecklist = Object.assign({}, previousChecklist);
+      nextChecklist[phase] = Object.assign({}, nextChecklist[phase] || {}, { status: "pendente", justificativa: "", resetAt: now, resetBy: state.user.uid });
+      if (phase === "retirada") nextChecklist.damageAssessment = { parts: [], details: "" };
+      nextPhotos = photosForProofScope(call, "stage", phase);
+      nextAudios = phase === "finalizacao" ? [] : proofAudios(call);
+      nextPhaseSignatures = Object.assign({}, call.phaseSignatures || {});
+      delete nextPhaseSignatures[phase];
+      nextCustomerSignature = call.customerSignature || null;
+      if ((phase === "entrega" || phase === "finalizacao") && nextCustomerSignature && nextCustomerSignature.phase === phase) nextCustomerSignature = null;
+      nextDamage = phase === "retirada" ? { parts: [], details: "" } : (call.damageAssessment || previousChecklist.damageAssessment || {});
+      msg = "Motorista reiniciou a etapa " + (step.label || phase) + " para refazer as provas.";
+    }
+
+    const updates = {
+      proofChecklist: nextChecklist,
+      proofPhotos: nextPhotos,
+      proofAudios: nextAudios,
+      customerSignature: nextCustomerSignature,
+      phaseSignatures: nextPhaseSignatures,
+      damageAssessment: nextDamage,
+      proofPhotoJustification: "",
+      proofStatus: "pendente",
+      proofMissingPhotos: [],
+      proofUpdatedAt: now,
+      proofUpdatedBy: state.user.uid,
+      timeline: arrayUnion({ at: now, by: state.profile.nome || state.user.email, text: msg }),
+      updatedAt: now
+    };
+    await db.collection("calls").doc(call.id).set(updates, { merge: true });
+    state.calls[call.id] = Object.assign({}, call, updates);
+    resetProofUploadsUi();
+    fieldValue("proofPhotoJustification", "");
+    fieldValue("signatureRefusalReason", "");
+    fieldValue("signatureCustomerName", "");
+    fieldValue("signatureCustomerDoc", "");
+    loadProofFormForCall(call.id, state.calls[call.id]);
+    renderSavedEvidenceSummary(state.calls[call.id]);
+    renderProofWizard();
+    renderProofMissingBox(state.calls[call.id]);
+    setProofSubmitStatus(scope === "all" ? "Provas zeradas. Comece de novo." : "Etapa reiniciada. Refazer provas desta etapa.", "success");
+    return true;
+  }
+
+  function setupSignatureRefusalQuickButtons() {
+    qsa('[data-signature-refusal]').forEach((btn) => {
+      if (btn.dataset.refusalBound === "true") return;
+      btn.dataset.refusalBound = "true";
+      btn.addEventListener("click", () => {
+        const reason = btn.dataset.signatureRefusal || btn.textContent || "Cliente não quis assinar";
+        fieldValue("signatureRefusalReason", reason);
+        if ($("signatureAcceptedText") && !$("signatureAcceptedText").value.trim()) fieldValue("signatureAcceptedText", signatureAcceptedTextValue());
+        qsa('[data-signature-refusal]').forEach((item) => item.classList.toggle("active", item === btn));
+        renderSignatureState(selectedCall());
+        setProofSubmitStatus("Justificativa de assinatura registrada. Nome e documento não bloqueiam quando o cliente recusou.", "info", false);
+      });
+    });
+  }
+
+  function setupResetProofButtons() {
+    const stageBtn = $("driverResetStageProofsBtn");
+    if (stageBtn && stageBtn.dataset.resetBound !== "true") {
+      stageBtn.dataset.resetBound = "true";
+      stageBtn.addEventListener("click", async () => {
+        if (!confirm("Reiniciar somente esta etapa e refazer as provas dela?")) return;
+        try { await resetProofs("stage"); } catch (err) { setProofSubmitStatus("Não consegui reiniciar a etapa: " + (err && (err.code || err.message) || "erro"), "danger"); }
+      });
+    }
+    const allBtn = $("driverResetAllProofsBtn");
+    if (allBtn && allBtn.dataset.resetBound !== "true") {
+      allBtn.dataset.resetBound = "true";
+      allBtn.addEventListener("click", async () => {
+        if (!confirm("Zerar TODAS as provas deste atendimento e começar do zero? Despesas e dados do chamado não serão apagados.")) return;
+        try { await resetProofs("all"); } catch (err) { setProofSubmitStatus("Não consegui zerar provas: " + (err && (err.code || err.message) || "erro"), "danger"); }
+      });
+    }
+  }
+
   window.JM = window.JM || {};
   window.JM.motorista = {
     setStatus,
@@ -3552,6 +3731,7 @@
     openSignatureCapture,
     setProofWizardStep,
     saveProofDraft,
+    resetProofs,
     state,
     proofMissingItems,
     focusProofTarget,
@@ -3563,9 +3743,12 @@
   setupDriverImagePickers();
   setupProofWizardLayout();
   setupSignaturePad();
+  setupSignatureRefusalQuickButtons();
+  setupResetProofButtons();
   if ($("driverOpenSignatureBtn")) $("driverOpenSignatureBtn").onclick = openSignatureCapture;
   if ($("signaturePhase")) $("signaturePhase").addEventListener("change", () => renderSignatureState(selectedCall()));
   if ($("signatureRefusalReason")) $("signatureRefusalReason").addEventListener("input", () => renderSignatureState(selectedCall()));
+  document.addEventListener("DOMContentLoaded", () => { setupSignatureRefusalQuickButtons(); setupResetProofButtons(); });
   if ($("signatureCanvas")) $("signatureCanvas").addEventListener("pointerup", () => window.setTimeout(() => renderSignatureState(selectedCall()), 0));
   if ($("clearSignatureBtn")) $("clearSignatureBtn").addEventListener("click", () => window.setTimeout(() => renderSignatureState(selectedCall()), 0));
   setupDamageDiagram();

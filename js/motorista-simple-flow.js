@@ -3,7 +3,7 @@
 (function () {
   "use strict";
 
-  const VERSION = "jm-fluxo-operacional-v26-cache-refresh";
+  const VERSION = "jm-fluxo-operacional-v27-motorista-ux-provas";
   const $ = (id) => document.getElementById(id);
   const qsa = (sel, root) => Array.from((root || document).querySelectorAll(sel));
 
@@ -328,6 +328,8 @@
     const reason = current || window.prompt("Justifique as fotos/evidências desta etapa uma única vez:", "Não bati fotos.");
     if (!reason) return;
     input.value = reason.trim();
+    const accepted = $("signatureAcceptedText");
+    if (accepted && !String(accepted.value || "").trim()) accepted.value = "Assinatura não coletada. Motorista registrou justificativa operacional.";
     input.dispatchEvent(new Event("input", { bubbles: true }));
     input.dispatchEvent(new Event("change", { bubbles: true }));
     if (typeof api().saveProofDraft === "function") {
@@ -343,6 +345,8 @@
     const reason = current || window.prompt("Por que não teve assinatura?", "Cliente não assinou.");
     if (!reason) return;
     input.value = reason.trim();
+    const accepted = $("signatureAcceptedText");
+    if (accepted && !String(accepted.value || "").trim()) accepted.value = "Assinatura não coletada. Motorista registrou justificativa operacional.";
     input.dispatchEvent(new Event("input", { bubbles: true }));
     input.dispatchEvent(new Event("change", { bubbles: true }));
     if (typeof api().saveProofDraft === "function") {
@@ -449,6 +453,33 @@
     }
   }
 
+
+  async function resetProofsFlow(scope) {
+    const call = currentCall();
+    if (!call || !api() || typeof api().resetProofs !== "function") {
+      openQuickPanel(PANEL_BY_STEP.provas);
+      return;
+    }
+    const all = scope === "all";
+    const ok = window.confirm(all
+      ? "Zerar TODAS as provas deste atendimento e começar do zero?"
+      : "Reiniciar somente esta etapa e refazer as provas dela?");
+    if (!ok) return;
+    busy = true;
+    render();
+    try {
+      await api().resetProofs(all ? "all" : "stage");
+      openQuickPanel(PANEL_BY_STEP.provas);
+    } catch (err) {
+      const msg = "Não consegui zerar provas: " + (err && (err.code || err.message) || "erro");
+      if (window.JM && window.JM.utils && typeof window.JM.utils.toast === "function") window.JM.utils.toast(msg, "danger");
+      else alert(msg);
+    } finally {
+      busy = false;
+      scheduleRender();
+    }
+  }
+
   function actionForMissing(call, missing) {
     if (isPhotoMissingItem(missing)) {
       const step = missing.step || "inspecao";
@@ -473,7 +504,7 @@
         tone: "proof-signature",
         step: "Assinatura",
         title: "Assinatura",
-        detail: "Peça para o cliente assinar.",
+        detail: "Assine ou toque NÃO ASSINOU e justifique. Nome/documento não bloqueiam recusa.",
         primary: "ASSINAR",
         secondary: "NÃO ASSINOU",
         run: () => openSignatureOnly(),
@@ -620,6 +651,7 @@
             <button data-driver-finalized="true" type="button">Finalizados</button>
             <button data-quick-panel="rota" type="button">Rota / GPS</button>
             <button data-quick-panel="provas" type="button">Fotos / Provas</button>
+            ${call && status !== "finalizado" ? `<button data-driver-reset-proofs="all" type="button">Zerar provas</button>` : ""}
             <button data-street-panel="${PANEL_BY_STEP.despesas}" type="button">Despesa</button>
             <button data-driver-notify="true" type="button">Avisos</button>
             <button data-street-panel="${PANEL_BY_STEP.atendimento}" data-street-all="true" type="button">Detalhes</button>
@@ -638,6 +670,7 @@
             <button data-quick-panel="rota" type="button">ROTA / GPS</button>
             <button data-quick-panel="provas" type="button">FOTOS / PROVAS</button>
             <button data-street-panel="${PANEL_BY_STEP.atendimento}" data-street-all="true" type="button">DETALHES</button>
+            ${call && status !== "finalizado" ? `<button class="danger" id="driverStreetResetProofsBtn" type="button">ZERAR PROVAS</button>` : ""}
           </div>
           <button class="driver-popular-expense" id="driverStreetExpenseBtn" type="button">DESPESA RÁPIDA</button>
         </article>
@@ -661,6 +694,14 @@
       });
     });
     $("driverStreetExpenseBtn")?.addEventListener("click", () => { closeMenu(); closeMissingList(); openDriverModule(PANEL_BY_STEP.despesas); });
+    $("driverStreetResetProofsBtn")?.addEventListener("click", () => resetProofsFlow("all"));
+    qsa("[data-driver-reset-proofs]").forEach((btn) => btn.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      closeMenu();
+      closeMissingList();
+      resetProofsFlow(btn.dataset.driverResetProofs || "all");
+    }));
     $("driverPopularMenuBtn")?.addEventListener("click", toggleMenu);
     qsa("[data-quick-panel]").forEach((btn) => {
       btn.addEventListener("click", () => {
