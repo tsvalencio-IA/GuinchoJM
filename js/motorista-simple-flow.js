@@ -1,4 +1,4 @@
-/* JM motorista V21 - Modo motorista popular
+/* JM motorista V24 - Modo motorista popular
    Atalhos explícitos, lista de pendências clicável e ABRIR indo direto no alvo. */
 (function () {
   "use strict";
@@ -269,6 +269,20 @@
     document.body.classList.remove("driver-signature-only");
     setVisiblePanel(panelId, { scroll: true, technical: true });
     scheduleRender();
+  }
+
+  function openAllDetails() {
+    closeMenu();
+    closeMissingList();
+    document.body.classList.remove("driver-signature-only");
+    document.body.classList.add("driver-show-all", "driver-focus-technical");
+    const app = $("driverAppView");
+    if (app) app.dataset.simplePanel = PANEL_BY_STEP.atendimento;
+    scheduleRender();
+    const active = $("driverPanelActive") || $("driverSimpleShell");
+    if (active) {
+      try { active.scrollIntoView({ behavior: "smooth", block: "start" }); } catch (_) {}
+    }
   }
 
   function proofStepForInput(inputId) {
@@ -660,24 +674,27 @@
       btn.addEventListener("click", async () => { closeMenu(); closeMissingList(); await requestDriverNotifications(true); });
     });
     qsa(".driver-popular-menu button[data-driver-finalized]").forEach((btn) => {
-      btn.addEventListener("click", () => {
+      btn.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
         closeMenu();
         closeMissingList();
+        document.body.classList.remove("driver-signature-only", "driver-show-all");
         if (api() && typeof api().setCallsView === "function") {
           try { api().setCallsView("finalizados"); } catch (_) {}
         }
         openDriverModule(PANEL_BY_STEP.chamados);
       });
     });
-    qsa(".driver-popular-menu button:not([data-driver-notify]):not([data-quick-panel])").forEach((btn) => {
+    qsa("[data-street-all]").forEach((btn) => {
+      btn.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        openAllDetails();
+      });
+    });
+    qsa(".driver-popular-menu button:not([data-driver-notify]):not([data-quick-panel]):not([data-driver-finalized]):not([data-street-all])").forEach((btn) => {
       btn.addEventListener("click", () => {
-        if (btn.dataset.streetAll === "true") {
-          document.body.classList.add("driver-show-all", "driver-focus-technical");
-          closeMenu();
-          closeMissingList();
-          scheduleRender();
-          return;
-        }
         closeMenu();
         closeMissingList();
         openDriverModule(btn.dataset.streetPanel || PANEL_BY_STEP.atendimento);
@@ -749,6 +766,41 @@
     });
   }
 
+  function installProofWizardSafety() {
+    const tabs = $("proofWizardTabs");
+    if (tabs && tabs.dataset.streetSafetyBound !== "true") {
+      tabs.dataset.streetSafetyBound = "true";
+      tabs.addEventListener("click", (event) => {
+        const button = event.target && event.target.closest && event.target.closest("[data-proof-index]");
+        if (!button) return;
+        document.body.classList.remove("driver-signature-only");
+        setVisiblePanel(PANEL_BY_STEP.provas, { scroll: false, technical: true });
+        const idx = Number(button.dataset.proofIndex);
+        if (Number.isFinite(idx) && api() && typeof api().setProofWizardStep === "function") {
+          try { api().setProofWizardStep(idx, { scroll: true }); } catch (_) {}
+        }
+      }, true);
+    }
+
+    const next = $("driverProofNextBtn");
+    if (next && next.dataset.streetSafetyBound !== "true") {
+      next.dataset.streetSafetyBound = "true";
+      next.addEventListener("click", () => {
+        window.setTimeout(() => {
+          const call = currentCall();
+          if (!call) {
+            openDriverModule(PANEL_BY_STEP.chamados);
+            return;
+          }
+          const missing = proofMissing(call);
+          const statusBox = $("driverProofStatus");
+          const hasError = statusBox && /falta|obrigat|pendente|complete|preencha/i.test(String(statusBox.textContent || ""));
+          if (missing.length && hasError) goToMissing(missing[0]);
+        }, 220);
+      }, true);
+    }
+  }
+
   function observeLightly() {
     const ids = [
       "driverActiveCallBox", "driverHeaderActiveCall", "driverLocationStatus",
@@ -792,9 +844,10 @@
     document.body.classList.add("driver-simple-mode", "driver-sequential-mode", "driver-street-mode", "driver-popular-mode");
     installShell();
     installAutoStepAdvance();
+    installProofWizardSafety();
     observeLightly();
     render();
-    setInterval(() => { installAutoStepAdvance(); observeLightly(); scheduleRender(); }, 2200);
+    setInterval(() => { installAutoStepAdvance(); installProofWizardSafety(); observeLightly(); scheduleRender(); }, 2200);
     console.log("JM motorista modo rua", VERSION);
   }
 
