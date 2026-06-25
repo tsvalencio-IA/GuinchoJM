@@ -1,4 +1,4 @@
-const CACHE_NAME = "jm-fluxo-operacional-v19-motorista-popular-um-botao";
+const CACHE_NAME = "jm-fluxo-operacional-v20-pendencias-notificacoes";
 const ASSETS = [
   "./",
   "./index.html",
@@ -80,4 +80,23 @@ self.addEventListener("fetch", (event) => {
 
 self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") self.skipWaiting();
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const targetUrl = event.notification && event.notification.data && event.notification.data.url || "motorista.html";
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+      for (const client of clients) {
+        const url = new URL(client.url);
+        if (url.pathname.endsWith("/motorista.html") || url.pathname.endsWith("motorista.html")) {
+          client.focus();
+          if (client.navigate) return client.navigate(targetUrl);
+          return client;
+        }
+      }
+      if (self.clients.openWindow) return self.clients.openWindow(targetUrl);
+      return null;
+    })
+  );
 });

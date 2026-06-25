@@ -1,9 +1,9 @@
-/* JM motorista V19 - Modo motorista popular
-   Uma ação por vez, poucos botões, acesso completo preservado no menu Mais. */
+/* JM motorista V20 - Modo motorista popular
+   Uma ação por vez, pendências clicáveis direto no campo e avisos de novo chamado. */
 (function () {
   "use strict";
 
-  const VERSION = "jm-fluxo-operacional-v19-motorista-popular-um-botao";
+  const VERSION = "jm-fluxo-operacional-v20-pendencias-notificacoes";
   const $ = (id) => document.getElementById(id);
   const qsa = (sel, root) => Array.from((root || document).querySelectorAll(sel));
 
@@ -101,10 +101,19 @@
     return raw.length > 64 ? raw.slice(0, 61) + "..." : raw;
   }
 
+  function addressText(value, fallback) {
+    if (!value) return fallback || "";
+    if (typeof value === "string") return value;
+    if (typeof value === "object") {
+      return value.label || value.address || value.endereco || value.formatted || value.name || value.nome || fallback || "";
+    }
+    return String(value || fallback || "");
+  }
+
   function routeTitle(call) {
     if (!call) return "Nenhum chamado selecionado";
-    const origin = call.originAddress || call.origem || call.origin || call.pickupAddress || "Origem";
-    const dest = call.destinationAddress || call.destino || call.destination || call.dropoffAddress || "Destino";
+    const origin = addressText(call.originAddress || call.origem || call.origin || call.pickupAddress, "Origem");
+    const dest = addressText(call.destinationAddress || call.destino || call.destination || call.dropoffAddress, "Destino");
     return `${shortAddress(origin, "Origem")} → ${shortAddress(dest, "Destino")}`;
   }
 
@@ -495,6 +504,7 @@
             <button data-street-panel="${PANEL_BY_STEP.gps}" type="button">GPS</button>
             <button data-street-panel="${PANEL_BY_STEP.provas}" type="button">Fotos</button>
             <button data-street-panel="${PANEL_BY_STEP.despesas}" type="button">Despesa</button>
+            <button data-driver-notify="true" type="button">Avisos</button>
             <button data-street-panel="${PANEL_BY_STEP.atendimento}" data-street-all="true" type="button">Detalhes</button>
           </div>` : ""}
         <article class="driver-popular-card">
@@ -511,16 +521,28 @@
         </article>
         <div class="driver-popular-foot">
           <span>${esc(STATUS_LABEL[status] || status)}</span>
-          ${missingCount ? `<span>Faltam ${missingCount}</span>` : '<span>Tudo ok</span>'}
+          ${missingCount ? `<button class="driver-popular-missing-btn" id="driverStreetMissingBtn" type="button">Faltam ${missingCount} · resolver</button>` : '<span>Tudo ok</span>'}
         </div>
       </section>`;
 
     $("driverStreetPrimaryBtn")?.addEventListener("click", () => action.run && action.run());
     $("driverStreetSecondaryBtn")?.addEventListener("click", () => action.runSecondary && action.runSecondary());
     $("driverStreetThirdBtn")?.addEventListener("click", () => action.runThird && action.runThird());
+    $("driverStreetMissingBtn")?.addEventListener("click", () => {
+      const item = firstMissingForStatus(currentCall()) || (proofMissing(currentCall())[0]);
+      if (!item) return;
+      if (isPhotoMissingItem(item) || isSignatureMissingItem(item)) {
+        const action = actionForMissing(currentCall(), item);
+        if (action && action.run) return action.run();
+      }
+      openProofTarget(item.target, item.step);
+    });
     $("driverStreetExpenseBtn")?.addEventListener("click", () => { closeMenu(); openDriverModule(PANEL_BY_STEP.despesas); });
     $("driverPopularMenuBtn")?.addEventListener("click", toggleMenu);
-    qsa(".driver-popular-menu button").forEach((btn) => {
+    qsa(".driver-popular-menu button[data-driver-notify]").forEach((btn) => {
+      btn.addEventListener("click", async () => { closeMenu(); await requestDriverNotifications(true); });
+    });
+    qsa(".driver-popular-menu button:not([data-driver-notify])").forEach((btn) => {
       btn.addEventListener("click", () => {
         if (btn.dataset.streetAll === "true") {
           document.body.classList.add("driver-show-all", "driver-focus-technical");
@@ -610,6 +632,31 @@
       new MutationObserver(scheduleRender).observe(el, { childList: true, subtree: true, characterData: true });
     });
   }
+
+  async function requestDriverNotifications(showFeedback) {
+    if (!("Notification" in window)) {
+      if (showFeedback) alert("Este navegador não suporta avisos fora da tela.");
+      return false;
+    }
+    if (Notification.permission === "granted") {
+      if (showFeedback) alert("Avisos já estão ativados para novos chamados.");
+      return true;
+    }
+    if (Notification.permission === "denied") {
+      if (showFeedback) alert("Os avisos estão bloqueados no navegador. Libere nas permissões do site.");
+      return false;
+    }
+    try {
+      const result = await Notification.requestPermission();
+      if (showFeedback) alert(result === "granted" ? "Avisos ativados." : "Avisos não foram ativados.");
+      return result === "granted";
+    } catch (_) {
+      if (showFeedback) alert("Não consegui pedir permissão de aviso neste navegador.");
+      return false;
+    }
+  }
+
+  window.JMDriverStreetNotify = { request: requestDriverNotifications };
 
   function init() {
     document.body.classList.add("driver-simple-mode", "driver-sequential-mode", "driver-street-mode", "driver-popular-mode");

@@ -1,8 +1,8 @@
 {
-  "version": "jm-fluxo-operacional-v19-motorista-popular-um-botao",
-  "description": "V19 transforma o motorista em modo popular de uma ação por vez: botão grande, poucos textos, menu Mais para acesso completo, fotos/assinatura/despesa preservadas e sem remover o modo técnico.",
-  "updatedAt": "2026-06-24T20:55:00Z",
-  "build": "V19",
-  "base": "V18 provas inteligentes",
-  "notes": "Não altera Firebase Rules, RTDB Rules, Cloudinary, financeiro ou gestor. A mudança é UIX do motorista: menos leitura, menos botões visíveis, acesso completo preservado no menu Mais."
+  "version": "jm-fluxo-operacional-v20-pendencias-notificacoes",
+  "description": "V20 mantém o Modo Motorista Popular, corrige o clique em pendências para levar direto ao campo certo e adiciona avisos do navegador/PWA para novos chamados do motorista.",
+  "updatedAt": "2026-06-25T10:20:00Z",
+  "build": "V20",
+  "base": "V19 motorista popular + V18 provas inteligentes",
+  "notes": "Não altera Firebase Rules, RTDB Rules, Cloudinary, financeiro, gestor ou salvamento das provas. Notificações dependem da permissão do navegador/PWA e funcionam com o painel/app carregado em segundo plano."
 }

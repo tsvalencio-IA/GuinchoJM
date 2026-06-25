@@ -1,11 +1,11 @@
-/* jm-fluxo-operacional-v19-motorista-popular-um-botao */
+/* jm-fluxo-operacional-v20-pendencias-notificacoes */
 (function () {
   "use strict";
 
   const { $, esc, parseMoney, toast, statusClass, routeKm, mapsRouteUrl, statusKey, statusLabel, isFinalStatus, setupCollapsiblePanels, pointFrom } = window.JM.utils;
   const { auth, db, arrayUnion, getRealtimeDb, rtdbKey } = window.JM.firebase;
   const cfg = window.JM_CONFIG || {};
-  const DRIVER_FLOW_VERSION = "jm-fluxo-operacional-v19-motorista-popular-um-botao";
+  const DRIVER_FLOW_VERSION = "jm-fluxo-operacional-v20-pendencias-notificacoes";
   const state = {
     user: null,
     profile: null,
@@ -33,6 +33,8 @@
   let lastSelectSignature = "";
   let lastRenderedCallsHtml = "";
   let lastLoadedProofCallId = "";
+  let knownDriverCallIds = new Set();
+  let initialDriverCallsSnapshot = true;
   const PROOF_STAGES = ["retirada", "carregamento", "transporte", "entrega", "finalizacao"];
   const PROOF_STAGE_FIELDS = {
     retirada: { select: "proofStageRetirada", justification: "proofStageRetiradaJustification", label: "Retirada" },
@@ -2278,6 +2280,67 @@
     return { id: user.uid, ...payload };
   }
 
+  function callNotificationText(call) {
+    const protocolo = call && (call.protocolo || call.id) || "novo chamado";
+    const cliente = call && (call.cliente || call.beneficiary || call.customerName || "") || "";
+    const origem = call && (call.origem && (call.origem.label || call.origem.address) || call.originLabel || call.originAddress || "") || "";
+    const destino = call && (call.destino && (call.destino.label || call.destino.address) || call.destLabel || call.destinationAddress || "") || "";
+    const body = [cliente, origem && destino ? origem + " → " + destino : origem || destino].filter(Boolean).join(" · ");
+    return { title: "Novo chamado JM: " + protocolo, body: body || "Toque para abrir o painel do motorista." };
+  }
+
+  async function requestDriverNotifications(showFeedback) {
+    if (!("Notification" in window)) {
+      if (showFeedback) toast("Este navegador não suporta notificações fora da tela.", "danger");
+      return false;
+    }
+    if (Notification.permission === "granted") {
+      if (showFeedback) toast("Avisos de novo chamado ativados.", "ok");
+      return true;
+    }
+    if (Notification.permission === "denied") {
+      if (showFeedback) toast("Avisos bloqueados. Libere a permissão do site no navegador.", "danger");
+      return false;
+    }
+    try {
+      const result = await Notification.requestPermission();
+      if (showFeedback) toast(result === "granted" ? "Avisos ativados." : "Avisos não ativados.", result === "granted" ? "ok" : "warn");
+      return result === "granted";
+    } catch (err) {
+      if (showFeedback) toast("Não consegui pedir permissão de avisos: " + (err && err.message || "erro"), "danger");
+      return false;
+    }
+  }
+
+  async function notifyDriverNewCall(call) {
+    if (!call || isFinalStatus(call) || call.deletedAt) return;
+    const text = callNotificationText(call);
+    toast("Novo chamado recebido: " + (call.protocolo || call.id), "ok");
+    if (!("Notification" in window) || Notification.permission !== "granted") return;
+    const url = "motorista.html#call=" + encodeURIComponent(call.id);
+    const options = {
+      body: text.body,
+      icon: "assets/icon.svg",
+      badge: "assets/icon.svg",
+      tag: "jm-novo-chamado-" + call.id,
+      renotify: true,
+      vibrate: [220, 90, 220],
+      data: { url, callId: call.id }
+    };
+    try {
+      if (navigator.serviceWorker && navigator.serviceWorker.ready) {
+        const registration = await navigator.serviceWorker.ready;
+        if (registration && registration.showNotification) {
+          await registration.showNotification(text.title, options);
+          return;
+        }
+      }
+    } catch (_) {}
+    try { new Notification(text.title, options); } catch (_) {}
+  }
+
+  window.JMDriverNotifications = { request: requestDriverNotifications };
+
   async function loadProfile(user) {
     const ref = db.collection("users").doc(user.uid);
     const snap = await ref.get();
@@ -2316,10 +2379,18 @@
     }));
     unsubscribers.push(db.collection("calls").where("driverId", "==", state.user.uid).onSnapshot((snap) => {
       const rows = {};
-      snap.forEach((doc) => { rows[doc.id] = { id: doc.id, ...doc.data() }; });
+      const freshCalls = [];
+      snap.forEach((doc) => {
+        const row = { id: doc.id, ...doc.data() };
+        rows[doc.id] = row;
+        if (!initialDriverCallsSnapshot && !knownDriverCallIds.has(doc.id) && !isFinalStatus(row) && !row.deletedAt) freshCalls.push(row);
+      });
       state.calls = rows;
+      knownDriverCallIds = new Set(Object.keys(rows));
+      initialDriverCallsSnapshot = false;
       state.callsLoaded = true;
       scheduleRender("calls");
+      freshCalls.forEach((call) => notifyDriverNewCall(call));
     }));
     unsubscribers.push(db.collection("expenses").where("driverId", "==", state.user.uid).onSnapshot((snap) => {
       const rows = {};
@@ -2355,6 +2426,8 @@
     state.user = user || null;
     state.activeCallRestored = false;
     state.callsLoaded = false;
+    knownDriverCallIds = new Set();
+    initialDriverCallsSnapshot = true;
     if (!user) {
       if (driverLocationWatchId != null) stopDriverPhoneLocation({ silent: true });
       state.selectedCallId = "";
