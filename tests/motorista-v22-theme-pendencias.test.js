@@ -8,7 +8,7 @@ const simple = fs.readFileSync('js/motorista-simple-flow.js', 'utf8');
 const audit = fs.readFileSync('tests/motorista-devtools-audit-v22.js', 'utf8');
 const entrega = fs.readFileSync('ENTREGA_FLUXO_OPERACIONAL_V22.md', 'utf8');
 
-assert(html.includes('jm-fluxo-operacional-v21-pendencias-diretas'), 'motorista.html precisa manter a versão ativa unificada');
+assert(html.includes('jm-fluxo-operacional-v26-cache-refresh'), 'motorista.html precisa manter a versão ativa unificada');
 assert(simple.includes('V22') || entrega.includes('V22'), 'sinalização documental da V22 ausente');
 assert(utils.includes('theme-toggle-icon'), 'theme toggle discreto com ícone ausente');
 assert(utils.includes('Ativar modo escuro') && utils.includes('Ativar modo claro'), 'theme toggle precisa alternar rótulo corretamente');

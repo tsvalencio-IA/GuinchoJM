@@ -1,8 +1,8 @@
 {
-  "version": "jm-fluxo-operacional-v20-pendencias-notificacoes",
-  "description": "V20 mantém o Modo Motorista Popular, corrige o clique em pendências para levar direto ao campo certo e adiciona avisos do navegador/PWA para novos chamados do motorista.",
-  "updatedAt": "2026-06-25T10:20:00Z",
-  "build": "V20",
-  "base": "V19 motorista popular + V18 provas inteligentes",
-  "notes": "Não altera Firebase Rules, RTDB Rules, Cloudinary, financeiro, gestor ou salvamento das provas. Notificações dependem da permissão do navegador/PWA e funcionam com o painel/app carregado em segundo plano."
+  "version": "jm-fluxo-operacional-v26-cache-refresh",
+  "description": "V26 força atualização de cache/versionamento após V25: query strings, service worker, version.json e testes passam para uma versão nova para impedir o navegador de continuar lendo arquivos com ?v=V21.",
+  "updatedAt": "2026-06-25T15:45:00Z",
+  "build": "V26",
+  "base": "V25 continuar provas",
+  "notes": "Não altera Firebase Rules, RTDB Rules, Cloudinary, financeiro, gestor ou salvamento das provas. É hotfix de cache/versionamento para garantir que o navegador carregue os arquivos novos."
 }

@@ -1,4 +1,4 @@
-const CACHE_NAME = "jm-fluxo-operacional-v20-pendencias-notificacoes";
+const CACHE_NAME = "jm-fluxo-operacional-v26-cache-refresh";
 const ASSETS = [
   "./",
   "./index.html",

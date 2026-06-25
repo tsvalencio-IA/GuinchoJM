@@ -3,7 +3,7 @@
 (function () {
   "use strict";
 
-  const VERSION = "jm-fluxo-operacional-v21-pendencias-diretas";
+  const VERSION = "jm-fluxo-operacional-v26-cache-refresh";
   const $ = (id) => document.getElementById(id);
   const qsa = (sel, root) => Array.from((root || document).querySelectorAll(sel));
 
