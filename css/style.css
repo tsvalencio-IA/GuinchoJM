@@ -2755,3 +2755,37 @@ html[data-theme="light"] .driver-field-nav button,
 html[data-theme="light"] .driver-field-nav button span { color: #0f172a; }
 html[data-theme="light"] .driver-field-nav button.active,
 html[data-theme="light"] .driver-field-nav button.active span { color: #0f172a; }
+
+/* V23: finalizados no motorista + contraste real com gradientes */
+.driver-call-view-toggle {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0 0 14px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(15, 28, 29, .72);
+}
+.driver-call-view-toggle button {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  min-height: 46px;
+  background: var(--panel-2);
+  color: var(--text);
+  font-weight: 900;
+}
+.driver-call-view-toggle button.active {
+  border-color: rgba(45, 212, 191, .6);
+  background: rgba(45, 212, 191, .14);
+  color: var(--accent);
+}
+.driver-call-view-toggle b { font-size: .92rem; }
+html[data-theme="light"] .driver-call-view-toggle { background: rgba(255,255,255,.86); }
+html[data-theme="light"] .driver-call-view-toggle button { background: #f8fafc; color: #0f172a; }
+html[data-theme="light"] .driver-call-view-toggle button.active { background: #dff7f4; color: #075985; }
+.driver-topbar { background-color: var(--bg); }
+html[data-theme="light"] .driver-topbar { background-color: #f4f7fb; color: #0f172a; }
+.driver-popular-primary { background-color: #15803d; }
+html[data-theme="light"] .driver-popular-primary { background-color: #15803d; color: #ffffff; }
+.driver-popular-menu [data-driver-finalized] { border-color: rgba(245,158,11,.42); }

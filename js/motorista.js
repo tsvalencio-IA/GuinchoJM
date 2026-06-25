@@ -1,11 +1,11 @@
-/* jm-fluxo-operacional-v20-pendencias-notificacoes */
+/* jm-fluxo-operacional-v21-pendencias-diretas */
 (function () {
   "use strict";
 
   const { $, esc, parseMoney, toast, statusClass, routeKm, mapsRouteUrl, statusKey, statusLabel, isFinalStatus, setupCollapsiblePanels, pointFrom } = window.JM.utils;
   const { auth, db, arrayUnion, getRealtimeDb, rtdbKey } = window.JM.firebase;
   const cfg = window.JM_CONFIG || {};
-  const DRIVER_FLOW_VERSION = "jm-fluxo-operacional-v20-pendencias-notificacoes";
+  const DRIVER_FLOW_VERSION = "jm-fluxo-operacional-v21-pendencias-diretas";
   const state = {
     user: null,
     profile: null,
@@ -23,7 +23,8 @@
     gpsState: "checking",
     statusUpdating: false,
     proofWizardStep: 0,
-    proofDraftSaving: false
+    proofDraftSaving: false,
+    callsView: "ativos"
   };
   const unsubscribers = [];
   let driverLocationWatchId = null;
@@ -885,7 +886,7 @@
     let saved = "";
     try { saved = localStorage.getItem(activeCallStorageKey()) || ""; } catch (_) {}
     const call = saved && state.calls[saved];
-    if (call && !isFinalStatus(call) && !call.deletedAt) state.selectedCallId = saved;
+    if (call && !call.deletedAt) state.selectedCallId = saved;
     else if (saved) persistActiveCall("");
   }
 
@@ -968,24 +969,26 @@
   }
 
   function updateContextLockState() {
-    const hasCall = !!selectedCall();
+    const call = selectedCall();
+    const hasCall = !!call;
+    const readOnly = hasCall && isFinalStatus(call);
     ["driverExpenseForm", "driverReportForm", "driverProofForm"].forEach((formId) => {
       const form = $(formId);
       if (!form) return;
-      form.classList.toggle("driver-context-locked", !hasCall);
+      form.classList.toggle("driver-context-locked", !hasCall || readOnly);
       Array.from(form.querySelectorAll("input,select,textarea,button")).forEach((control) => {
         if (control.matches("[data-active-call-select]")) {
           control.disabled = true;
           return;
         }
-        control.disabled = !hasCall;
+        control.disabled = !hasCall || readOnly;
       });
     });
     document.querySelectorAll("[data-context-notice]").forEach((notice) => {
-      notice.classList.toggle("ok", hasCall);
-      notice.textContent = hasCall
-        ? "Vinculado ao atendimento atual. Para trocar, use o botão ‘Trocar atendimento’."
-        : "Selecione o atendimento atual para liberar este módulo.";
+      notice.classList.toggle("ok", hasCall && !readOnly);
+      if (!hasCall) notice.textContent = "Selecione o atendimento atual para liberar este módulo.";
+      else if (readOnly) notice.textContent = "Atendimento finalizado. Consulta liberada; edição, GPS e envio ficam bloqueados.";
+      else notice.textContent = "Vinculado ao atendimento atual. Para trocar, use o botão ‘Trocar atendimento’.";
     });
     updateGpsButtons();
   }
@@ -1037,6 +1040,11 @@
       header.className = "driver-runtime-chip ok";
     }
     controls.forEach((control) => { control.disabled = false; });
+    const readOnlyFinalized = isFinalStatus(call);
+    if (readOnlyFinalized) {
+      [routeBtn, startBtn, statusSelect, statusBtn].filter(Boolean).forEach((control) => { control.disabled = true; });
+      if (clearBtn) clearBtn.disabled = false;
+    }
     const currentStatusKey = statusKey(call.statusKey || call.status);
     if (startBtn) {
       const alreadyStarted = statusFlowIndex(currentStatusKey) >= statusFlowIndex("motorista_a_caminho");
@@ -1052,21 +1060,23 @@
 
   async function setActiveCall(id, options) {
     const call = id && state.calls[id];
-    if (!call || isFinalStatus(call) || call.deletedAt) {
-      toast("Este chamado não está disponível como atendimento ativo.", "danger");
+    if (!call || call.deletedAt) {
+      toast("Este chamado não está disponível.", "danger");
       return null;
     }
+    const readOnlyFinalized = isFinalStatus(call);
     if (driverLocationWatchId != null && state.selectedCallId && state.selectedCallId !== id) {
       await stopDriverPhoneLocation({ silent: true, preserveCallId: state.selectedCallId });
     }
     state.selectedCallId = id;
-    persistActiveCall(id);
+    if (readOnlyFinalized) persistActiveCall("");
+    else persistActiveCall(id);
     renderActiveCall();
     restoreProofWizardStep(call);
     renderCalls();
     renderExpenseSelects();
     scheduleMapRender(80);
-    if (!options || options.toast !== false) toast("Atendimento atual selecionado: " + (call.protocolo || call.cliente || id) + ".", "ok");
+    if (!options || options.toast !== false) toast((readOnlyFinalized ? "Visualizando atendimento finalizado: " : "Atendimento atual selecionado: ") + (call.protocolo || call.cliente || id) + ".", readOnlyFinalized ? "info" : "ok");
     if (options && options.scroll) {
       const panel = $(options.scroll);
       if (panel) panel.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -2493,9 +2503,22 @@
     return visibleRows(state.calls).filter((c) => !isFinalStatus(c));
   }
 
+  function finalizedCalls() {
+    return visibleRows(state.calls).filter((c) => isFinalStatus(c));
+  }
+
+  function listedDriverCalls() {
+    return state.callsView === "finalizados" ? finalizedCalls() : activeCalls();
+  }
+
+  function setCallsView(view) {
+    state.callsView = view === "finalizados" ? "finalizados" : "ativos";
+    renderCalls();
+  }
+
   function render(reason) {
     const active = state.selectedCallId && state.calls[state.selectedCallId];
-    if (state.selectedCallId && (!active || isFinalStatus(active) || active.deletedAt)) {
+    if (state.selectedCallId && (!active || active.deletedAt)) {
       state.selectedCallId = "";
       persistActiveCall("");
     }
@@ -2509,8 +2532,14 @@
   }
 
   function renderCalls() {
-    const calls = activeCalls().sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
-    $("driverCallsBox").innerHTML = calls.length ? calls.map((call) => {
+    const activeCount = activeCalls().length;
+    const finalizedCount = finalizedCalls().length;
+    const calls = listedDriverCalls().sort((a, b) => String(b.createdAt || b.closedAt || "").localeCompare(String(a.createdAt || a.closedAt || "")));
+    const toolbar = '<div class="driver-call-view-toggle" role="tablist" aria-label="Filtro de chamados">' +
+      '<button type="button" class="' + (state.callsView !== "finalizados" ? "active" : "") + '" onclick="JM.motorista.setCallsView(\'ativos\')">Em andamento <b>' + activeCount + '</b></button>' +
+      '<button type="button" class="' + (state.callsView === "finalizados" ? "active" : "") + '" onclick="JM.motorista.setCallsView(\'finalizados\')">Finalizados <b>' + finalizedCount + '</b></button>' +
+      '</div>';
+    $("driverCallsBox").innerHTML = toolbar + (calls.length ? calls.map((call) => {
       const vehicle = state.vehicles[call.vehicleId] || {};
       const url = call.routeExternalUrl || call.routeUrl || mapsRouteUrl(call, vehicle);
       const km = routeKm(call, vehicle);
@@ -2519,14 +2548,15 @@
       const proof = proofBadge(call);
       const selected = state.selectedCallId === call.id;
       const recommendedStatus = nextStatusKey(call);
-      const actionButtons = selected ? `
-          <button class="btn primary" onclick="JM.motorista.setStatus('${esc(call.id)}','${esc(recommendedStatus)}')">Continuar: ${esc(statusLabel(recommendedStatus))}</button>
-          <button class="btn good" onclick="JM.motorista.openRouteForCall('${esc(call.id)}')">Ver rota</button>
-          ${url ? `<button class="btn" onclick="JM.motorista.openExternalRouteForCall('${esc(call.id)}')">Maps/Waze</button>` : ""}
-          <button class="btn warn" data-mobile-gps-only onclick="JM.motorista.startLocationForCall('${esc(call.id)}')" ${isMobileGpsEnabled() ? "" : "disabled"}>Ligar GPS</button>
-          <button class="btn" onclick="document.getElementById('driverPanelProofs').scrollIntoView({behavior:'smooth'})">Abrir checklist</button>` : `
-          <button class="btn primary" onclick="JM.motorista.selectCall('${esc(call.id)}')">Selecionar atendimento</button>
-          <button class="btn" disabled title="Selecione este atendimento antes de executar ações">Rota e status bloqueados</button>`;
+      const readOnlyFinalized = isFinalStatus(call);
+      const actionButtons = readOnlyFinalized ?           '<button class="btn primary" onclick="JM.motorista.selectCall(\'' + esc(call.id) + '\')">Ver finalizado</button>' +
+          (url ? '<button class="btn" onclick="JM.motorista.openExternalRouteForCall(\'' + esc(call.id) + '\')">Maps/Waze</button>' : '') +
+          '<button class="btn" onclick="JM.motorista.setCallsView(\'ativos\')">Voltar aos ativos</button>' : selected ?           '<button class="btn primary" onclick="JM.motorista.setStatus(\'' + esc(call.id) + '\',\'' + esc(recommendedStatus) + '\')">Continuar: ' + esc(statusLabel(recommendedStatus)) + '</button>' +
+          '<button class="btn good" onclick="JM.motorista.openRouteForCall(\'' + esc(call.id) + '\')">Ver rota</button>' +
+          (url ? '<button class="btn" onclick="JM.motorista.openExternalRouteForCall(\'' + esc(call.id) + '\')">Maps/Waze</button>' : '') +
+          '<button class="btn warn" data-mobile-gps-only onclick="JM.motorista.startLocationForCall(\'' + esc(call.id) + '\')" ' + (isMobileGpsEnabled() ? '' : 'disabled') + '>Ligar GPS</button>' +
+          '<button class="btn" onclick="document.getElementById(\'driverPanelProofs\').scrollIntoView({behavior:\'smooth\'})">Abrir checklist</button>' :           '<button class="btn primary" onclick="JM.motorista.selectCall(\'' + esc(call.id) + '\')">Selecionar atendimento</button>' +
+          '<button class="btn" disabled title="Selecione este atendimento antes de executar ações">Rota e status bloqueados</button>';
       return `<div class="card driver-call-card ${selected ? "selected" : ""}" style="margin-bottom:10px">
         <div class="actions" style="justify-content:space-between">
           <div><b>${esc(call.protocolo || call.id)}</b><br><span class="muted small">${esc(call.cliente || call.beneficiary || "")} - ${esc(vehicle.placa || "")}</span></div>
@@ -2536,7 +2566,7 @@
         <p class="small"><b>Origem:</b> ${esc(call.origem?.label || call.originLabel || "-")}<br><b>Destino:</b> ${esc(call.destino?.label || call.destLabel || "-")}<br><b>Rota:</b> ${esc(metric)} ${routeBadge} ${proof}<br><b>Acionamento:</b> ${esc(call.source || "Particular")}${call.insurance ? " · " + esc(call.insurance) : ""}${call.insuranceProtocol ? " · Prot. " + esc(call.insuranceProtocol) : ""}<br><b>Veículo cliente:</b> ${esc(call.customerPlate || "-")} ${call.customerVehicle ? "· " + esc(call.customerVehicle) : ""}</p>
         <div class="actions">${actionButtons}</div>
       </div>`;
-    }).join("") : `<p class="muted">Nenhum chamado vinculado ao seu usuário.</p>`;
+    }).join("") : '<p class="muted">' + (state.callsView === "finalizados" ? "Nenhum chamado finalizado vinculado ao seu usuário." : "Nenhum chamado em andamento vinculado ao seu usuário.") + '</p>');
   }
 
   function renderExpenseSelects() {
@@ -3526,7 +3556,8 @@
     proofMissingItems,
     focusProofTarget,
     proofStepCompleted,
-    validateCompleteProofPackage
+    validateCompleteProofPackage,
+    setCallsView
   };
   setupProofStageButtons();
   setupDriverImagePickers();

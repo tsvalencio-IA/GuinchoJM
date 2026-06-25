@@ -256,7 +256,7 @@
   }
 
   function returnToStreetMode() {
-    document.body.classList.remove("driver-focus-technical", "driver-show-all");
+    document.body.classList.remove("driver-focus-technical", "driver-show-all", "driver-signature-only");
     setVisiblePanel(PANEL_BY_STEP.atendimento, { scroll: false, technical: false });
     scheduleRender();
     const shell = $("driverSimpleShell");
@@ -266,6 +266,7 @@
   }
 
   function openDriverModule(panelId) {
+    document.body.classList.remove("driver-signature-only");
     setVisiblePanel(panelId, { scroll: true, technical: true });
     scheduleRender();
   }
@@ -602,6 +603,7 @@
         ${menuOpen ? `
           <div class="driver-popular-menu" id="driverPopularMenu">
             <button data-street-panel="${PANEL_BY_STEP.chamados}" type="button">Chamados</button>
+            <button data-driver-finalized="true" type="button">Finalizados</button>
             <button data-quick-panel="rota" type="button">Rota / GPS</button>
             <button data-quick-panel="provas" type="button">Fotos / Provas</button>
             <button data-street-panel="${PANEL_BY_STEP.despesas}" type="button">Despesa</button>
@@ -656,6 +658,16 @@
     });
     qsa(".driver-popular-menu button[data-driver-notify]").forEach((btn) => {
       btn.addEventListener("click", async () => { closeMenu(); closeMissingList(); await requestDriverNotifications(true); });
+    });
+    qsa(".driver-popular-menu button[data-driver-finalized]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        closeMenu();
+        closeMissingList();
+        if (api() && typeof api().setCallsView === "function") {
+          try { api().setCallsView("finalizados"); } catch (_) {}
+        }
+        openDriverModule(PANEL_BY_STEP.chamados);
+      });
     });
     qsa(".driver-popular-menu button:not([data-driver-notify]):not([data-quick-panel])").forEach((btn) => {
       btn.addEventListener("click", () => {
