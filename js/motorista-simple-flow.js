@@ -785,18 +785,37 @@
     const next = $("driverProofNextBtn");
     if (next && next.dataset.streetSafetyBound !== "true") {
       next.dataset.streetSafetyBound = "true";
-      next.addEventListener("click", () => {
-        window.setTimeout(() => {
-          const call = currentCall();
-          if (!call) {
-            openDriverModule(PANEL_BY_STEP.chamados);
-            return;
+      next.addEventListener("click", async (event) => {
+        /* V25: o botão CONTINUAR precisa sempre responder.
+           O handler original de motorista.js usa uma função local, então o teste F12 não consegue interceptar.
+           Aqui usamos a API pública, preservamos o fluxo e evitamos a sensação de clique morto. */
+        if (event) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+        }
+        const call = currentCall();
+        if (!call) {
+          openDriverModule(PANEL_BY_STEP.chamados);
+          return;
+        }
+        const missing = proofMissing(call);
+        const statusBox = $("driverProofStatus");
+        const hasError = statusBox && /falta|obrigat|pendente|complete|preencha/i.test(String(statusBox.textContent || ""));
+        if (missing.length && hasError) {
+          goToMissing(missing[0]);
+          return;
+        }
+        try {
+          if (api() && typeof api().saveProofDraft === "function") {
+            await api().saveProofDraft({ silent: true, validate: false });
           }
-          const missing = proofMissing(call);
-          const statusBox = $("driverProofStatus");
-          const hasError = statusBox && /falta|obrigat|pendente|complete|preencha/i.test(String(statusBox.textContent || ""));
-          if (missing.length && hasError) goToMissing(missing[0]);
-        }, 220);
+        } catch (_) {}
+        const st = state();
+        const currentIndex = Number(st && st.proofWizardStep || 0);
+        if (api() && typeof api().setProofWizardStep === "function") {
+          try { api().setProofWizardStep(Math.min(5, currentIndex + 1), { scroll: true }); } catch (_) {}
+        }
+        scheduleRender();
       }, true);
     }
   }
