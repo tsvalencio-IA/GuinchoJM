@@ -62,13 +62,31 @@ html[data-theme="light"] .btn.danger { background: #b91c1c; color: #ffffff; bord
 
 .theme-toggle {
   position: fixed;
-  right: 14px;
-  bottom: 38px;
-  z-index: 9000;
+  top: calc(env(safe-area-inset-top, 0px) + 12px);
+  right: 12px;
+  bottom: auto;
+  z-index: 9400;
+  width: 44px;
+  min-width: 44px;
   min-height: 44px;
+  height: 44px;
   border-radius: 999px;
-  box-shadow: 0 14px 36px rgba(0,0,0,.24);
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  box-shadow: 0 10px 26px rgba(0,0,0,.22);
+  background: rgba(15,28,29,.9);
+  border: 1px solid rgba(153,179,172,.28);
+  backdrop-filter: blur(10px);
 }
+.theme-toggle:hover { transform: translateY(-1px); }
+.theme-toggle-icon { font-size: 1.05rem; line-height: 1; }
+.theme-toggle-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+html[data-theme="light"] .theme-toggle { background: rgba(255,255,255,.94); border-color: rgba(148,163,184,.35); color: #0f172a; }
+body.driver-popular-mode .theme-toggle,
+body.driver-street-mode .theme-toggle { top: calc(env(safe-area-inset-top, 0px) + 10px); right: 10px; }
 @media print {
   .theme-toggle { display: none !important; }
 }
@@ -1364,7 +1382,7 @@ td { font-size: .88rem; }
   .ops-map-panel > .actions { align-items: stretch !important; }
   .ops-map-panel > .actions > .actions .btn { width: 100%; justify-content: center; }
   .proof-inspection-grid, .proof-accessories-grid { grid-template-columns: 1fr; }
-  .theme-toggle { bottom: 18px; right: 12px; min-height: 42px; padding-inline: 12px; }
+  .theme-toggle { top: calc(env(safe-area-inset-top, 0px) + 10px); right: 10px; width: 42px; min-width: 42px; min-height: 42px; height: 42px; }
   .dash-kpi-grid, .dossier-grid { grid-template-columns: 1fr; }
   .dossier-head { flex-direction: column; }
   .finance-toolbar, .proof-phase-grid { grid-template-columns: 1fr; }
@@ -2626,3 +2644,114 @@ body.driver-signature-only #driverPanelProofs h2{font-size:1.15rem}
   border-color:rgba(34,197,94,.38);
   background:rgba(34,197,94,.12);
 }
+
+/* V21 - atalhos claros e lista de pendências clicável no modo motorista */
+.driver-popular-shortcuts{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+}
+.driver-popular-shortcuts button{
+  min-height:54px;
+  border-radius:16px;
+  border:1px solid rgba(45,212,191,.34);
+  background:rgba(45,212,191,.10);
+  color:#99f6e4;
+  font-weight:1000;
+  font-size:.88rem;
+  letter-spacing:.01em;
+  cursor:pointer;
+  padding:8px 6px;
+  line-height:1.05;
+}
+.driver-popular-missing-list{
+  display:grid;
+  gap:10px;
+  padding:12px;
+  border-radius:20px;
+  background:rgba(15,23,42,.88);
+  border:1px solid rgba(245,158,11,.38);
+  box-shadow:0 12px 32px rgba(0,0,0,.28);
+}
+.driver-popular-missing-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.driver-popular-missing-head strong{
+  color:#fbbf24;
+  font-size:1rem;
+  font-weight:1000;
+}
+.driver-popular-missing-head button{
+  min-height:38px;
+  border-radius:999px;
+  border:1px solid rgba(148,163,184,.28);
+  background:rgba(15,23,42,.72);
+  color:var(--text);
+  font-weight:1000;
+  cursor:pointer;
+  padding:6px 12px;
+}
+.driver-popular-missing-list p{
+  margin:0;
+  color:var(--muted);
+  font-weight:850;
+  font-size:.88rem;
+  line-height:1.25;
+}
+.driver-popular-missing-items{
+  display:grid;
+  gap:8px;
+}
+.driver-popular-missing-items button{
+  width:100%;
+  min-height:58px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:10px;
+  border-radius:16px;
+  border:1px solid rgba(245,158,11,.34);
+  background:rgba(245,158,11,.09);
+  color:var(--text);
+  font-weight:950;
+  cursor:pointer;
+  text-align:left;
+  padding:10px 12px;
+}
+.driver-popular-missing-items button span{
+  overflow-wrap:anywhere;
+  line-height:1.18;
+}
+.driver-popular-missing-items button small{
+  color:#fbbf24;
+  font-size:.72rem;
+  font-weight:1000;
+  letter-spacing:.06em;
+}
+@media(max-width:520px){
+  .driver-popular-shortcuts{grid-template-columns:1fr}
+  .driver-popular-shortcuts button{min-height:50px;font-size:.92rem}
+  .driver-popular-missing-items button{grid-template-columns:1fr;gap:4px}
+}
+
+/* V22: contraste reforçado nos modos claro/escuro */
+html[data-theme="light"] label,
+html[data-theme="light"] .driver-eyebrow,
+html[data-theme="light"] .muted.small,
+html[data-theme="light"] .driver-popular small,
+html[data-theme="light"] .driver-popular p,
+html[data-theme="light"] .driver-popular-foot,
+html[data-theme="light"] .proof-wizard-summary,
+html[data-theme="light"] .driver-runtime-summary,
+html[data-theme="light"] .driver-runtime-toggle-label { color: #334155 !important; }
+html[data-theme="light"] input::placeholder,
+html[data-theme="light"] textarea::placeholder { color: #64748b; opacity: 1; }
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder { color: #9fb3c8; opacity: 1; }
+html[data-theme="light"] .driver-field-nav button,
+html[data-theme="light"] .driver-field-nav button span { color: #0f172a; }
+html[data-theme="light"] .driver-field-nav button.active,
+html[data-theme="light"] .driver-field-nav button.active span { color: #0f172a; }

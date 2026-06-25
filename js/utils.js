@@ -391,9 +391,17 @@
     button.type = "button";
     button.className = "btn theme-toggle";
     button.setAttribute("aria-label", "Alternar modo claro e escuro");
+    button.innerHTML = '<span class="theme-toggle-icon" aria-hidden="true"></span><span class="theme-toggle-label"></span>';
+    const icon = button.querySelector(".theme-toggle-icon");
+    const label = button.querySelector(".theme-toggle-label");
     function render(next) {
-      button.textContent = next === "light" ? "Modo escuro" : "Modo claro";
-      button.title = button.textContent;
+      const isLight = next === "light";
+      button.dataset.theme = next;
+      if (icon) icon.textContent = isLight ? "☀" : "☾";
+      const text = isLight ? "Ativar modo escuro" : "Ativar modo claro";
+      if (label) label.textContent = text;
+      button.title = text;
+      button.setAttribute("aria-label", text);
     }
     render(theme);
     button.addEventListener("click", () => render(applyTheme(document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light")));

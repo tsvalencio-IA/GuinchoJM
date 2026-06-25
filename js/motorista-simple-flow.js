@@ -1,9 +1,9 @@
-/* JM motorista V20 - Modo motorista popular
-   Uma ação por vez, pendências clicáveis direto no campo e avisos de novo chamado. */
+/* JM motorista V21 - Modo motorista popular
+   Atalhos explícitos, lista de pendências clicável e ABRIR indo direto no alvo. */
 (function () {
   "use strict";
 
-  const VERSION = "jm-fluxo-operacional-v20-pendencias-notificacoes";
+  const VERSION = "jm-fluxo-operacional-v21-pendencias-diretas";
   const $ = (id) => document.getElementById(id);
   const qsa = (sel, root) => Array.from((root || document).querySelectorAll(sel));
 
@@ -105,7 +105,14 @@
     if (!value) return fallback || "";
     if (typeof value === "string") return value;
     if (typeof value === "object") {
-      return value.label || value.address || value.endereco || value.formatted || value.name || value.nome || fallback || "";
+      const direct = value.label || value.address || value.endereco || value.formatted || value.name || value.nome || value.descricao || value.texto || value.local || value.localizacao;
+      if (direct) return direct;
+      const street = [value.logradouro, value.numero, value.bairro].filter(Boolean).join(", ");
+      const city = [value.cidade, value.estado || value.uf].filter(Boolean).join(" - ");
+      const combo = [street, city].filter(Boolean).join(" • ");
+      if (combo) return combo;
+      const firstUseful = Object.keys(value).map((key) => value[key]).find((entry) => typeof entry === "string" && entry.trim());
+      if (firstUseful) return firstUseful;
     }
     return String(value || fallback || "");
   }
@@ -181,6 +188,41 @@
   function isSignatureMissingItem(item) {
     const label = String(item && item.label || "");
     return !!item && (/assin/i.test(label) || item.target === "driverSignatureSection" || item.target === "signatureAcceptedText" || item.target === "signatureRefusalReason");
+  }
+
+  function resolveMissingStep(item) {
+    if (item && item.step) return item.step;
+    const target = String(item && item.target || "");
+    if (/Pickup|Retirada/i.test(target)) return "retirada";
+    if (/Fuel|Odometer|Tire|KeyDocument|VehicleLoaded|EasyRemoval|Damage/i.test(target)) return "inspecao";
+    if (/Carregamento|LoadAfter/i.test(target)) return "carregamento";
+    if (/Transporte/i.test(target)) return "transporte";
+    if (/Delivery|Entrega/i.test(target)) return "entrega";
+    if (/signature|Finalizacao|Finaliza/i.test(target)) return "finalizacao";
+    return "inspecao";
+  }
+
+  function resolveMissingTarget(item) {
+    const rawTarget = String(item && item.target || "").trim();
+    if (rawTarget && $(rawTarget)) return rawTarget;
+    const step = resolveMissingStep(item);
+    const label = String(item && item.label || "");
+    if (isPhotoMissingItem(item)) return "proofPhotoJustification";
+    if (isSignatureMissingItem(item)) return "driverSignatureSection";
+    if (/aceite/i.test(label)) return "signatureAcceptedText";
+    if (/documento/i.test(label) && step === "retirada") return "proofPickupResponsibleDoc";
+    if (/documento/i.test(label) && step === "entrega") return "proofDeliveryResponsibleDoc";
+    if (/respons[aá]vel/i.test(label) && step === "retirada") return "proofPickupResponsibleName";
+    if (/respons[aá]vel/i.test(label) && step === "entrega") return "proofDeliveryResponsibleName";
+    const fallback = {
+      retirada: "proofStageRetirada",
+      inspecao: "proofFuelLevel",
+      carregamento: "proofStageCarregamento",
+      transporte: "proofStageTransporte",
+      entrega: "proofStageEntrega",
+      finalizacao: "driverSignatureSection"
+    };
+    return fallback[step] || "driverPanelProofs";
   }
 
   function firstMissingForStatus(call) {
@@ -304,6 +346,66 @@
     scheduleRender();
   }
 
+  function toggleMissingList() {
+    document.body.classList.toggle("driver-popular-missing-open");
+    scheduleRender();
+  }
+
+  function closeMissingList() {
+    document.body.classList.remove("driver-popular-missing-open");
+    scheduleRender();
+  }
+
+  function missingItemButtonText(item, index) {
+    const label = String(item && item.label || "Pendência").trim();
+    const group = String(item && (item.group || PROOF_STEP_TITLES[item.step]) || "").trim();
+    return `${index + 1}. ${group ? group + " — " : ""}${label}`;
+  }
+
+  function goToMissing(item) {
+    if (!item) return;
+    closeMenu();
+    closeMissingList();
+    const resolvedStep = resolveMissingStep(item);
+    const resolvedTarget = resolveMissingTarget(item);
+    if (isPhotoMissingItem(item)) {
+      const act = actionForMissing(currentCall(), item);
+      if (act && act.run) return act.run();
+    }
+    if (isSignatureMissingItem(item)) return openSignatureOnly();
+    openProofTarget(resolvedTarget, resolvedStep);
+  }
+
+  function renderMissingList(call) {
+    const items = call ? proofMissing(call) : [];
+    if (!items.length) return '';
+    const open = document.body.classList.contains("driver-popular-missing-open");
+    if (!open) return '';
+    return `
+      <div class="driver-popular-missing-list" id="driverPopularMissingList">
+        <div class="driver-popular-missing-head">
+          <strong>Resolver pendências</strong>
+          <button id="driverCloseMissingListBtn" type="button">Fechar</button>
+        </div>
+        <p>Toque no item. O sistema abre direto onde precisa preencher, fotografar ou assinar.</p>
+        <div class="driver-popular-missing-items">
+          ${items.map((item, index) => `
+            <button type="button" data-missing-index="${index}">
+              <span>${esc(missingItemButtonText(item, index))}</span>
+              <small>ABRIR</small>
+            </button>
+          `).join('')}
+        </div>
+      </div>`;
+  }
+
+  function openQuickPanel(panelKey) {
+    const target = PANEL_BY_STEP[panelKey] || panelKey || PANEL_BY_STEP.atendimento;
+    closeMenu();
+    closeMissingList();
+    openDriverModule(target);
+  }
+
   function toggleMenu() {
     document.body.classList.toggle("driver-popular-menu-open");
     scheduleRender();
@@ -371,7 +473,7 @@
       detail: missing.label || "Falta uma informação.",
       primary: "ABRIR",
       secondary: "JUSTIFICAR",
-      run: () => openProofTarget(missing.target, missing.step),
+      run: () => goToMissing(missing),
       runSecondary: () => openJustificationFor(missing)
     };
   }
@@ -500,9 +602,8 @@
         ${menuOpen ? `
           <div class="driver-popular-menu" id="driverPopularMenu">
             <button data-street-panel="${PANEL_BY_STEP.chamados}" type="button">Chamados</button>
-            <button data-street-panel="${PANEL_BY_STEP.rota}" type="button">Mapa</button>
-            <button data-street-panel="${PANEL_BY_STEP.gps}" type="button">GPS</button>
-            <button data-street-panel="${PANEL_BY_STEP.provas}" type="button">Fotos</button>
+            <button data-quick-panel="rota" type="button">Rota / GPS</button>
+            <button data-quick-panel="provas" type="button">Fotos / Provas</button>
             <button data-street-panel="${PANEL_BY_STEP.despesas}" type="button">Despesa</button>
             <button data-driver-notify="true" type="button">Avisos</button>
             <button data-street-panel="${PANEL_BY_STEP.atendimento}" data-street-all="true" type="button">Detalhes</button>
@@ -517,39 +618,56 @@
             ${action.secondary ? `<button id="driverStreetSecondaryBtn" type="button">${esc(action.secondary)}</button>` : ""}
             ${action.third ? `<button class="warn" id="driverStreetThirdBtn" type="button">${esc(action.third)}</button>` : ""}
           </div>
+          <div class="driver-popular-shortcuts" aria-label="Acessos rápidos do motorista">
+            <button data-quick-panel="rota" type="button">ROTA / GPS</button>
+            <button data-quick-panel="provas" type="button">FOTOS / PROVAS</button>
+            <button data-street-panel="${PANEL_BY_STEP.atendimento}" data-street-all="true" type="button">DETALHES</button>
+          </div>
           <button class="driver-popular-expense" id="driverStreetExpenseBtn" type="button">DESPESA RÁPIDA</button>
         </article>
         <div class="driver-popular-foot">
           <span>${esc(STATUS_LABEL[status] || status)}</span>
           ${missingCount ? `<button class="driver-popular-missing-btn" id="driverStreetMissingBtn" type="button">Faltam ${missingCount} · resolver</button>` : '<span>Tudo ok</span>'}
         </div>
+        ${renderMissingList(call)}
       </section>`;
 
     $("driverStreetPrimaryBtn")?.addEventListener("click", () => action.run && action.run());
     $("driverStreetSecondaryBtn")?.addEventListener("click", () => action.runSecondary && action.runSecondary());
     $("driverStreetThirdBtn")?.addEventListener("click", () => action.runThird && action.runThird());
-    $("driverStreetMissingBtn")?.addEventListener("click", () => {
-      const item = firstMissingForStatus(currentCall()) || (proofMissing(currentCall())[0]);
-      if (!item) return;
-      if (isPhotoMissingItem(item) || isSignatureMissingItem(item)) {
-        const action = actionForMissing(currentCall(), item);
-        if (action && action.run) return action.run();
-      }
-      openProofTarget(item.target, item.step);
+    $("driverStreetMissingBtn")?.addEventListener("click", toggleMissingList);
+    $("driverCloseMissingListBtn")?.addEventListener("click", closeMissingList);
+    qsa("[data-missing-index]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const idx = Number(btn.dataset.missingIndex);
+        const item = proofMissing(currentCall())[idx];
+        goToMissing(item);
+      });
     });
-    $("driverStreetExpenseBtn")?.addEventListener("click", () => { closeMenu(); openDriverModule(PANEL_BY_STEP.despesas); });
+    $("driverStreetExpenseBtn")?.addEventListener("click", () => { closeMenu(); closeMissingList(); openDriverModule(PANEL_BY_STEP.despesas); });
     $("driverPopularMenuBtn")?.addEventListener("click", toggleMenu);
-    qsa(".driver-popular-menu button[data-driver-notify]").forEach((btn) => {
-      btn.addEventListener("click", async () => { closeMenu(); await requestDriverNotifications(true); });
+    qsa("[data-quick-panel]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const key = btn.dataset.quickPanel;
+        if (key === "rota") return openQuickPanel(PANEL_BY_STEP.rota);
+        if (key === "provas") return openQuickPanel(PANEL_BY_STEP.provas);
+        openQuickPanel(key);
+      });
     });
-    qsa(".driver-popular-menu button:not([data-driver-notify])").forEach((btn) => {
+    qsa(".driver-popular-menu button[data-driver-notify]").forEach((btn) => {
+      btn.addEventListener("click", async () => { closeMenu(); closeMissingList(); await requestDriverNotifications(true); });
+    });
+    qsa(".driver-popular-menu button:not([data-driver-notify]):not([data-quick-panel])").forEach((btn) => {
       btn.addEventListener("click", () => {
         if (btn.dataset.streetAll === "true") {
           document.body.classList.add("driver-show-all", "driver-focus-technical");
           closeMenu();
+          closeMissingList();
+          scheduleRender();
           return;
         }
         closeMenu();
+        closeMissingList();
         openDriverModule(btn.dataset.streetPanel || PANEL_BY_STEP.atendimento);
       });
     });
