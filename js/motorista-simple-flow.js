@@ -3,7 +3,7 @@
 (function () {
   "use strict";
 
-  const VERSION = "jm-fluxo-operacional-v28-motorista-hotfix";
+  const VERSION = "jm-fluxo-operacional-v29-motorista-cache-clean";
   const $ = (id) => document.getElementById(id);
   const qsa = (sel, root) => Array.from((root || document).querySelectorAll(sel));
 

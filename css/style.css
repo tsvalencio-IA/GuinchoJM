@@ -2906,7 +2906,7 @@ html[data-theme="light"] body.driver-popular-mode .driver-popular-missing-btn {
   .proof-wizard-actions #driverResetAllProofsBtn { grid-column: 1 / -1; }
 }
 
-/* jm-fluxo-operacional-v28-motorista-hotfix — contraste final motorista */
+/* jm-fluxo-operacional-v29-motorista-cache-clean — contraste final motorista */
 body.driver-popular-mode .driver-popular-primary {
   background-color: #15803d !important;
   background-image: linear-gradient(135deg, #15803d, #16a34a) !important;

@@ -1,4 +1,4 @@
-/* jm-fluxo-operacional-v28-motorista-hotfix */
+/* jm-fluxo-operacional-v29-motorista-cache-clean */
 (function () {
   "use strict";
 
@@ -6,7 +6,7 @@
   const { auth, db, arrayUnion, getRealtimeDb, rtdbKey } = window.JM.firebase;
   const cfg = window.JM_CONFIG || {};
   const qsa = (sel, root) => Array.from((root || document).querySelectorAll(sel));
-  const DRIVER_FLOW_VERSION = "jm-fluxo-operacional-v28-motorista-hotfix";
+  const DRIVER_FLOW_VERSION = "jm-fluxo-operacional-v29-motorista-cache-clean";
   const state = {
     user: null,
     profile: null,

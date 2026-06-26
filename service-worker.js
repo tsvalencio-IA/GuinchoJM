@@ -1,4 +1,6 @@
-const CACHE_NAME = "jm-fluxo-operacional-v28-motorista-hotfix";
+const CACHE_NAME = "jm-fluxo-operacional-v29-motorista-cache-clean";
+const CURRENT_VERSION = "jm-fluxo-operacional-v29-motorista-cache-clean";
+const OLD_VERSION_RE = /jm-fluxo-operacional-v2[1-8][^&?#"']*/i;
 const ASSETS = [
   "./",
   "./index.html",
@@ -34,11 +36,29 @@ self.addEventListener("install", (event) => {
   self.skipWaiting();
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)).catch(() => null));
 });
+async function purgeOldVersionEntries() {
+  const keys = await caches.keys();
+  await Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)));
+  const cache = await caches.open(CACHE_NAME);
+  const requests = await cache.keys();
+  await Promise.all(requests.map((request) => {
+    const url = request && request.url || "";
+    if (OLD_VERSION_RE.test(url) && !url.includes(CURRENT_VERSION)) return cache.delete(request);
+    return Promise.resolve(false);
+  }));
+}
+
+function shouldCacheRequest(request) {
+  const url = new URL(request.url);
+  const version = url.searchParams.get("v") || "";
+  if (version && version !== CURRENT_VERSION) return false;
+  if (OLD_VERSION_RE.test(url.href) && !url.href.includes(CURRENT_VERSION)) return false;
+  return true;
+}
+
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))))
-      .then(() => self.clients.claim())
+    purgeOldVersionEntries().then(() => self.clients.claim())
   );
 });
 
@@ -57,7 +77,9 @@ self.addEventListener("fetch", (event) => {
       fetch(event.request, { cache: "no-store" })
         .then((response) => {
           const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy)).catch(() => null);
+          if (shouldCacheRequest(event.request)) {
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy)).catch(() => null);
+          }
           return response;
         })
         .catch(() => caches.match(event.request).then((cached) => cached || caches.match("./index.html")))
@@ -70,7 +92,9 @@ self.addEventListener("fetch", (event) => {
       if (cached) return cached;
       return fetch(event.request).then((response) => {
         const copy = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy)).catch(() => null);
+        if (shouldCacheRequest(event.request)) {
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy)).catch(() => null);
+        }
         return response;
       });
     })
@@ -80,6 +104,9 @@ self.addEventListener("fetch", (event) => {
 
 self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") self.skipWaiting();
+  if (event.data && event.data.type === "PURGE_OLD_CACHES") {
+    event.waitUntil(purgeOldVersionEntries());
+  }
 });
 
 self.addEventListener("notificationclick", (event) => {
