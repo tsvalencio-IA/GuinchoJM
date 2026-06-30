@@ -1,8 +1,8 @@
 {
-  "version": "jm-fluxo-operacional-v29-motorista-cache-clean",
-  "description": "V26 força atualização de cache/versionamento após V25: query strings, service worker, version.json e testes passam para uma versão nova para impedir o navegador de continuar lendo arquivos com ?v=V21.",
-  "updatedAt": "2026-06-25T15:45:00Z",
-  "build": "V26",
-  "base": "V25 continuar provas",
-  "notes": "Não altera Firebase Rules, RTDB Rules, Cloudinary, financeiro, gestor ou salvamento das provas. É hotfix de cache/versionamento para garantir que o navegador carregue os arquivos novos."
+  "version": "jm-fluxo-operacional-v31-motorista-cloudinary-real-flow",
+  "description": "V31 corrige o fluxo real de provas do motorista: arquivos selecionados em câmera/galeria agora disparam upload Cloudinary ao SALVAR ou CONTINUAR, antes de gravar no Firestore.",
+  "updatedAt": "2026-06-30T14:30:00Z",
+  "build": "V31",
+  "base": "GitHub atual enviado pelo usuário em 2026-06-30",
+  "notes": "Correção cirúrgica no motorista: preserva o painel e liga o fluxo de arquivo selecionado -> Cloudinary -> Firestore. Não altera gestor, cliente, superadmin, regras Firebase ou jm.html."
 }

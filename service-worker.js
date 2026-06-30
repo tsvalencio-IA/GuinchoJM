@@ -1,6 +1,6 @@
-const CACHE_NAME = "jm-fluxo-operacional-v29-motorista-cache-clean";
-const CURRENT_VERSION = "jm-fluxo-operacional-v29-motorista-cache-clean";
-const OLD_VERSION_RE = /jm-fluxo-operacional-v2[1-8][^&?#"']*/i;
+const CACHE_NAME = "jm-fluxo-operacional-v31-motorista-cloudinary-real-flow";
+const CURRENT_VERSION = "jm-fluxo-operacional-v31-motorista-cloudinary-real-flow";
+const OLD_VERSION_RE = /jm-fluxo-operacional-v(2[1-9]|30)[^&?#"']*/i;
 const ASSETS = [
   "./",
   "./index.html",

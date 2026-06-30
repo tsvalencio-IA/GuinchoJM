@@ -1,4 +1,4 @@
-/* jm-fluxo-operacional-v29-motorista-cache-clean */
+/* jm-fluxo-operacional-v31-motorista-cloudinary-real-flow */
 (function () {
   "use strict";
 
@@ -6,7 +6,7 @@
   const { auth, db, arrayUnion, getRealtimeDb, rtdbKey } = window.JM.firebase;
   const cfg = window.JM_CONFIG || {};
   const qsa = (sel, root) => Array.from((root || document).querySelectorAll(sel));
-  const DRIVER_FLOW_VERSION = "jm-fluxo-operacional-v29-motorista-cache-clean";
+  const DRIVER_FLOW_VERSION = "jm-fluxo-operacional-v31-motorista-cloudinary-real-flow";
   const state = {
     user: null,
     profile: null,
@@ -576,6 +576,47 @@
     return Array.from(driverImageFallbackFiles[input.id] || []).filter(Boolean);
   }
 
+  function syncDriverGalleryFallbacks() {
+    document.querySelectorAll('.driver-image-picker-wrap').forEach((wrap) => {
+      const sourceId = wrap.dataset && wrap.dataset.sourceInput;
+      const target = sourceId ? $(sourceId) : null;
+      const gallery = wrap.querySelector('.driver-gallery-file-input');
+      if (!target || !gallery || !gallery.files || !gallery.files.length) return;
+      copyFilesToInput(target, gallery.files);
+      renderDriverImagePickerStatus(target);
+    });
+  }
+
+  function selectedProofPhotoItems() {
+    syncDriverGalleryFallbacks();
+    return REQUIRED_PHOTOS.filter((photo) => {
+      const input = $(photo.input);
+      return !!(input && inputFiles(input)[0]);
+    });
+  }
+
+  function hasPendingProofUploadEvidence() {
+    syncDriverGalleryFallbacks();
+    const photoPending = selectedProofPhotoItems().length > 0;
+    const audioInput = $('proofAudioFiles');
+    const audioPending = !!(audioInput && inputFiles(audioInput).length);
+    const signaturePending = !!(signaturePad && signaturePad.dirty);
+    return !!(photoPending || audioPending || signaturePending);
+  }
+
+  function markCurrentProofStepReadyForUpload() {
+    const step = PROOF_WIZARD_STEPS[state.proofWizardStep] || PROOF_WIZARD_STEPS[0];
+    const phase = step && step.phase;
+    const select = phase ? stageSelect(phase) : null;
+    if (!select) return;
+    if (!select.value || select.value === 'pendente') {
+      setProofStageValue(phase, 'ok', true);
+    } else {
+      select.dataset.touched = 'true';
+      refreshStageButtons(phase);
+    }
+  }
+
   function copyFilesToInput(targetInput, files) {
     if (!targetInput || !files) return false;
     const list = Array.from(files || []).filter(Boolean);
@@ -660,6 +701,7 @@
       galleryInput.accept = input.getAttribute('accept') || 'image/*';
       if (input.multiple) galleryInput.multiple = true;
       galleryInput.className = 'driver-gallery-file-input';
+      galleryInput.dataset.galleryFor = input.id;
       galleryInput.tabIndex = -1;
       galleryInput.setAttribute('aria-hidden', 'true');
       galleryBtn.addEventListener('click', () => galleryInput.click());
@@ -700,6 +742,13 @@
       if (input.dataset.previewBound === "true") return;
       input.dataset.previewBound = "true";
       input.addEventListener("change", () => {
+        syncDriverGalleryFallbacks();
+        const stepKey = PROOF_INPUT_STEP_MAP[input.id];
+        const step = PROOF_WIZARD_STEPS.find((item) => item.key === stepKey);
+        if (step && inputFiles(input).length) {
+          const select = stageSelect(step.phase);
+          if (select && (!select.value || select.value === "pendente")) setProofStageValue(step.phase, "ok", true);
+        }
         Array.from(proofUploadState.keys()).filter((key) => key.startsWith(input.id + ":")).forEach((key) => proofUploadState.delete(key));
         const files = inputFiles(input);
         files.forEach((file, index) => {
@@ -3024,7 +3073,7 @@
     const cloud = activeCloudinaryConfig();
     if (!file) return null;
     if (!cloud.cloudName || !cloud.uploadPreset) {
-      throw new Error("Cloudinary não configurado: salve cloudName e uploadPreset no superadmin antes de enviar fotos.");
+      throw new Error("Cloudinary não configurado: falta cloudName ou uploadPreset em settings/publicIntegrations.cloudinary para o motorista.");
     }
     const isAudio = String(file.type || "").toLowerCase().startsWith("audio/");
     const resourceType = options && options.resourceType || (isAudio ? "auto" : "image");
@@ -3271,6 +3320,8 @@
       setProofSubmitStatus("Formulário de provas não encontrado.", "danger");
       return false;
     }
+    syncDriverGalleryFallbacks();
+    if (options && options.markStep !== false && hasPendingProofUploadEvidence()) markCurrentProofStepReadyForUpload();
     if (options && options.safeDispatch === false) {
       form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
       return true;
@@ -3280,6 +3331,16 @@
     return true;
   }
 
+  async function saveProofAction(options) {
+    options = options || {};
+    syncDriverGalleryFallbacks();
+    if (hasPendingProofUploadEvidence()) {
+      markCurrentProofStepReadyForUpload();
+      return submitProof({ source: options.source || "proof-action", markStep: false });
+    }
+    return saveProofDraft(options);
+  }
+
   $("driverProofForm") && ($("driverProofForm").onsubmit = async (e) => {
     e.preventDefault();
     const submit = e.submitter || document.querySelector("#driverProofForm button[type='submit']");
@@ -3287,6 +3348,7 @@
     if (!call) return setProofSubmitStatus("Selecione o atendimento atual para salvar as provas.", "danger");
     const callId = call.id;
 
+    syncDriverGalleryFallbacks();
     const acceptedText = $("signatureAcceptedText").value.trim();
     const signatureRefusalReason = $("signatureRefusalReason") ? $("signatureRefusalReason").value.trim() : "";
     const signaturePhase = $("signaturePhase") ? $("signaturePhase").value : "finalizacao";
@@ -3330,12 +3392,9 @@
 
     const requiredPhotos = requiredProofPhotosForChecklist(checklist);
     const existingPhotos = proofPhotos(call);
-    const selectedPhotos = REQUIRED_PHOTOS.filter((photo) => {
-      const input = $(photo.input);
-      return !!(input && inputFiles(input)[0]);
-    });
+    const selectedPhotos = selectedProofPhotoItems();
     const audioInput = $("proofAudioFiles");
-    const selectedAudios = audioInput && audioInput.files ? Array.from(audioInput.files).filter(Boolean) : [];
+    const selectedAudios = audioInput ? inputFiles(audioInput) : [];
     const missingBeforeUpload = requiredPhotos.filter((photo) => !hasPhotoType(call, photo.key) && !selectedPhotos.some((p) => p.key === photo.key));
     const hasPhotoJustificationNow = hasPhotoJustification(checklist);
     if (!hasStageTouchedNow && !selectedPhotos.length && !selectedAudios.length && !hasNewSignature && !signatureRefusalReason && !checklist.notes && !hasPhotoJustificationNow && selectedDamageParts.size === 0) {
@@ -3351,7 +3410,7 @@
     const cloud = activeCloudinaryConfig();
     const needsCloudinary = selectedPhotos.length > 0 || selectedAudios.length > 0 || hasNewSignature;
     if (needsCloudinary && (!cloud.cloudName || !cloud.uploadPreset)) {
-      return setProofSubmitStatus("Cloudinary não configurado para envio de arquivos. Entre no superadmin, salve cloudName e uploadPreset, depois atualize esta tela.", "danger");
+      return setProofSubmitStatus("Cloudinary não configurado para envio de arquivos. Verifique settings/publicIntegrations.cloudinary.cloudName e uploadPreset no superadmin, salve a integração pública e atualize esta tela.", "danger");
     }
 
     submit.disabled = true;
@@ -3601,13 +3660,20 @@
   if ($("driverProofNextBtn")) $("driverProofNextBtn").onclick = async () => {
     const call = requireActiveCall("avançar o checklist");
     if (!call) return;
+    syncDriverGalleryFallbacks();
+    if (hasPendingProofUploadEvidence()) {
+      markCurrentProofStepReadyForUpload();
+      const sent = await saveProofAction({ silent: true, validate: false, source: "continuar" });
+      if (sent) setProofWizardStep(state.proofWizardStep + 1);
+      return;
+    }
     const checklist = collectProofChecklist(call);
     const validation = validateCurrentProofStep(checklist, false);
     if (!validation.ok) return setProofSubmitStatus(validation.message, "danger");
     const saved = await saveProofDraft({ silent: true, validate: false });
     if (saved) setProofWizardStep(state.proofWizardStep + 1);
   };
-  if ($("driverSaveProofDraftBtn")) $("driverSaveProofDraftBtn").onclick = () => saveProofDraft();
+  if ($("driverSaveProofDraftBtn")) $("driverSaveProofDraftBtn").onclick = () => saveProofAction({ source: "salvar" });
 
 
   function photosForProofScope(call, scope, phase) {
@@ -3748,7 +3814,10 @@
     openSignatureCapture,
     setProofWizardStep,
     saveProofDraft,
+    saveProofAction,
     submitProof,
+    activeCloudinaryConfig,
+    hasPendingProofUploadEvidence,
     resetProofs,
     state,
     proofMissingItems,

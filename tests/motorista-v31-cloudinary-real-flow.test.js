@@ -1,0 +1,25 @@
+const fs = require('fs');
+const path = require('path');
+const root = process.cwd();
+const motorista = fs.readFileSync(path.join(root, 'js/motorista.js'), 'utf8');
+const html = fs.readFileSync(path.join(root, 'motorista.html'), 'utf8');
+const sw = fs.readFileSync(path.join(root, 'service-worker.js'), 'utf8');
+const version = JSON.parse(fs.readFileSync(path.join(root, 'version.json'), 'utf8'));
+const v = 'jm-fluxo-operacional-v31-motorista-cloudinary-real-flow';
+function ok(cond, msg){ if(!cond){ console.error(msg); process.exit(1); } }
+ok(motorista.includes(v), 'motorista.js sem V31');
+ok(html.includes(v), 'motorista.html sem V31');
+ok(sw.includes(v), 'service-worker.js sem V31');
+ok(version.version === v, 'version.json sem V31');
+ok(/function\s+syncDriverGalleryFallbacks/.test(motorista), 'faltou syncDriverGalleryFallbacks');
+ok(/function\s+selectedProofPhotoItems/.test(motorista), 'faltou selectedProofPhotoItems');
+ok(/function\s+hasPendingProofUploadEvidence/.test(motorista), 'faltou hasPendingProofUploadEvidence');
+ok(/function\s+markCurrentProofStepReadyForUpload/.test(motorista), 'faltou markCurrentProofStepReadyForUpload');
+ok(/async\s+function\s+saveProofAction/.test(motorista), 'faltou saveProofAction');
+ok(/driverSaveProofDraftBtn"\)\) \$\("driverSaveProofDraftBtn"\)\.onclick = \(\) => saveProofAction/.test(motorista), 'SALVAR nao chama saveProofAction');
+ok(/driverProofNextBtn[\s\S]{0,500}hasPendingProofUploadEvidence\(\)[\s\S]{0,500}saveProofAction/.test(motorista), 'CONTINUAR nao chama upload quando ha evidencia pendente');
+ok(/const selectedPhotos = selectedProofPhotoItems\(\);/.test(motorista), 'submit ainda nao usa selectedProofPhotoItems');
+ok(/driver-gallery-file-input/.test(motorista) && /dataset\.galleryFor = input\.id/.test(motorista), 'galeria nao ligada ao input fonte');
+ok(/saveProofAction,[\s\S]*activeCloudinaryConfig,[\s\S]*hasPendingProofUploadEvidence/.test(motorista), 'APIs de diagnostico nao expostas');
+ok(/jm-fluxo-operacional-v\(2\[1-9\]\|30\)/.test(sw), 'service-worker nao limpa v21-v30');
+console.log('motorista-v31-cloudinary-real-flow ok');
